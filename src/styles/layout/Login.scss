@@ -1,0 +1,43 @@
+@use "../base/variables";
+
+div:has(.login-container) {
+    display: grid;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+  display: grid;
+  place-items: center;
+  height: 90vh;
+
+    div.login-box {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        width: 100%;
+        max-width: 450px;
+        min-height: 275px;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 8px;
+
+        h1 {
+            font-size: 30px;
+            text-align: center;
+        }
+
+        p {
+            a {
+                color: variables.$primary-color;
+                text-decoration: none;
+            }
+        }
+
+        .base-FormControl-root {
+            display: inherit;
+            flex-direction: column;
+            gap: 20px;
+        }
+    }
+}

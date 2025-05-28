@@ -1,0 +1,13 @@
+{
+  "login": {
+    "welcome": "Entrar no TestTrack!",
+    "email": "E-mail",
+    "password": "Senha",
+    "button": "Entrar",
+    "help": "Problemas para acessar sua conta?",
+    "helpLink": "Clique aqui"
+  },
+  "register": {
+    
+  }
+}
