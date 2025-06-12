@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Drawer, Toolbar } from '@mui/material';
+import { Box, Drawer } from '@mui/material';
 import Sidebar from './Sidebar';
 
 interface PageLayoutProps {
@@ -28,7 +28,6 @@ export default function PageLayout({ children }: PageLayoutProps) {
       <Box
         component="main"
       >
-        <Toolbar />
         {children}
       </Box>
     </Box>

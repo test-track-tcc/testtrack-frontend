@@ -11,6 +11,28 @@ body {
     background-color: variables.$background-color-primary;
 }
 
+main {
+    padding: 28px;
+    width: 100%;
+    height: 100%;
+}
+
+section.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #FFFFFF;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
 .center-container {
     display: flex;
     flex-direction: column;
