@@ -1,10 +1,11 @@
 // import React from 'react'
+import PageLayout from "../components/PageLayout"
 
 export default function Dashboard() {
     return (
-        <div>
+        <PageLayout>
             <title>TestTrack | Dashboard</title>
             Dashboard
-        </div>
+        </PageLayout>
     )
 }
