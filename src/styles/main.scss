@@ -5,9 +5,10 @@
 @use "./layout/Header.scss";
 @use "./layout/Login.scss";
 @use "./layout/Register.scss";
+@use "./layout/Sidebar.scss";
 
 body {
-    font-family: variables.$font-inter;
+    font-family: variables.$font-inter !important;
     background-color: variables.$background-color-primary;
 }
 

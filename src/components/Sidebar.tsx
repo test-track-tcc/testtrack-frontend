@@ -4,14 +4,18 @@ import { List, ListItemButton, ListItemIcon, ListItemText, Box, Divider, Toolbar
 import LogoutIcon from '@mui/icons-material/Logout';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-
+import CasesIcon from '@mui/icons-material/Cases';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const drawerItems = [
-    { title: 'Casos de Testes', path: '/addTestCases', icon: <i className="fas fa-chart-bar" /> },
-    { title: 'Área de Trabalho', path: '/home', icon: <i className="fas fa-chart-bar" /> },
-    { title: 'Projetos', path: '/projects', icon: <i className="fas fa-file-alt" /> },
-    { title: 'Kanban', path: '/kanban', icon: <i className="fas fa-file-alt" /> },
-    { title: 'Relátorios', path: '/reports', icon: <i className="fas fa-file-alt" /> },
+    { title: 'Casos de Testes', path: '/addTestCases', icon: <CasesIcon /> },
+    { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
+    { title: 'Projetos', path: '/projects', icon: <DescriptionIcon /> },
+    { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
+    { title: 'Relátorios', path: '/reports', icon: <AssessmentIcon /> },
     ];
 
 const organizations = [
@@ -35,7 +39,7 @@ export default function Sidebar() {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Toolbar>
-            <Box display="flex" alignItems="center" sx={{ flexDirection: "column" }}>
+            <Box className="sidebar-logo">
                 <h1>TestTrack</h1>
                 <p>Automatize, gerencie, evolua seus projetos</p>
             </Box>
@@ -43,11 +47,13 @@ export default function Sidebar() {
         <Divider />
 
         <Box>
-            <Box>
+            <Box className="organization-div">
+                <p>Organização</p>
                 <Select 
                     value={organizations[0].id} 
                     onChange={(e) => console.log(e.target.value)} 
                     label="Organização"
+                    className='organization-select'
                 >
                     {organizations.map((organization) => (
                         <MenuItem
@@ -61,6 +67,7 @@ export default function Sidebar() {
             </Box>
   
         </Box>
+        <Divider />
 
         <List>
             {drawerItems.map((item) => {
