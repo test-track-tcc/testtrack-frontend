@@ -52,7 +52,6 @@ export default function Sidebar() {
                 <Select 
                     value={organizations[0].id} 
                     onChange={(e) => console.log(e.target.value)} 
-                    label="Organização"
                     className='organization-select'
                 >
                     {organizations.map((organization) => (

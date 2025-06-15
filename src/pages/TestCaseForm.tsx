@@ -1,18 +1,6 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Chip,
-  Avatar,
-  IconButton
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, TextField, FormControl, InputLabel, Select, MenuItem, Typography, IconButton, List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
+// import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import PageLayout from '../components/PageLayout';
@@ -23,15 +11,16 @@ const TestForm: React.FC = () => {
         formData,
         handleChange,
         handleSelectChange,
-        setNewScript,
-        newScript,
-        addAttachment,
-        addScript,
-        removeAttachment,
+        // setNewScript,
+        // newScript,
+        // addAttachment,
+        // addScript,
+        // removeAttachment,
         removeScript,
         handleSubmit,
-        newAttachment,
-        setNewAttachment
+        handleFileChange,
+        // newAttachment,
+        // setNewAttachment
     } = TestCaseFormFunctions();
 
   return (
@@ -67,64 +56,70 @@ const TestForm: React.FC = () => {
                 onChange={handleChange('idResponsavel')}
                 />
             
-                <FormControl fullWidth>
-                    <InputLabel>Tipo de Teste</InputLabel>
-                    <Select
-                        value={formData.tipoTeste}
-                        onChange={handleSelectChange('tipoTeste')}
-                        label="Tipo de Teste"
-                        disabled
-                    >
-                        <MenuItem value="FUNCIONAL">Funcional</MenuItem>
-                        <MenuItem value="USABILIDADE">Usabilidade</MenuItem>
-                        <MenuItem value="DESEMPENHO">Desempenho</MenuItem>
-                        <MenuItem value="SEGURANCA">Segurança</MenuItem>
-                        <MenuItem value="REGRESSAO">Regressão</MenuItem>
-                    </Select>
-                </FormControl>
-            
-                <FormControl fullWidth>
-                    <InputLabel>Prioridade</InputLabel>
-                    <Select
-                        value={formData.prioridade}
-                        onChange={handleSelectChange('prioridade')}
-                        label="Prioridade"
-                    >
-                        <MenuItem value="BAIXA">Baixa</MenuItem>
-                        <MenuItem value="MEDIA">Média</MenuItem>
-                        <MenuItem value="ALTA">Alta</MenuItem>
-                        <MenuItem value="CRITICA">Crítica</MenuItem>
-                    </Select>
-                </FormControl>
-            
-                <FormControl fullWidth>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                        value={formData.status}
-                        onChange={handleSelectChange('status')}
-                        label="Status"
-                    >
-                        <MenuItem value="PENDENTE">Pendente</MenuItem>
-                        <MenuItem value="EM_EXECUCAO">Em execução</MenuItem>
-                        <MenuItem value="CONCLUIDO">Concluído</MenuItem>
-                        <MenuItem value="BLOQUEADO">Bloqueado</MenuItem>
-                    </Select>
-                </FormControl>
-
-                <TextField
+                <div className="flex-row">
+                    <FormControl fullWidth>
+                        <InputLabel>Tipo de Teste</InputLabel>
+                        <Select
+                            value={formData.tipoTeste}
+                            onChange={handleSelectChange('tipoTeste')}
+                            label="Tipo de Teste"
+                            disabled
+                        >
+                            <MenuItem value="FUNCIONAL">Funcional</MenuItem>
+                            <MenuItem value="USABILIDADE">Usabilidade</MenuItem>
+                            <MenuItem value="DESEMPENHO">Desempenho</MenuItem>
+                            <MenuItem value="SEGURANCA">Segurança</MenuItem>
+                            <MenuItem value="REGRESSAO">Regressão</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel>Prioridade</InputLabel>
+                        <Select
+                            onChange={handleSelectChange('prioridade')}
+                            label="Prioridade"
+                        >
+                            <MenuItem value="NENHUM">Nenhum</MenuItem> 
+                            <MenuItem value="BAIXA">Baixa</MenuItem>
+                            <MenuItem value="MEDIA">Média</MenuItem>
+                            <MenuItem value="ALTA">Alta</MenuItem>
+                            <MenuItem value="CRITICA">Crítica</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel id="status-label">Status</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            value={formData.status}
+                            onChange={handleSelectChange('status')}
+                            label="Status"
+                        >
+                            <MenuItem value="NAO_INICIADO">Não Iniciado</MenuItem>
+                            <MenuItem value="PENDENTE">Pendente</MenuItem>
+                            <MenuItem value="EM_PROGRESSO">Em Progresso</MenuItem>
+                            <MenuItem value="CONCLUIDO">Concluído</MenuItem>
+                            <MenuItem value="BLOQUEADO">Bloqueado</MenuItem>
+                            <MenuItem value="FALHA">Falha</MenuItem>
+                            <MenuItem value="APROVADO">Aprovado</MenuItem>
+                            <MenuItem value="REVISAO_PENDENTE">Revisão Pendente</MenuItem>
+                            <MenuItem value="RETESTANDO">Retestando</MenuItem>
+                            <MenuItem value="CANCELADO">Cancelado</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        fullWidth
+                        label="Tempo Estimado"
+                        value={formData.tempoEstimado}
+                        onChange={handleChange('tempoEstimado')}
+                        placeholder="Ex: 1h30m"
+                    />
+                    
+                    <TextField
                     fullWidth
-                    label="Tempo Estimado"
-                    value={formData.tempoEstimado}
-                    onChange={handleChange('tempoEstimado')}
-                    placeholder="Ex: 1h30m"
-                />
-            
-                <TextField
-                fullWidth
-                label="Requisito Vinculado"
-                value={formData.requisitoVinculado}
-                onChange={handleChange('requisitoVinculado')}
-                />
+                    label="Requisito Vinculado"
+                    value={formData.requisitoVinculado}
+                    onChange={handleChange('requisitoVinculado')}
+                    />
+                </div>
             
                 <TextField
                 fullWidth
@@ -147,7 +142,7 @@ const TestForm: React.FC = () => {
                 required
                 />
             
-                <Typography variant="h6" gutterBottom>
+                {/* <Typography variant="h6" gutterBottom>
                 Anexos
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -177,26 +172,48 @@ const TestForm: React.FC = () => {
                         target="_blank"
                         />
                     ))}
-                </Box>
+                </Box> */}
             
-                <Typography variant="h6" gutterBottom>
-                    Scripts de Automação
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <TextField
-                        fullWidth
-                        label="Novo Script"
-                        value={newScript}
-                        onChange={(e) => setNewScript(e.target.value)}
-                        multiline
-                        rows={2}
-                    />
-                    <IconButton color="primary" onClick={addScript}>
-                        <AddIcon />
-                    </IconButton>
-                </Box>
+                <Divider />
+                <Typography variant="h6" gutterBottom>Scripts de Automação</Typography>
+                <input
+                    accept="*" // Ajuste para tipos de arquivo específicos se necessário (ex: ".js,.py")
+                    style={{ display: 'none' }}
+                    id="script-file-upload"
+                    multiple 
+                    type="file"
+                    onChange={handleFileChange}
+                />
+                <label htmlFor="script-file-upload">
+                    <Button variant="outlined" component="span" startIcon={<AttachFileIcon />}>
+                    Selecionar Script(s)
+                    </Button>
+                </label>
+                <List dense>
+                    {formData.scripts.map((file: { url: string; name: string }, index: number) => (
+                        <ListItem
+                            key={file.url + index}
+                            secondaryAction={
+                                <IconButton edge="end" aria-label="delete" onClick={() => removeScript(index)}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            }
+                        >
+                            <ListItemIcon>
+                                <AttachFileIcon />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        {file.name}
+                                    </a>
+                                }
+                            />
+                        </ListItem>
+                    ))}
+                </List>
             
-                <Box sx={{ mt: 2 }}>
+                {/* <Box sx={{ mt: 2 }}>
                     {formData.scripts.map((script, index) => (
                         <Box key={index} sx={{
                         display: 'flex',
@@ -215,7 +232,7 @@ const TestForm: React.FC = () => {
                             </Typography>
                         </Box>
                     ))}
-                </Box>
+                </Box> */}
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                     <Button variant="outlined" color="secondary">
