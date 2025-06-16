@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { type SelectChangeEvent } from '@mui/material/Select';
+import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from 'react-router-dom';
+
+// --- Interfaces (Devem ser mantidas em src/types.ts para organização) ---
+// Para este exemplo, vou manter aqui para que seja um arquivo autocontido para teste.
 type TestType = 'FUNCIONAL' | 'USABILIDADE' | 'DESEMPENHO' | 'SEGURANCA' | 'REGRESSAO';
 type PriorityType = 'NENHUM' | 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA';
 type StatusType = 'NAO_INICIADO' | 'PENDENTE' | 'EM_PROGRESSO' | 'CONCLUIDO' | 'BLOQUEADO' | 'FALHA' | 'APROVADO' | 'REVISAO_PENDENTE' | 'RETESTANDO' | 'CANCELADO';
@@ -10,7 +15,14 @@ interface Comment {
   data: Date;
 }
 
-interface TestFormData {
+interface ScriptFile {
+  url: string;
+  name: string;
+  file: File | null; // <-- MUDANÇA AQUI: Agora aceita File ou null
+}
+
+export interface TestFormData {
+  id?: string;
   titulo: string;
   descricao: string;
   tipoTeste: TestType;
@@ -24,153 +36,279 @@ interface TestFormData {
   status: StatusType;
   comentarios: Comment[];
   anexos: string[];
-  scripts: { url: string, name: string }[]
+  scripts: ScriptFile[];
 }
+// --- Fim das Interfaces ---
 
 function TestCaseFormFunctions() {
-    const [formData, setFormData] = useState<TestFormData>({
-        titulo: '',
-        descricao: '',
-        tipoTeste: 'FUNCIONAL',
-        prioridade: 'MEDIA',
-        id_userCriacao: '',
-        idResponsavel: '',
-        tempoEstimado: '',
-        steps: '',
-        resultadoEsperado: '',
-        requisitoVinculado: '',
-        status: 'NAO_INICIADO',
-        comentarios: [
-          {
-            idUsuario: 'uuid',
-            comentario: 'Observação inicial',
-            data: new Date('2025-06-09T21:34:52.000Z')
-          }
-        ],
-        anexos: ['http://example.com/image.png'],
-        scripts: []
-    });
-    
-    const [newComment, setNewComment] = useState('');
-    const [newAttachment, setNewAttachment] = useState('');
-    const [newScript, setNewScript] = useState('');
-    
-    const handleChange = (field: keyof TestFormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData({
-        ...formData,
-        [field]: event.target.value
-      });
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const editId = queryParams.get('id');
+
+  const [formData, setFormData] = useState<TestFormData>(() => {
+    if (editId) {
+      const storedTestCases = localStorage.getItem('testCases');
+      if (storedTestCases) {
+        const parsedTestCases: TestFormData[] = JSON.parse(storedTestCases);
+        const testCaseToEdit = parsedTestCases.find(tc => tc.id === editId);
+        if (testCaseToEdit) {
+          testCaseToEdit.comentarios = testCaseToEdit.comentarios.map((c: Comment) => ({
+            ...c,
+            data: new Date(c.data),
+          }));
+          testCaseToEdit.scripts = testCaseToEdit.scripts.map((s: ScriptFile) => ({
+            url: s.url,
+            name: s.name,
+            file: null, // Definir como null ao carregar do localStorage
+          }));
+          return testCaseToEdit;
+        }
+      }
+    }
+
+    const savedDraft = localStorage.getItem('testCaseFormDraft');
+    if (savedDraft) {
+      const parsedDraft = JSON.parse(savedDraft);
+      parsedDraft.comentarios = parsedDraft.comentarios.map((c: Comment) => ({
+        ...c,
+        data: new Date(c.data),
+      }));
+      parsedDraft.scripts = parsedDraft.scripts.map((s: ScriptFile) => ({
+        url: s.url,
+        name: s.name,
+        file: null, // Definir como null ao carregar rascunho
+      }));
+      return parsedDraft;
+    }
+
+    return {
+      titulo: '',
+      descricao: '',
+      tipoTeste: 'FUNCIONAL',
+      prioridade: 'MEDIA',
+      id_userCriacao: uuidv4(),
+      idResponsavel: '',
+      tempoEstimado: '',
+      steps: '',
+      resultadoEsperado: '',
+      requisitoVinculado: '',
+      status: 'NAO_INICIADO',
+      comentarios: [
+        {
+          idUsuario: uuidv4(),
+          comentario: 'Observação inicial (mock)',
+          data: new Date('2025-06-09T21:34:52.000Z'),
+        },
+      ],
+      anexos: ['http://example.com/image.png'],
+      scripts: [],
     };
-    
-    const handleSelectChange = <K extends keyof TestFormData>(prop: K) => (event: SelectChangeEvent<TestFormData[K] extends string ? TestFormData[K] : string>) => {
+  });
+
+  const [newComment, setNewComment] = useState('');
+  const [newAttachment, setNewAttachment] = useState('');
+
+  useEffect(() => {
+    const dataToSave = {
+      ...formData,
+      scripts: formData.scripts.map(({ url, name }) => ({ url, name })),
+    };
+    localStorage.setItem('testCaseFormDraft', JSON.stringify(dataToSave));
+  }, [formData]);
+
+  useEffect(() => {
+    if (editId) {
+      const storedTestCases = localStorage.getItem('testCases');
+      if (storedTestCases) {
+        const parsedTestCases: TestFormData[] = JSON.parse(storedTestCases);
+        const testCaseToEdit = parsedTestCases.find(tc => tc.id === editId);
+        if (testCaseToEdit) {
+          testCaseToEdit.comentarios = testCaseToEdit.comentarios.map((c: Comment) => ({
+            ...c,
+            data: new Date(c.data),
+          }));
+          testCaseToEdit.scripts = testCaseToEdit.scripts.map((s: ScriptFile) => ({
+            url: s.url,
+            name: s.name,
+            file: null,
+          }));
+          setFormData(testCaseToEdit);
+          localStorage.removeItem('testCaseFormDraft');
+        }
+      }
+    } else {
+        const savedDraft = localStorage.getItem('testCaseFormDraft');
+        if (savedDraft) {
+            const parsedDraft = JSON.parse(savedDraft);
+            parsedDraft.comentarios = parsedDraft.comentarios.map((c: Comment) => ({
+                ...c,
+                data: new Date(c.data),
+            }));
+            parsedDraft.scripts = parsedDraft.scripts.map((s: ScriptFile) => ({
+                url: s.url,
+                name: s.name,
+                file: null,
+            }));
+            setFormData(parsedDraft);
+        } else {
+            setFormData({
+                titulo: '',
+                descricao: '',
+                tipoTeste: 'FUNCIONAL',
+                prioridade: 'MEDIA',
+                id_userCriacao: uuidv4(),
+                idResponsavel: '',
+                tempoEstimado: '',
+                steps: '',
+                resultadoEsperado: '',
+                requisitoVinculado: '',
+                status: 'NAO_INICIADO',
+                comentarios: [{ idUsuario: uuidv4(), comentario: 'Observação inicial (mock)', data: new Date() }],
+                anexos: ['http://example.com/image.png'],
+                scripts: [],
+            });
+        }
+    }
+  }, [editId]);
+
+  const handleChange =
+    (field: keyof Omit<TestFormData, 'scripts' | 'comentarios' | 'anexos'>) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: event.target.value,
+      }));
+    };
+
+  const handleSelectChange =
+    <K extends keyof TestFormData>(prop: K) =>
+    (
+      event: SelectChangeEvent<
+        TestFormData[K] extends string ? TestFormData[K] : string
+      >,
+    ) => {
       const newValue = event.target.value as TestFormData[K];
-      
       setFormData((prev) => ({
         ...prev,
         [prop]: newValue,
       }));
     };
 
-  // DEBUG: Use este useEffect para ver o estado formData sempre que ele for atualizado
-  React.useEffect(() => {
-      console.log("Estado formData atualizado:", formData);
-  }, [formData]);
-    
-    const addComment = () => {
-      if (newComment.trim()) {
-        const comment: Comment = {
-          idUsuario: 'current-user-id',
-          comentario: newComment,
-          data: new Date()
-        };
-        setFormData({
-          ...formData,
-          comentarios: [...formData.comentarios, comment]
-        });
-        setNewComment('');
-      }
-    };
-    
-    const addAttachment = () => {
-      if (newAttachment.trim()) {
-        setFormData({
-          ...formData,
-          anexos: [...formData.anexos, newAttachment]
-        });
-        setNewAttachment('');
-      }
-    };
-  
-    const addScript = () => {
-      if (newScript.trim()) {
-        setFormData({
-          ...formData,
-          scripts: [
-            ...formData.scripts,
-            { url: newScript, name: newScript }
-          ]
-        });
-        setNewScript('');
-      }
-    };
-  
-    const removeAttachment = (index: number) => {
-      const updatedAttachments = [...formData.anexos];
+  const addComment = () => {
+    if (newComment.trim()) {
+      const comment: Comment = {
+        idUsuario: uuidv4(),
+        comentario: newComment,
+        data: new Date(),
+      };
+      setFormData((prev) => ({
+        ...prev,
+        comentarios: [...prev.comentarios, comment],
+      }));
+      setNewComment('');
+    }
+  };
+
+  const removeComment = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      comentarios: prev.comentarios.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addAttachment = () => {
+    if (newAttachment.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        anexos: [...prev.anexos, newAttachment],
+      }));
+      setNewAttachment('');
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setFormData((prev) => {
+      const updatedAttachments = [...prev.anexos];
       updatedAttachments.splice(index, 1);
-      setFormData({
-        ...formData,
-        anexos: updatedAttachments
-      });
-    };
-  
-    const removeScript = (index: number) => {
-      const updatedScripts = [...formData.scripts];
-      updatedScripts.splice(index, 1);
-      setFormData({
-        ...formData,
-        scripts: updatedScripts
-      });
-    };
-  
-    const handleSubmit = (event: React.FormEvent) => {
-      event.preventDefault();
-      console.log('Formulário enviado:', formData);
-    };
+      return { ...prev, anexos: updatedAttachments };
+    });
+  };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const files = Array.from(e.target.files);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
 
-        const newScripts = files.map(file => ({
-          url: URL.createObjectURL(file),
-          name: file.name
-        }));
+      const newScripts: ScriptFile[] = files.map((file) => ({
+        url: URL.createObjectURL(file),
+        name: file.name,
+        file: file, // Aqui continua sendo o objeto File real
+      }));
 
-        setFormData(prev => ({
-          ...prev,
-          scripts: [...prev.scripts, ...newScripts]
-        }));
-        console.log('Scripts adicionados:', newScripts)
+      setFormData((prev) => ({
+        ...prev,
+        scripts: [...prev.scripts, ...newScripts],
+      }));
+    }
+  };
+
+  const removeScript = (index: number) => {
+    setFormData((prev) => {
+      const updatedScripts = [...prev.scripts];
+      if (updatedScripts[index]?.url) {
+        URL.revokeObjectURL(updatedScripts[index].url);
       }
-    };
-        
-    return {
-        formData,
-        setFormData,
-        handleChange,
-        handleSelectChange,
-        addComment,
-        addAttachment,
-        addScript,
-        removeAttachment,
-        removeScript,
-        handleSubmit,
-        newAttachment,
-        setNewAttachment,
-        setNewScript,
-        newScript,
-        handleFileChange
-    };
+      updatedScripts.splice(index, 1);
+      return { ...prev, scripts: updatedScripts };
+    });
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const testCaseToSave = { ...formData, id: formData.id || uuidv4() };
+
+    const existingTestCases = JSON.parse(
+      localStorage.getItem('testCases') || '[]',
+    );
+
+    let updatedTestCases;
+    if (testCaseToSave.id) {
+      const index = existingTestCases.findIndex(
+        (tc: TestFormData) => tc.id === testCaseToSave.id,
+      );
+      if (index > -1) {
+        updatedTestCases = [...existingTestCases];
+        updatedTestCases[index] = testCaseToSave;
+      } else {
+        updatedTestCases = [...existingTestCases, testCaseToSave];
+      }
+    } else {
+      updatedTestCases = [...existingTestCases, testCaseToSave];
+    }
+
+    localStorage.setItem('testCases', JSON.stringify(updatedTestCases));
+    localStorage.removeItem('testCaseFormDraft');
+
+    alert('Caso de teste salvo com sucesso!');
+  };
+
+  return {
+    formData,
+    setFormData,
+    handleChange,
+    handleSelectChange,
+    addComment,
+    removeComment,
+    addAttachment,
+    removeAttachment,
+    handleFileChange,
+    removeScript,
+    handleSubmit,
+    newComment,
+    setNewComment,
+    newAttachment,
+    setNewAttachment,
+  };
 }
 
 export default TestCaseFormFunctions;
