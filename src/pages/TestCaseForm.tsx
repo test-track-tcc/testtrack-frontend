@@ -5,6 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import PageLayout from '../components/PageLayout';
 import TestCaseFormFunctions from '../functions/TestCaseFormFunctions';
+import { useNavigate } from 'react-router-dom';
 
 const TestForm: React.FC = () => {
     const {
@@ -22,6 +23,8 @@ const TestForm: React.FC = () => {
         // newAttachment,
         // setNewAttachment
     } = TestCaseFormFunctions();
+
+    const navigate = useNavigate();
 
   return (
     <PageLayout>
@@ -235,7 +238,7 @@ const TestForm: React.FC = () => {
                 </Box> */}
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                    <Button variant="outlined" color="secondary">
+                    <Button variant="outlined" color="secondary" onClick={() => navigate('/testCase')}>
                         Cancelar
                     </Button>
                     <Button type="submit" variant="contained" color="primary">

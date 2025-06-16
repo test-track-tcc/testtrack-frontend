@@ -4,6 +4,7 @@ import Onboarding from "./pages/Onboarding";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import TestCaseForm from "./pages/TestCaseForm";
+import TestCase from "./pages/TestCase";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCases" element={<TestCaseForm />} />
       </Routes>
     </BrowserRouter>
