@@ -15,8 +15,6 @@ import {
   ListItemText,
   ListItemIcon,
   Divider,
-  Chip,
-  Avatar,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -29,23 +27,16 @@ const TestForm: React.FC = () => {
     formData,
     handleChange,
     handleSelectChange,
-    addComment,
-    removeComment,
-    addAttachment,
-    removeAttachment,
     removeScript,
     handleSubmit,
     handleFileChange,
-    newComment,
-    setNewComment,
-    newAttachment,
-    setNewAttachment,
   } = TestCaseFormFunctions();
 
   const navigate = useNavigate();
 
   return (
     <PageLayout>
+      <title>TestTrack | Cadastro do Caso de Teste</title>
       <section className="form">
         <Typography variant="h4" gutterBottom>
           Cadastro do Caso de Teste
@@ -170,7 +161,7 @@ const TestForm: React.FC = () => {
             margin="normal"
           />
 
-          <Divider sx={{ my: 3 }} />
+          {/* <Divider sx={{ my: 3 }} />
           <Typography variant="h6" gutterBottom>
             Comentários
           </Typography>
@@ -184,8 +175,8 @@ const TestForm: React.FC = () => {
             <Button variant="contained" onClick={addComment}>
               Adicionar
             </Button>
-          </Box>
-          <List dense>
+          </Box> */}
+          {/* <List dense>
             {formData.comentarios.map((comment, index) => (
               <ListItem
                 key={index}
@@ -217,8 +208,8 @@ const TestForm: React.FC = () => {
             <Button variant="contained" onClick={addAttachment}>
               Adicionar
             </Button>
-          </Box>
-          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          </Box> */}
+          {/* <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {formData.anexos.map((anexo, index) => (
               <Chip
                 key={index}
@@ -234,7 +225,7 @@ const TestForm: React.FC = () => {
                 rel="noopener noreferrer"
               />
             ))}
-          </Box>
+          </Box> */}
 
           <Divider sx={{ my: 3 }} />
           <Typography variant="h6" gutterBottom>

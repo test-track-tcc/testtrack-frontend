@@ -11,7 +11,7 @@ import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const drawerItems = [
-    { title: 'Casos de Testes', path: '/addTestCases', icon: <CasesIcon /> },
+    { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
     { title: 'Projetos', path: '/projects', icon: <DescriptionIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },

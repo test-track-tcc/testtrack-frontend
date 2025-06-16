@@ -17,7 +17,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/testCase" element={<TestCase />} />
-        <Route path="/addTestCases" element={<TestCaseForm />} />
+        <Route path="/addTestCase" element={<TestCaseForm />} />
       </Routes>
     </BrowserRouter>
   );

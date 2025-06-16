@@ -47,7 +47,7 @@ export default function TestCase() {
 
   const handleEdit = (id: string) => {
     console.log(`Editar caso de teste com ID: ${id}`);
-    navigate(`/addTestCases?id=${id}`);
+    navigate(`/addTestCase?id=${id}`);
   };
 
   const handleDelete = (id: string) => {
@@ -107,6 +107,7 @@ export default function TestCase() {
 
   return (
     <PageLayout>
+      <title>TestTrack  | Casos de Testes</title>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Gerenciamento de Casos de Teste
@@ -114,7 +115,7 @@ export default function TestCase() {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate('/addTestCases')}
+          onClick={() => navigate('/addTestCase')}
           startIcon={<AddIcon />}
         >
           Adicionar Caso de Teste
