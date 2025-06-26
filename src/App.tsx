@@ -5,7 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import TestCaseForm from "./pages/TestCaseForm";
 import TestCase from "./pages/TestCase";
-
+import Projects from "./pages/Projects";
 
 function App() {
   return (
@@ -18,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCase" element={<TestCaseForm />} />
+        <Route path="/projects" element={<Projects />} /> 
       </Routes>
     </BrowserRouter>
   );

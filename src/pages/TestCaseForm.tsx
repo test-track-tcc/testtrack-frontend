@@ -1,302 +1,177 @@
-// src/pages/TestForm.tsx
-import React from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import PageLayout from '../components/PageLayout';
+import { Box, Button, MenuItem, Select, TextField, Paper, FormControl, InputLabel } from '@mui/material';
 import TestCaseFormFunctions from '../functions/TestCaseFormFunctions';
+import { type StatusType, type PriorityType, type TestType, type ScriptFile } from '../types/TestCase';
+import PageLayout from '../components/PageLayout';
+import ScriptUpload from '../components/ScriptUpload';
+import { GridDownloadIcon } from '@mui/x-data-grid';
+import DocIcon from "../assets/doc-icon.svg?react";
 import { useNavigate } from 'react-router-dom';
 
-const TestForm: React.FC = () => {
+export default function TestCaseForm() {
   const {
     formData,
+    setFormData,
     handleChange,
     handleSelectChange,
-    removeScript,
     handleSubmit,
-    handleFileChange,
   } = TestCaseFormFunctions();
+
+  const tipos: TestType[] = ['FUNCIONAL', 'USABILIDADE', 'DESEMPENHO', 'SEGURANCA', 'REGRESSAO'];
+  const prioridades: PriorityType[] = ['NENHUM', 'BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
+  const statusList: StatusType[] = [
+  'NAO_INICIADO',
+  'PENDENTE',
+  'EM_ANDAMENTO',
+  'CONCLUIDO',
+  'BLOQUEADO',
+  'FALHA',
+  'APROVADO',
+  'REVISAO_PENDENTE',
+  'RETESTANDO',
+  'CANCELADO',
+  ];
 
   const navigate = useNavigate();
 
-  return (
+  return (    
     <PageLayout>
-      <title>TestTrack | Cadastro do Caso de Teste</title>
-      <section className="form">
-        <Typography variant="h4" gutterBottom>
-          Cadastro do Caso de Teste
-        </Typography>
+      <title>Cadastro de Caso de Teste | TestTrack</title>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <h1>Cadastro de Caso de Teste</h1>
 
-        <form onSubmit={handleSubmit}>
+        <Paper sx={{ padding: 3, display: 'flex', flexDirection: 'column', gap: 2, borderRadius: 2}}>
           <TextField
-            fullWidth
             label="Título"
             value={formData.titulo}
             onChange={handleChange('titulo')}
             required
-            margin="normal"
+            autoComplete='off'
           />
-
           <TextField
-            fullWidth
             label="Descrição"
             value={formData.descricao}
             onChange={handleChange('descricao')}
             multiline
-            rows={4}
-            required
-            margin="normal"
+            rows={3}
+            autoComplete='off'
           />
 
-          <TextField
-            fullWidth
-            label="Responsável pelo Caso de Teste"
-            value={formData.idResponsavel}
-            onChange={handleChange('idResponsavel')}
-            margin="normal"
-          />
-
-          <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <FormControl fullWidth>
-              <InputLabel>Tipo de Teste</InputLabel>
+              <InputLabel id="tipo-teste-label">Tipo de Teste</InputLabel>
               <Select
+                labelId="tipo-teste-label"
                 value={formData.tipoTeste}
                 onChange={handleSelectChange('tipoTeste')}
                 label="Tipo de Teste"
-                disabled
               >
-                <MenuItem value="FUNCIONAL">Funcional</MenuItem>
-                <MenuItem value="USABILIDADE">Usabilidade</MenuItem>
-                <MenuItem value="DESEMPENHO">Desempenho</MenuItem>
-                <MenuItem value="SEGURANCA">Segurança</MenuItem>
-                <MenuItem value="REGRESSAO">Regressão</MenuItem>
+                {tipos.map((tipo) => (
+                  <MenuItem key={tipo} value={tipo}>{tipo}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel>Prioridade</InputLabel>
+              <InputLabel id="prioridades-label">Prioridades</InputLabel>
               <Select
+                labelId="prioridades-label"
+                label="Prioridade"
                 value={formData.prioridade}
                 onChange={handleSelectChange('prioridade')}
-                label="Prioridade"
               >
-                <MenuItem value="NENHUM">Nenhum</MenuItem>
-                <MenuItem value="BAIXA">Baixa</MenuItem>
-                <MenuItem value="MEDIA">Média</MenuItem>
-                <MenuItem value="ALTA">Alta</MenuItem>
-                <MenuItem value="CRITICA">Crítica</MenuItem>
+                <MenuItem value="" disabled>Prioridade</MenuItem>
+                {prioridades.map((p) => (
+                  <MenuItem key={p} value={p}>{p}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
               <InputLabel id="status-label">Status</InputLabel>
               <Select
-                labelId="status-label"
+                labelId='status-label'
+                label="Status"
                 value={formData.status}
                 onChange={handleSelectChange('status')}
-                label="Status"
               >
-                <MenuItem value="NAO_INICIADO">Não Iniciado</MenuItem>
-                <MenuItem value="PENDENTE">Pendente</MenuItem>
-                <MenuItem value="EM_PROGRESSO">Em Progresso</MenuItem>
-                <MenuItem value="CONCLUIDO">Concluído</MenuItem>
-                <MenuItem value="BLOQUEADO">Bloqueado</MenuItem>
-                <MenuItem value="FALHA">Falha</MenuItem>
-                <MenuItem value="APROVADO">Aprovado</MenuItem>
-                <MenuItem value="REVISAO_PENDENTE">Revisão Pendente</MenuItem>
-                <MenuItem value="RETESTANDO">Retestando</MenuItem>
-                <MenuItem value="CANCELADO">Cancelado</MenuItem>
+                <MenuItem value="" disabled>Status</MenuItem>
+                {statusList.map((s) => (
+                  <MenuItem key={s} value={s}>{s}</MenuItem>
+                ))}
               </Select>
             </FormControl>
-            <TextField
-              fullWidth
-              label="Tempo Estimado"
-              value={formData.tempoEstimado}
-              onChange={handleChange('tempoEstimado')}
-              placeholder="Ex: 1h30m"
-            />
           </Box>
 
           <TextField
-            fullWidth
-            label="Requisito Vinculado"
-            value={formData.requisitoVinculado}
-            onChange={handleChange('requisitoVinculado')}
-            margin="normal"
+            label="Responsável pelo Caso de Teste"
+            value={formData.idResponsavel}
+            onChange={handleChange('idResponsavel')}
+            autoComplete='off'
           />
-
           <TextField
-            fullWidth
-            label="Passos do Teste"
+            label="Tempo Estimado"
+            value={formData.tempoEstimado}
+            onChange={handleChange('tempoEstimado')}
+            autoComplete='off'
+          />
+          <TextField
+            label="Passos (Steps)"
             value={formData.steps}
             onChange={handleChange('steps')}
             multiline
-            rows={4}
-            placeholder="1. Passo um; 2. Passo dois; 3. Passo três;"
-            required
-            margin="normal"
+            rows={3}
+            autoComplete='off'
           />
-
           <TextField
-            fullWidth
             label="Resultado Esperado"
             value={formData.resultadoEsperado}
             onChange={handleChange('resultadoEsperado')}
             multiline
             rows={3}
-            required
-            margin="normal"
+            autoComplete='off'
           />
-
-          {/* <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" gutterBottom>
-            Comentários
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <TextField
-              fullWidth
-              label="Novo Comentário"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            <Button variant="contained" onClick={addComment}>
-              Adicionar
-            </Button>
-          </Box> */}
-          {/* <List dense>
-            {formData.comentarios.map((comment, index) => (
-              <ListItem
-                key={index}
-                secondaryAction={
-                  <IconButton edge="end" aria-label="delete" onClick={() => removeComment(index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                }
-              >
-                <ListItemText
-                  primary={comment.comentario}
-                  secondary={`Por: ${comment.idUsuario} em ${new Date(comment.data).toLocaleString()}`}
-                />
-              </ListItem>
-            ))}
-          </List>
-
-          <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" gutterBottom>
-            Anexos
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <TextField
-              fullWidth
-              label="Novo Anexo (URL)"
-              value={newAttachment}
-              onChange={(e) => setNewAttachment(e.target.value)}
-            />
-            <Button variant="contained" onClick={addAttachment}>
-              Adicionar
-            </Button>
-          </Box> */}
-          {/* <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {formData.anexos.map((anexo, index) => (
-              <Chip
-                key={index}
-                label={anexo.length > 30 ? `${anexo.substring(0, 27)}...` : anexo}
-                onDelete={() => removeAttachment(index)}
-                deleteIcon={<DeleteIcon />}
-                avatar={<Avatar><AttachFileIcon /></Avatar>}
-                variant="outlined"
-                clickable
-                component="a"
-                href={anexo}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-            ))}
-          </Box> */}
-
-          <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" gutterBottom>
-            Scripts de Automação
-          </Typography>
-          <input
-            accept="*"
-            style={{ display: 'none' }}
-            id="script-file-upload"
-            multiple
-            type="file"
-            onChange={handleFileChange}
+          <TextField
+            label="Vincular Requisito/Task"
+            value={formData.requisitoVinculado}
+            onChange={handleChange('requisitoVinculado')}
+            autoComplete='off'
           />
-          <label htmlFor="script-file-upload">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<AttachFileIcon />}
-            >
-              Selecionar Script(s)
+          
+          <ScriptUpload
+            onFileSelect={(files) => {
+              const selectedFiles = Array.from(files).map((file) => ({
+                url: URL.createObjectURL(file),
+                name: file.name,
+                file: file,
+              }));
+              setFormData((prev) => ({
+                ...prev,
+                scripts: [...prev.scripts, ...selectedFiles],
+              }));
+            }}
+          />
+          
+          {formData.scripts?.length > 0 && (
+              <ul className='script-list'>
+                {formData.scripts.map((script: ScriptFile, index: number) => (
+                  <li key={index}>
+                      <div>
+                        <DocIcon></DocIcon>
+                        {String(script)}
+                      </div>
+                    <GridDownloadIcon />
+                  </li>
+                ))}
+              </ul>
+            )}
+          <Box className='button-group'>
+            <Button onClick={() => navigate("/testCase")} className='btn icon secondary'>
+              Voltar
             </Button>
-          </label>
-          <List dense>
-            {formData.scripts.map((file, index) => (
-              <ListItem
-                key={file.url + index}
-                secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => removeScript(index)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                }
-              >
-                <ListItemIcon>
-                  <AttachFileIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                      {file.name}
-                    </a>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
-
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => navigate('/test-cases')}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="contained" color="primary">
-              Salvar Teste
+            <Button type="submit" className='btn icon primary'>
+              Salvar
             </Button>
           </Box>
-        </form>
-      </section>
+        </Paper>
+      </Box>
     </PageLayout>
   );
-};
-
-export default TestForm;
+}

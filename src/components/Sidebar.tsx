@@ -9,11 +9,12 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import Avatar from '@mui/material/Avatar';
 
 const drawerItems = [
-    { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
     { title: 'Projetos', path: '/projects', icon: <DescriptionIcon /> },
+    { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
     { title: 'Relátorios', path: '/reports', icon: <AssessmentIcon /> },
     ];
@@ -83,17 +84,28 @@ export default function Sidebar() {
             );
             })}
         </List>
+        
+        
+
         <Box flexGrow={1} />
-        <Box textAlign="center" p={2}>
-            <Button
-            variant="outlined"
-            color="secondary"
-            startIcon={<LogoutIcon />}
-            onClick={() => navigate('/')}
-            >
-            Logout
-            </Button>
-        </Box>
+            <Box display={'flex'} flexDirection={'row'} p={2} className="user-info" gap={"10px"}>
+                <Avatar>JD</Avatar>
+                <Box flexDirection={'column'} className="user-details">
+                    <p className='user-name'>John Doe</p>
+                    <p className='user-role'>Gestor de Projeto</p>
+                </Box>
+            </Box>
+            
+            <Box className="logout-button" textAlign="center" p={2}>
+                <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<LogoutIcon />}
+                onClick={() => navigate('/')}
+                >
+                Logout
+                </Button>
+            </Box>
         </Box>
     );
 }

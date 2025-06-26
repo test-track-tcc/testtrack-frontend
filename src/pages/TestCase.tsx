@@ -1,103 +1,63 @@
-import { useState, useEffect } from 'react';
-import PageLayout from '../components/PageLayout';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
-import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { IconButton, Box, Typography, Button } from '@mui/material';
+import type { GridRenderCellParams, GridColDef } from '@mui/x-data-grid';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { useNavigate } from 'react-router-dom';
-import { type TestFormData } from '../functions/TestCaseFormFunctions'; // Importa a interface
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { getTestCases, deleteTestCase } from '../api/testCases';
+import { type TestFormData } from '../types/TestCase';
+import PageLayout from '../components/PageLayout';
 
 export default function TestCase() {
   const navigate = useNavigate();
-
   const [testCases, setTestCases] = useState<TestFormData[]>([]);
 
-  useEffect(() => {
-    const storedTestCases = localStorage.getItem('testCases');
-    if (storedTestCases) {
-      try {
-        const parsedTestCases: TestFormData[] = JSON.parse(storedTestCases);
-        const hydratedTestCases = parsedTestCases.map((tc) => ({
-          ...tc,
-          comentarios: tc.comentarios.map((c) => ({
-            ...c,
-            data: new Date(c.data),
-          })),
-          scripts: tc.scripts.map(({ url, name }) => ({ url, name, file: null })), // file: null agora é compatível com ScriptFile
-        }));
-        setTestCases(hydratedTestCases);
-      } catch (error) {
-        console.error("Erro ao carregar casos de teste do localStorage:", error);
-        setTestCases([]);
-      }
+  const fetchTestCases = async () => {
+    try {
+      const data = await getTestCases();
+      setTestCases(data);
+    } catch (error) {
+      console.error('Erro ao buscar casos de teste:', error);
     }
+  };
+
+  useEffect(() => {
+    fetchTestCases();
   }, []);
 
-  useEffect(() => {
-    const dataToSave = testCases.map(tc => ({
-      ...tc,
-      scripts: tc.scripts.map(({ url, name }) => ({ url, name })),
-    }));
-    localStorage.setItem('testCases', JSON.stringify(dataToSave));
-  }, [testCases]);
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
+      try {
+        await deleteTestCase(id);
+        fetchTestCases();
+      } catch (error) {
+        console.error('Erro ao deletar caso de teste:', error);
+      }
+    }
+  };
 
   const handleEdit = (id: string) => {
-    console.log(`Editar caso de teste com ID: ${id}`);
     navigate(`/addTestCase?id=${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
-      console.log(`Deletar caso de teste com ID: ${id}`);
-      setTestCases((prev) => prev.filter((testCase) => testCase.id !== id));
-    }
-  };
-
   const columns: GridColDef[] = [
-    { field: 'titulo', headerName: 'Título', width: 250, editable: false },
-    {
-      field: 'idResponsavel',
-      headerName: 'Responsável',
-      width: 180,
-      editable: false,
-    },
-    { field: 'prioridade', headerName: 'Prioridade', width: 130, editable: false },
-    { field: 'status', headerName: 'Status', width: 150, editable: false },
-    { field: 'tempoEstimado', headerName: 'Tempo Estimado', width: 150, editable: false },
-    {
-      field: 'dataCriacao',
-      headerName: 'Criação',
-      width: 150,
-      editable: false,
-      valueGetter: (params: { row: TestFormData }) => {
-        const rawDate = params.row.comentarios[0]?.data;
-        return rawDate ? format(rawDate, 'dd/MM/yyyy HH:mm', { locale: ptBR }) : 'N/A';
-      },
-    },
+    { field: 'titulo', headerName: 'Título', flex: 2, minWidth: 150,},
+    { field: 'idResponsavel', headerName: 'Responsável', flex: 1.5, minWidth: 120 },
+    { field: 'prioridade', headerName: 'Prioridade', flex: 1, minWidth: 100 },
+    { field: 'status', headerName: 'Status', flex: 1, minWidth: 100 },
+    { field: 'tempoEstimado', headerName: 'Tempo Estimado'  },
     {
       field: 'actions',
       headerName: 'Ações',
-      width: 120,
-      sortable: false,
-      filterable: false,
+
       renderCell: (params: GridRenderCellParams<TestFormData>) => (
         <Box>
-          <IconButton
-            color="primary"
-            aria-label="editar"
-            onClick={() => handleEdit(params.row.id!)}
-          >
+          <IconButton color='info' onClick={() => handleEdit(params.row.id!)}>
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="secondary"
-            aria-label="deletar"
-            onClick={() => handleDelete(params.row.id!)}
-          >
+          <IconButton color='error' onClick={() => handleDelete(params.row.id!)}>
             <DeleteIcon />
           </IconButton>
         </Box>
@@ -107,14 +67,11 @@ export default function TestCase() {
 
   return (
     <PageLayout>
-      <title>TestTrack  | Casos de Testes</title>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Gerenciamento de Casos de Teste
-        </Typography>
+      <title>Casos de Testes | TestTrack</title>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }} className="page-header">
+        <h1>Gerenciamento de Casos de Teste</h1>
         <Button
-          variant="contained"
-          color="primary"
+          className='btn primary icon'
           onClick={() => navigate('/addTestCase')}
           startIcon={<AddIcon />}
         >
@@ -123,23 +80,20 @@ export default function TestCase() {
       </Box>
 
       {testCases.length === 0 ? (
-        <Typography variant="body1" align="center" sx={{ mt: 5 }}>
-          Nenhum caso de teste cadastrado ainda. Crie um novo!
+        <Typography align="center" sx={{ mt: 5 }}>
+          Nenhum caso de teste cadastrado ainda.
         </Typography>
       ) : (
-        <div style={{ height: 600, width: '100%' }}>
+        <div style={{ height: 600 }}>
           <DataGrid
             rows={testCases}
             columns={columns}
             getRowId={(row) => row.id!}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 10 },
-              },
-            }}
+            paginationModel={{ pageSize: 10, page: 0 }}
             pageSizeOptions={[5, 10, 20]}
-            checkboxSelection
+            checkboxSelection={false}
             disableRowSelectionOnClick
+            disableColumnResize
           />
         </div>
       )}

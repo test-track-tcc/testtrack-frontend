@@ -23,7 +23,7 @@ function Onboarding() {
                   <h3>Ideal para líderes técnicos, gestores de qualidade ou coordenadores de equipes de QA</h3>
                   <p>Responsável por configurar e gerenciar a estrutura da organização no sistema.</p>
                 </div>
-                <Button className="primary-button" variant="contained" onClick={() => navigate("/dashboard")}>Escolher perfil</Button>
+                <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Escolher perfil</Button>
               </div>
               <div className="onboarding-box">
                 <Groups2OutlinedIcon/>
@@ -32,7 +32,7 @@ function Onboarding() {
                   <h3>Ideal para <strong>analistas</strong> de testes, <strong>engenheiros</strong> de QA e <strong>testadores</strong> automatizados.</h3>
                   <p>Usuário responsável por criar, executar e acompanhar os testes automatizados.</p>
                 </div>
-                <Button className="primary-button" variant="contained" onClick={() => navigate("/dashboard")}>Escolher perfil</Button>
+                <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Escolher perfil</Button>
               </div>
               <div className="onboarding-box">
                 <PsychologyAltOutlinedIcon/>
@@ -41,7 +41,7 @@ function Onboarding() {
                   <h3>Ideal para desenvolvedores de software responsáveis pela correção de erros apontados pelos testes automatizados</h3>
                   <p>Focado em corrigir falhas identificadas durante a execução dos testes</p>
                 </div>
-                <Button className="primary-button" variant="contained" onClick={() => navigate("/dashboard")}>Escolher perfil</Button>
+                <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Escolher perfil</Button>
               </div>
             </section>
         </div>
