@@ -5,10 +5,33 @@
 @use "./layout/Header.scss";
 @use "./layout/Login.scss";
 @use "./layout/Register.scss";
+@use "./layout/Sidebar.scss";
 
 body {
-    font-family: variables.$font-inter;
+    font-family: variables.$font-inter !important;
     background-color: variables.$background-color-primary;
+}
+
+main {
+    padding: 28px;
+    width: 100%;
+    height: 100%;
+}
+
+section.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #FFFFFF;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
 }
 
 .center-container {
@@ -29,3 +52,122 @@ button.primary-button {
     }
 }
 
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-button {
+    button  {
+        width: 100%;
+        text-transform: none;
+        color: black;
+        border-color: black;
+        &:hover {
+            background-color: #f0f0f0;
+        }
+    }
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    .user-name {
+        font-weight: bold;
+    }
+
+    .user-role {
+        font-size: 14px;
+    }
+}
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    justify-content: flex-end;
+    button {
+        width: 230px;
+    }
+}
+
+.btn.primary.icon {
+    background-color: #2E819D;
+    color: white;
+    font-family: "Inter", sans-serif;
+    text-transform: none;
+    font-weight: normal;
+    letter-spacing: normal;
+}
+
+.btn.secondary.icon {
+    background-color: transparent;
+    border: 2px solid #EFEFEF;
+    color: #2E819D;
+    font-family: "Inter", sans-serif;
+    text-transform: none;
+    font-weight: normal;
+    letter-spacing: normal;
+}
+
+.project-item {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    padding: 24px;
+    background-color: white;
+    border-radius: 12px;
+    gap: 20px;
+    img {
+        border-radius: 12px;
+        width: 100%;
+        height: 120px;
+    }
+}
+
+.page-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+[title] {
+  pointer-events: none;
+}
+
+.script-list {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    li {
+        display: flex;
+        padding: 12px;
+        list-style-type: none;
+        justify-content: space-between;
+        width: 230px;
+        background-color: #EFEFEF;
+        border-radius: 12px;
+        font-weight: bold;
+        align-items: center;
+        > div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+}
