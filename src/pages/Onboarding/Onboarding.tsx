@@ -1,5 +1,5 @@
 // import React from 'react';
-import SimpleHeader from "../components/SimpleHeader";
+import SimpleHeader from '../../components/layout/SimpleHeader';
 import PsychologyAltOutlinedIcon from '@mui/icons-material/PsychologyAltOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import Groups2OutlinedIcon from '@mui/icons-material/Groups2Outlined';
@@ -11,7 +11,7 @@ function Onboarding() {
   return (
     <div>
       <title>TestTrack | Escolha seu tipo de perfil</title>
-      <SimpleHeader></SimpleHeader>
+      <SimpleHeader />
       <section className='center-container'>
         <div>
             <h1 className="head">Qual é seu tipo de perfil?</h1>
