@@ -31,7 +31,6 @@ export const createTestCase = async (data: TestFormData) => {
   formData.append('comentarios', JSON.stringify(data.comentarios));
   formData.append('anexos', JSON.stringify(data.anexos));
 
-  // Scripts - adiciona os arquivos
   data.scripts.forEach((script) => {
     if (script.file) {
       formData.append('scripts', script.file);
