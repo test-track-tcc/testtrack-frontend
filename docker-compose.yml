@@ -1,0 +1,22 @@
+services:
+  vite-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: vite-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev
+
+  vite-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vite-prod
+    ports:
+      - "4173:4173"
