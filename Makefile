@@ -1,9 +1,9 @@
 DEV_SERVICE = vite-dev
 PROD_SERVICE = vite-prod
 
-.PHONY: dev prod build-dev build-prod stop
+.PHONY: run-dev prod build-dev build-prod stop
 
-dev:
+run-dev:
 	docker compose up $(DEV_SERVICE)
 
 prod:

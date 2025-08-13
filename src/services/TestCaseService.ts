@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { TesteData } from '../types/types'; 
 
-export const testCasesApi = {
+export const TestCaseService = {
 
   createTeste: async (data: TesteData): Promise<TesteData> => {
     try {

@@ -1,12 +1,11 @@
-// Register.tsx
 import React from "react";
-import SimpleHeader from "../components/SimpleHeader";
+import SimpleHeader from "../../components/layout/SimpleHeader";
 import { FormControl } from "@mui/base/FormControl";
 import { TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useRegisterFunctions } from "../functions/RegisterFunctions";
-import "../i18n";
-import { type UserRegister } from "../types/User";
+import { useRegisterFunctions } from "../../functions/RegisterFunctions";
+import "../../i18n";
+import { type UserRegister } from "../../types/User";
 
 function Register() {
   const navigate = useNavigate();
@@ -31,7 +30,7 @@ function Register() {
     }
     try {
       await handleSubmit(formData);
-      navigate("/"); // redireciona após sucesso
+      navigate("/");
     } catch {
       alert("Erro ao registrar. Verifique os dados.");
     }

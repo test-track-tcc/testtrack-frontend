@@ -1,4 +1,4 @@
-import { UsersService } from '../services/usersApi';
+import { UsersService } from '../services/UsersService';
 import { type UserRegister } from '../types/User';
 
 export function useRegisterFunctions() {

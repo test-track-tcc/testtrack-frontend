@@ -6,9 +6,9 @@ import { Box, Button, IconButton, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { getTestCases, deleteTestCase } from '../api/testCases';
-import { type TestFormData } from '../types/TestCase';
-import PageLayout from '../components/PageLayout';
+import { TestCaseService } from '../../services/TestCaseService';
+import { type TestFormData } from '../../types/TestCase';
+import PageLayout from '../../components/layout/PageLayout';
 
 export default function TestCase() {
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ export default function TestCase() {
 
   const fetchTestCases = async () => {
     try {
-      const data = await getTestCases();
-      setTestCases(data);
+      const data = await TestCaseService.getAllTestes();
+      // setTestCases(data);
     } catch (error) {
       console.error('Erro ao buscar casos de teste:', error);
     }
@@ -30,8 +30,8 @@ export default function TestCase() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
       try {
-        await deleteTestCase(id);
-        fetchTestCases();
+        // await testCasesApi.createTeste(id);
+        // fetchTestCases();
       } catch (error) {
         console.error('Erro ao deletar caso de teste:', error);
       }
