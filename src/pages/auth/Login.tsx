@@ -1,33 +1,60 @@
-// import React from 'react';
 import SimpleHeader from "../../components/layout/SimpleHeader";
 import { FormControl } from '@mui/base/FormControl';
-import { TextField, Button } from '@mui/material';
+import { TextField, Button, Alert, CircularProgress, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import '../../i18n';
-
+import { useAuth } from '../../functions/AuthFunctions';
 
 function Login() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  // Use o hook para obter tudo o que você precisa
+  const { credentials, loading, error, handleChange, handleLogin } = useAuth();
 
-  return ( 
+  return (
     <div>
       <title>Logar-se | TestTrack</title>
-      <SimpleHeader></SimpleHeader>
+      <SimpleHeader />
       <section className='center-container login-container'>
         <div className='login-box'>
           <h1>{t('login.welcome')}</h1>
-          <FormControl defaultValue="" required>
-            <TextField id="outlined-basic" label={t('login.email')} variant="outlined" />
-            <TextField id="outlined-password-input" label="Senha" type="password" autoComplete="current-password" />
-            <Button className="primary-button" variant="contained" onClick={() => navigate("/onboarding")}>Entrar</Button>
-          </FormControl>
+          {error && <Alert severity="error">{error}</Alert>}
+          
+          <Box component="form" onSubmit={handleLogin}>
+            <FormControl required>
+              <TextField
+                id="email-input"
+                name="email"
+                label={t('login.email')}
+                variant="outlined"
+                value={credentials.email}
+                onChange={handleChange}
+                disabled={loading}
+              />
+              <TextField
+                id="password-input"
+                name="password"
+                label={t('login.password')}
+                type="password"
+                autoComplete="current-password"
+                value={credentials.password}
+                onChange={handleChange}
+                disabled={loading}
+              />
+              <Button 
+                className="primary-button" 
+                variant="contained" 
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Entrar'}
+              </Button>
+            </FormControl>
+          </Box>
           <p>Não possui uma conta? <a href="/register">Clique aqui</a></p>
         </div>
       </section>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

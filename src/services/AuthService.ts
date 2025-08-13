@@ -1,16 +1,17 @@
 import axios from 'axios';
-import { type UserRegister } from '../types/User';
+import { type UserLoginData, type AuthResponse } from '../types/User';
+
 
 export const AuthService = {
-  login: async (data: UserRegister): Promise<UserRegister> => {
+  login: async (data: UserLoginData): Promise<AuthResponse> => {
     try {
-      const response = await axios.post<UserRegister>(`${import.meta.env.VITE_API_BASE_URL}/users`, data);
+      const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, data);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        throw new Error('Falha ao criar teste: erro desconhecido');
+        throw new Error(error.response?.data?.message || 'Falha ao realizar o login. Tente novamente.');
       }
-      throw error;
+      throw new Error('Ocorreu um erro inesperado.');
     }
   },
 };
