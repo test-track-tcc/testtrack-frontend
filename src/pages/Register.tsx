@@ -39,7 +39,7 @@ function Register() {
 
   return (
     <div>
-      <title>TestTrack | Registrar-se</title>
+      <title>Registrar-se | TestTrack</title>
       <SimpleHeader />
       <section className="center-container login-container">
         <div className="login-box">
