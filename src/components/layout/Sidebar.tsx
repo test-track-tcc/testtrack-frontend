@@ -10,6 +10,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import Avatar from '@mui/material/Avatar';
+import { useAuth } from '../../functions/AuthFunctions';
 
 const drawerItems = [
     { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
@@ -28,6 +29,7 @@ const organizations = [
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { handleLogout } = useAuth();
 
     const activeItem = drawerItems.find(item =>
         location.pathname.startsWith(item.path)
@@ -101,9 +103,9 @@ export default function Sidebar() {
                 variant="outlined"
                 color="secondary"
                 startIcon={<LogoutIcon />}
-                onClick={() => navigate('/')}
+                onClick={handleLogout}
                 >
-                Logout
+                    Logout
                 </Button>
             </Box>
         </Box>

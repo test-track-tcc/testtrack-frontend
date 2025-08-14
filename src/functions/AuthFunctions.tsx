@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../services/AuthService';
 import { type UserLoginData } from '../types/User';
+import { removeItem } from '../utils/authStorage';
 
 export function useAuth() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export function useAuth() {
       const data = await AuthService.login(credentials);
 
       localStorage.setItem('authToken', data.access_token);
-      localStorage.setItem('userData', JSON.stringify({ id: data.id, email: data.email }));
+      localStorage.setItem('userData', JSON.stringify({ id: data.id, email: data.email, firstAccess: data.firstAccess}));
 
       if (data.firstAccess) {
         navigate('/onboarding');
@@ -43,11 +44,19 @@ export function useAuth() {
     }
   };
 
+  const handleLogout = async () => {
+    await AuthService.logout(); 
+    removeItem('authToken');
+    removeItem('userData');
+    navigate('/login');
+  };
+
   return {
     credentials,
     loading,
     error,
     handleChange,
     handleLogin,
+    handleLogout
   };
 }

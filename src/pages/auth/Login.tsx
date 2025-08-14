@@ -7,7 +7,6 @@ import { useAuth } from '../../functions/AuthFunctions';
 
 function Login() {
   const { t } = useTranslation();
-  // Use o hook para obter tudo o que você precisa
   const { credentials, loading, error, handleChange, handleLogin } = useAuth();
 
   return (
@@ -17,8 +16,6 @@ function Login() {
       <section className='center-container login-container'>
         <div className='login-box'>
           <h1>{t('login.welcome')}</h1>
-          {error && <Alert severity="error">{error}</Alert>}
-          
           <Box component="form" onSubmit={handleLogin}>
             <FormControl required>
               <TextField
@@ -29,6 +26,7 @@ function Login() {
                 value={credentials.email}
                 onChange={handleChange}
                 disabled={loading}
+                autoComplete="off"
               />
               <TextField
                 id="password-input"
@@ -49,6 +47,7 @@ function Login() {
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Entrar'}
               </Button>
             </FormControl>
+            {error && <Alert severity="error">{error}</Alert>}
           </Box>
           <p>Não possui uma conta? <a href="/register">Clique aqui</a></p>
         </div>
