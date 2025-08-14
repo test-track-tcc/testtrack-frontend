@@ -6,6 +6,7 @@ import Dashboard from "./pages/home/Dashboard";
 import TestCaseForm from "./pages/testCases/form/TestCaseForm";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
+import SelectOrganization from "./pages/organization/SelectOrganization";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCase" element={<TestCaseForm />} />
         <Route path="/projects" element={<Projects />} /> 
+        <Route path="/organization" element={<SelectOrganization />} /> 
       </Routes>
     </BrowserRouter>
   );

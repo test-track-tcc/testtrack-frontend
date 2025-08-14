@@ -18,6 +18,14 @@ main {
     height: 100%;
 }
 
+main:has(.centered-section) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    padding: 0;
+}
+
 section.form {
     display: flex;
     flex-direction: column;
@@ -170,4 +178,12 @@ button.primary-button {
             gap: 8px;
         }
     }
+}
+
+.centered-section {
+    max-width: 90vh;
+    background-color: #FFFFFF;
+    padding: 20px;
+    width: max-content;
+    border-radius: 20px;
 }
