@@ -1,10 +1,13 @@
 import { Box, Button, MenuItem, Select, TextField, Paper, FormControl, InputLabel } from '@mui/material';
-import TestCaseFormFunctions from '../functions/TestCaseFormFunctions';
-import { type StatusType, type PriorityType, type TestType, type ScriptFile } from '../types/TestCase';
-import PageLayout from '../components/PageLayout';
-import ScriptUpload from '../components/ScriptUpload';
+import TestCaseFormFunctions from '../../../functions/TestCaseFormFunctions';
+import { type TestType } from '../../../types/TestTypes';
+import { type PriorityType } from '../../../types/TestTypes';
+import { type StatusType } from '../../../types/TestTypes';
+import { type ScriptFile } from '../../../types/ScriptFile';
+import PageLayout from '../../../components/layout/PageLayout';
+import ScriptUpload from '../../../components/common/ScriptUpload';
 import { GridDownloadIcon } from '@mui/x-data-grid';
-import DocIcon from "../assets/doc-icon.svg?react";
+import DocIcon from "../../../assets/doc-icon.svg?react";
 import { useNavigate } from 'react-router-dom';
 
 export default function TestCaseForm() {

@@ -1,0 +1,3 @@
+export type TestType = 'FUNCIONAL' | 'USABILIDADE' | 'DESEMPENHO' | 'SEGURANCA' | 'REGRESSAO';
+export type PriorityType = 'NENHUM' | 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA';
+export type StatusType = | 'NAO_INICIADO' | 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDO' | 'BLOQUEADO' | 'FALHA' | 'APROVADO' | 'REVISAO_PENDENTE' | 'RETESTANDO' | 'CANCELADO'
