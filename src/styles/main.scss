@@ -1,4 +1,4 @@
-@use "./base/mixins";
+@use "./base/mixins" as *;
 @use "./base/variables";
 @use "./base/reset";
 @use "./base/typograph";
@@ -180,10 +180,43 @@ button.primary-button {
     }
 }
 
-.centered-section {
-    max-width: 90vh;
-    background-color: #FFFFFF;
-    padding: 20px;
-    width: max-content;
-    border-radius: 20px;
+.centered-container {
+    padding: 1em 2em;
+    width: 100%;
+    min-height: 400px;
+    .centered-section {
+        background-color: #FFFFFF;
+        padding: 24px;
+        border-radius: 20px;
+    }
+}
+
+.organization-section {
+    @include flex-column(start, stretch, 16px);
+
+    .organization-title {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .project-organization-select {
+        @include flex(space-between, center, 8px);
+        flex-wrap: wrap;
+        padding: 16px;
+        background-color: #F5F5F5;
+        border: 2px solid #C8C6C6;
+        border-radius: 16px;
+
+        .project-organization-infos {
+            @include flex-column(start, start, 8px);
+            label {
+                font-weight: bold;
+            }
+        }
+
+        button.primary-button {
+            min-width: 120px;
+        }
+    }
 }
