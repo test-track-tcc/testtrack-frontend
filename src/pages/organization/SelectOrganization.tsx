@@ -17,14 +17,16 @@ export default function SelectOrganization() {
                     <p>Selecione a sua organização!</p>
                   </div>
 
-                  <div className="project-organization-select">
-                    <div className="project-organization-infos">
-                      <label htmlFor="">Organization Name</label>
-                      <p>Description about my organization</p>
-                    </div>
+                  <div className='project-organization-general'>
+                    <div className="project-organization-select">
+                      <div className="project-organization-infos">
+                        <label htmlFor="">Organization Name</label>
+                        <p>Description about my organization</p>
+                      </div>
 
-                    <div>
-                        <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Entrar</Button>
+                      <div>
+                          <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Entrar</Button>
+                      </div>
                     </div>
                   </div>
                 </div>

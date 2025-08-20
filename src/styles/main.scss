@@ -6,6 +6,7 @@
 @use "./layout/Login.scss";
 @use "./layout/Register.scss";
 @use "./layout/Sidebar.scss";
+@use "./components/button.scss";
 
 body {
     font-family: variables.$font-inter !important;
@@ -183,7 +184,6 @@ button.primary-button {
 .centered-container {
     padding: 1em 2em;
     width: 100%;
-    min-height: 400px;
     .centered-section {
         background-color: #FFFFFF;
         padding: 24px;
@@ -200,10 +200,18 @@ button.primary-button {
         gap: 16px;
     }
 
+    h2 {
+        font-size: 20px;
+    }
+
+    .project-organization-general {
+        @include flex-column(start, stretch, 16px);
+    }
+
     .project-organization-select {
         @include flex(space-between, center, 8px);
         flex-wrap: wrap;
-        padding: 16px;
+        padding: 24px;
         background-color: #F5F5F5;
         border: 2px solid #C8C6C6;
         border-radius: 16px;
@@ -220,3 +228,5 @@ button.primary-button {
         }
     }
 }
+
+

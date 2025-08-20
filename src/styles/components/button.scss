@@ -1,0 +1,42 @@
+@use "../base/variables";
+
+// Componente Geral de Botão
+button.MuiButtonBase-root {
+    letter-spacing: normal;
+    min-width: 120px !important;
+    text-transform: none;
+    border-radius: 8px;
+    letter-spacing: 0;
+}
+
+// Primary Button (Contained)
+button.MuiButton-contained.MuiButton-containedPrimary {
+    background-color: variables.$primary-color;
+    color: white;
+}
+
+// Secondary Button (Outline)
+button.MuiButton-outlined.MuiButton-outlinedPrimary {
+    border-color: #B1ADAD;
+    color: black;
+}
+
+// Button Group Component
+.group-btn.buttons-section {
+    box-shadow: none;
+    justify-content: space-between;
+    margin-top: 8px;
+    
+
+    .MuiButtonGroup-firstButton {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .MuiButtonGroup-lastButton {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+
+}

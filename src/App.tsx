@@ -7,6 +7,7 @@ import TestCaseForm from "./pages/testCases/form/TestCaseForm";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
 import SelectOrganization from "./pages/organization/SelectOrganization";
+import CreateOrganization1 from "./pages/organization/form/CreateOrganization1";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/addTestCase" element={<TestCaseForm />} />
         <Route path="/projects" element={<Projects />} /> 
         <Route path="/organization" element={<SelectOrganization />} /> 
+        <Route path="/create-organization-1" element={<CreateOrganization1 />} /> 
       </Routes>
     </BrowserRouter>
   );
