@@ -8,6 +8,8 @@ import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
 import SelectOrganization from "./pages/organization/SelectOrganization";
 import CreateOrganization1 from "./pages/organization/form/CreateOrganization1";
+import CreateOrganization2 from "./pages/organization/form/CreateOrganization2";
+import CreateOrganization3 from "./pages/organization/form/CreateOrganization3";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/projects" element={<Projects />} /> 
         <Route path="/organization" element={<SelectOrganization />} /> 
         <Route path="/create-organization-1" element={<CreateOrganization1 />} /> 
+        <Route path="/create-organization-2" element={<CreateOrganization2 />} /> 
+        <Route path="/create-organization-3" element={<CreateOrganization3 />} /> 
       </Routes>
     </BrowserRouter>
   );

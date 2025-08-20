@@ -5,7 +5,7 @@ import { ToggleButton, ToggleButtonGroup, ButtonGroup, Button } from "@mui/mater
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-export default function CreateOrganization1() {
+export default function CreateOrganization2() {
     const [value, setValue] = React.useState<string | null>("");
 
     const handleChange = (
@@ -25,11 +25,11 @@ export default function CreateOrganization1() {
                     <div className='organization-section'>
                         <div className="organization-title">
                             <h1>Criar Organização</h1>
-                            <p>Seja muito bem-vindo à criação da sua organização!</p>
+                            <p>Está quase lá... Você está terminando de configurar a sua organização, falta pouco!</p>
                         </div>
 
                         <div className="select-option">
-                            <h2>Quantas pessoas há na sua equipe atualmente?</h2>
+                            <h2>Qual é o principal objetivo ou foco desta organização na ferramenta?</h2>
                             <ToggleButtonGroup
                                 value={value}
                                 exclusive
@@ -37,29 +37,10 @@ export default function CreateOrganization1() {
                                 aria-label="employee count"
                                 className="toggle-button-select"
                             >
-                                <ToggleButton value="single">Apenas eu</ToggleButton>
-                                <ToggleButton value="1-10">1-10</ToggleButton>
-                                <ToggleButton value="11-50">11-50</ToggleButton>
-                                <ToggleButton value="51-100">51-100</ToggleButton>
-                                <ToggleButton value="100-500">100-500</ToggleButton>
-                            </ToggleButtonGroup>
-                        </div>
-
-                        <div className="select-option">
-                            <h2>Quantas pessoas trabalham na sua empresa?</h2>
-                            <ToggleButtonGroup
-                                value={value}
-                                exclusive
-                                onChange={handleChange}
-                                aria-label="employee count"
-                                className="toggle-button-select"
-                            >
-                                <ToggleButton value="1-20">1-20</ToggleButton>
-                                <ToggleButton value="21-50">21-50</ToggleButton>
-                                <ToggleButton value="51-100">51-100</ToggleButton>
-                                <ToggleButton value="101-500">101-500</ToggleButton>
-                                <ToggleButton value="500-1000">500-1000</ToggleButton>
-                                <ToggleButton value="1000+">+1000</ToggleButton>
+                                <ToggleButton value="single">Gerenciar testes de produto</ToggleButton>
+                                <ToggleButton value="1-10">Gerenciar testes no departamento de TI</ToggleButton>
+                                <ToggleButton value="11-50">Gerenciar testes de integração contínua (CI/CD)</ToggleButton>
+                                <ToggleButton value="51-100">Gerenciar testes de aceitação do usuário (UAT)</ToggleButton>
                             </ToggleButtonGroup>
                         </div>
 

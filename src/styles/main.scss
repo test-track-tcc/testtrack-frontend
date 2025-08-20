@@ -192,7 +192,7 @@ button.primary-button {
 }
 
 .organization-section {
-    @include flex-column(start, stretch, 16px);
+    @include flex-column(start, stretch, 24px);
 
     .organization-title {
         display: flex;
@@ -229,4 +229,6 @@ button.primary-button {
     }
 }
 
-
+.select-option {
+    @include flex-column(start, start, 16px);
+}
