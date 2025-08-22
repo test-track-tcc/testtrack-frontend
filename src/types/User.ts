@@ -13,6 +13,7 @@ export interface UserLoginData {
 export interface AuthResponse {
   id: string;
   email: string;
+  name: string;
   access_token: string;
   firstAccess: boolean;
 }
