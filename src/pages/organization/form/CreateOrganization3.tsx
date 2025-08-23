@@ -49,6 +49,7 @@ export default function CreateOrganization3() {
 
     return (
         <div>
+            <title>Criar Organização | TestTrack</title>
             <SimpleHeader></SimpleHeader>
             <main>
                 <CenteredSection>
@@ -63,13 +64,15 @@ export default function CreateOrganization3() {
                         <TextField
                             datatype='string'
                             label='Nome da Organização'
-                            placeholder='Organização'
+                            placeholder='ex: TestTrack Organization'
                             value={orgName}
                             onChange={(e) => setOrgName(e.target.value)}
                         />
+                        
                         <TextField
                             id="standard-multiline-static"
                             label="Descrição"
+                            placeholder='ex: Estou descrevendo minha organização...'
                             multiline
                             rows={4}
                             value={orgDescription}

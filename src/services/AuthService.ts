@@ -26,8 +26,6 @@ export const AuthService = {
         });
       }
     } catch (error) {
-      // Mesmo que a chamada à API falhe (ex: token expirado, servidor offline),
-      // o logout no frontend deve continuar. Por isso, apenas logamos o erro.
       console.error('Erro ao chamar o endpoint de logout:', error);
     }
   },

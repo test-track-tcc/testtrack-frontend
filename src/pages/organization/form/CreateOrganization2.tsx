@@ -44,6 +44,7 @@ export default function CreateOrganization2() {
 
     return (
         <div>
+            <title>Criar Organização | TestTrack</title>
             <SimpleHeader></SimpleHeader>
             <main>
                 <CenteredSection>

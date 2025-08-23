@@ -2,6 +2,22 @@
 // @include inter-font("normal", 400);
 // @include inter-font("bold", bold);
 
-$background-color-primary: #E2DADA;
+/* COLORS */
+// Sequential Colors
 $primary-color: #2E819D;
+
+// Background Colors
+$background-color-primary: #E2DADA;
+$background-color-secondary: #FFFFFF;
+$background-color-tertiary: #F5F5F5;
+
+// Gray
+$gray-100: #C8C6C6; 
+$gray-200: #B1ADAD;
+
+// Black 
+$black-100: #1E1E1E;
+$black-200: #000000;
+
+// Font-Family
 $font-inter: "Inter", sans-serif;
