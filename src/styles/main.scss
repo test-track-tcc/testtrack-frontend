@@ -61,6 +61,10 @@ button.primary-button {
     }
 }
 
+.MuiInputBase-input, .MuiFormLabel-root {
+    font-family: "Inter", sans-serif !important;
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;
@@ -231,4 +235,8 @@ button.primary-button {
 
 .select-option {
     @include flex-column(start, start, 16px);
+}
+
+.input-container {
+    @include flex(start, start, 16px);
 }
