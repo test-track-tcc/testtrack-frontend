@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SimpleHeader from "../../../components/layout/SimpleHeader";
 import CenteredSection from "../../../components/layout/CenteredSection"
 import { ToggleButton, ToggleButtonGroup, ButtonGroup, Button } from "@mui/material";
@@ -6,15 +7,42 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export default function CreateOrganization1() {
-    const [value, setValue] = React.useState<string | null>("");
+    const navigate = useNavigate();
+    const [teamSize, setTeamSize] = useState<string | null>(null);
+    const [companySize, setCompanySize] = useState<string | null>(null);
 
-    const handleChange = (
-        event: React.MouseEvent<HTMLElement>,
+    useEffect(() => {
+        const savedData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
+        setTeamSize(savedData.teamSize || null);
+        setCompanySize(savedData.companySize || null);
+    }, []);
+
+    const handleTeamSizeChange = (
+        _event: React.MouseEvent<HTMLElement>,
         newValue: string | null
     ) => {
         if (newValue !== null) {
-        setValue(newValue);
+            setTeamSize(newValue);
         }
+    };
+
+    const handleCompanySizeChange = (
+        _event: React.MouseEvent<HTMLElement>,
+        newValue: string | null
+    ) => {
+        if (newValue !== null) {
+            setCompanySize(newValue);
+        }
+    };
+
+    const handleNext = () => {
+        const onboardingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
+        localStorage.setItem('onboardingData', JSON.stringify({
+            ...onboardingData,
+            teamSize,
+            companySize,
+        }));
+        navigate('/create-organization/step-2');
     };
 
     return (
@@ -31,9 +59,9 @@ export default function CreateOrganization1() {
                         <div className="select-option">
                             <h2>Quantas pessoas há na sua equipe atualmente?</h2>
                             <ToggleButtonGroup
-                                value={value}
+                                value={teamSize}
                                 exclusive
-                                onChange={handleChange}
+                                onChange={handleTeamSizeChange}
                                 aria-label="employee count"
                                 className="toggle-button-select"
                             >
@@ -48,9 +76,9 @@ export default function CreateOrganization1() {
                         <div className="select-option">
                             <h2>Quantas pessoas trabalham na sua empresa?</h2>
                             <ToggleButtonGroup
-                                value={value}
+                                value={companySize}
                                 exclusive
-                                onChange={handleChange}
+                                onChange={handleCompanySizeChange}
                                 aria-label="employee count"
                                 className="toggle-button-select"
                             >
@@ -64,13 +92,12 @@ export default function CreateOrganization1() {
                         </div>
 
                         <ButtonGroup variant="contained" className='group-btn buttons-section'>
-                            <Button variant="outlined" startIcon={<ArrowBackIcon />}>Voltar</Button>
-                            <Button variant="contained" endIcon={<ArrowForwardIcon />}>Próximo</Button>
+                            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/onboarding')}>Voltar</Button>
+                            <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={handleNext}>Próximo</Button>
                         </ButtonGroup>
                     </div>
                 </CenteredSection>
             </main>
         </div>
-    )
+    );
 }
-

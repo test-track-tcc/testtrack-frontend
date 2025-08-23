@@ -25,10 +25,10 @@ function App() {
         <Route path="/addTestCase" element={<TestCaseForm />} />
         <Route path="/projects" element={<Projects />} /> 
         <Route path="/organization" element={<SelectOrganization />} /> 
-        <Route path="/create-organization-1" element={<CreateOrganization1 />} /> 
-        <Route path="/create-organization-2" element={<CreateOrganization2 />} /> 
-        <Route path="/create-organization-3" element={<CreateOrganization3 />} /> 
-        <Route path="/create-organization-4" element={<CreateOrganization4 />} />
+        <Route path="/create-organization/step-1" element={<CreateOrganization1 />} /> 
+        <Route path="/create-organization/step-2" element={<CreateOrganization2 />} /> 
+        <Route path="/create-organization/step-3" element={<CreateOrganization3 />} /> 
+        <Route path="/create-organization/step-4" element={<CreateOrganization4 />} />
       </Routes>
     </BrowserRouter>
   );
