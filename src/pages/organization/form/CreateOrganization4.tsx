@@ -60,7 +60,7 @@ export default function CreateOrganization4() {
                 <CenteredSection>
                     <div className='organization-section'>
                         <div className="organization-title">
-                            <h1>{JSON.parse(localStorage.getItem('onboardingData') || '{}').orgName || ''}</h1>
+                            <h1>{JSON.parse(localStorage.getItem('onboardingData') || '').orgName || 'Organização'}</h1>
                         </div>
 
                         <h2>Quem está na sua organização?</h2>
