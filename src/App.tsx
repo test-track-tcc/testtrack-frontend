@@ -23,8 +23,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCase" element={<TestCaseForm />} />
-        <Route path="/projects" element={<Projects />} /> 
         <Route path="/organization" element={<SelectOrganization />} /> 
+        <Route path="/organization/:orgId/projects" element={<Projects />} />
         <Route path="/create-organization/step-1" element={<CreateOrganization1 />} /> 
         <Route path="/create-organization/step-2" element={<CreateOrganization2 />} /> 
         <Route path="/create-organization/step-3" element={<CreateOrganization3 />} /> 

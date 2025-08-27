@@ -1,36 +1,74 @@
-import PageLayout from "../../components/layout/PageLayout";
-import { Box, Button } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import PageLayout from '../../components/layout/PageLayout';
+import { Box, Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useNavigate } from 'react-router-dom';
+import { type Project } from '../../types/Project';
+import { ProjectService } from '../../services/ProjectService';
 
-export default function Projects() { 
-    const navigate = useNavigate();
+export default function Projects() {
+  const navigate = useNavigate();
+  const { orgId } = useParams<{ orgId: string }>();
 
-    return (
-        <PageLayout>
-            <title>Projetos | TestTrack</title>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <h1>Projetos</h1>
-                <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate('/addProject')}
-                startIcon={<AddIcon />}
-                className="btn primary icon"
-                >
-                    Adicionar Projeto
-                </Button>
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (orgId) {
+      const fetchProjects = async () => {
+        try {
+          setLoading(true);
+          const data = await ProjectService.getProjectsByOrganization(orgId);
+          setProjects(data);
+        } catch (error) {
+          console.error("Erro ao carregar projetos:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProjects();
+    }
+  }, [orgId]); // Executa sempre que o orgId mudar
+
+  if (loading) {
+    return <PageLayout><Typography>Carregando projetos...</Typography></PageLayout>;
+  }
+
+  return (
+    <PageLayout>
+      <title>Projetos | TestTrack</title>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <h1>Projetos</h1>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/addProject')}
+          startIcon={<AddIcon />}
+          className="btn primary icon"
+        >
+          Adicionar Projeto
+        </Button>
+      </Box>
+
+      <Box className="projects-list" sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        {projects.length > 0 ? (
+          projects.map(project => (
+            <Box className="project-item" key={project.id}>
+              <h2>{project.name}</h2>
+              <p>{project.description || 'Sem descrição.'}</p>
+              <p><strong>12</strong>/24 Casos de Testes concluídos</p>
+              <p>Data de Conclusão: 20/05/2025</p>
+              <p><strong>Status: Em progresso</strong></p>
+              <Box className="button-group">
+                  <Button className="btn icon secondary" onClick={() => navigate(`/projects/${project.id}/testCase`)}>Editar projeto</Button>
+                  <Button className="btn icon primary" onClick={() => navigate(`/projects/${project.id}/testCase`)}>Ver detalhes</Button>
+              </Box>
             </Box>
-
-            <Box className="projects-list">
-                <Box className="project-item">
-                    <img src="src\assets\img\mock-project.png" alt="" />
-                    <h2>TestTrack</h2>
-                    <p>O projeto TestTrack é um projeto de TCC.</p>
-                    <Button className="btn icon primary" onClick={() => navigate('/testCase')}>Ver detalhes</Button>
-                </Box>
-
-            </Box>
-        </PageLayout>
-    )
+          ))
+        ) : (
+          <Typography>Nenhum projeto encontrado para esta organização.</Typography>
+        )}
+      </Box>
+    </PageLayout>
+  );
 }

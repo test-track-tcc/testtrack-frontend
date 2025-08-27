@@ -45,7 +45,7 @@ export default function OrganizationSelect() {
             <Button
               className="primary-button"
               variant="contained"
-              onClick={() => navigate(`/projects`)}
+              onClick={() => navigate(`/organization/${org.id}/projects`)}
             >
               Entrar
             </Button>
