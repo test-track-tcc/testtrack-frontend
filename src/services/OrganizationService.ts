@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type OrganizationPayload } from '../types/Organization';
+import { type OrganizationPayload, type Organization } from '../types/Organization';
 
 export const OrganizationService = {
     create: async (data: OrganizationPayload): Promise<OrganizationPayload> => {
@@ -10,6 +10,15 @@ export const OrganizationService = {
             console.error("Error creating organization:", error);
             throw error;
         }
-     }
+     },
 
+    get: async (): Promise<Organization[]> => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/organization`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar organizações:', error);
+            throw error;
+        }
+    },
 };

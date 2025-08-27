@@ -207,6 +207,10 @@ button.primary-button {
         font-size: 20px;
     }
 
+    .organization-container {
+        @include flex-column(start, stretch, 16px);
+    }
+
     .project-organization-general {
         @include flex-column(start, stretch, 16px);
     }
