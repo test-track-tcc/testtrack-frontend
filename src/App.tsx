@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Onboarding from "./pages/Onboarding";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import TestCaseForm from "./pages/TestCaseForm";
-import TestCase from "./pages/TestCase";
-import Projects from "./pages/Projects";
+import Login from "./pages/auth/Login";
+import Onboarding from "./pages/auth/Onboarding";
+import Register from "./pages/auth/Register";
+import Dashboard from "./pages/home/Dashboard";
+import TestCaseForm from "./pages/testCases/form/TestCaseForm";
+import TestCase from "./pages/testCases/TestCase";
+import Projects from "./pages/projects/Projects";
+import SelectOrganization from "./pages/organization/SelectOrganization";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCase" element={<TestCaseForm />} />
         <Route path="/projects" element={<Projects />} /> 
+        <Route path="/organization" element={<SelectOrganization />} /> 
       </Routes>
     </BrowserRouter>
   );

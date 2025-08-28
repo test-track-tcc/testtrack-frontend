@@ -8,4 +8,8 @@ export default defineConfig({
     react(),
     svgr(),
 ],
+  server: {
+    host: '0.0.0.0',
+    port: 5173
+  }
 })

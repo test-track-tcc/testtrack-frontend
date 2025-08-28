@@ -1,13 +1,11 @@
 import axios from 'axios';
 import type { TesteData } from '../types/types'; 
 
-const API_BASE_URL = 'http://localhost:3000/testes'; 
-
-export const testCasesApi = {
+export const TestCaseService = {
 
   createTeste: async (data: TesteData): Promise<TesteData> => {
     try {
-      const response = await axios.post<TesteData>(API_BASE_URL, data);
+      const response = await axios.post<TesteData>(import.meta.env.API_BASE_URL, data);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -25,7 +23,7 @@ export const testCasesApi = {
 
   getAllTestes: async (): Promise<TesteData[]> => {
     try {
-      const response = await axios.get<TesteData[]>(API_BASE_URL);
+      const response = await axios.get<TesteData[]>(import.meta.env.API_BASE_URL);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

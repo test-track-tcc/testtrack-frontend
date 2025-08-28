@@ -10,6 +10,7 @@ div:has(.login-container) {
   display: grid;
   place-items: center;
   height: 90vh;
+  padding: 20px;
 
     div.login-box {
         display: flex;
@@ -17,7 +18,6 @@ div:has(.login-container) {
         gap: 32px;
         width: 100%;
         max-width: 450px;
-        min-height: 275px;
         padding: 2rem;
         background-color: white;
         border-radius: 8px;

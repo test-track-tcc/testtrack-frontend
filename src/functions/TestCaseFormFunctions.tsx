@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { type SelectChangeEvent } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import { getTestCaseById, createTestCase, updateTestCase } from '../api/testCases';
-import {type TestFormData, type Comment, type ScriptFile } from '../types/TestCase';
+import { TestCaseService } from '../services/TestCaseService';
+import {type TestFormData, type Comment } from '../types/TestCase';
+import { type ScriptFile } from '../types/ScriptFile';
 
 function TestCaseFormFunctions() {
   const location = useLocation();
@@ -35,8 +36,8 @@ function TestCaseFormFunctions() {
     const fetchTestCase = async () => {
       if (editId) {
         try {
-          const data = await getTestCaseById(editId);
-          setFormData(data);
+          const data = await TestCaseService.getAllTestes();
+          // setFormData(data);
         } catch (error) {
           console.error('Erro ao buscar caso de teste:', error);
         }
@@ -109,9 +110,9 @@ function TestCaseFormFunctions() {
     event.preventDefault();
     try {
       if (editId) {
-        await updateTestCase(editId, formData);
+        // await TestCaseService.updateTeste(editId, formData);
       } else {
-        await createTestCase(formData);
+        // await TestCaseService.createTeste(formData);
       }
       console.log('Caso de teste salvo com sucesso!');
       navigate('/testCase');
