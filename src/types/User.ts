@@ -1,3 +1,9 @@
+export interface User {
+    id?: string | undefined;
+    name?: string;
+    email?: string;  
+}
+
 export interface UserRegister {
     name: string;
     email: string;

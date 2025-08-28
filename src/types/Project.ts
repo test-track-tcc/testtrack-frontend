@@ -8,3 +8,9 @@ export interface Project {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type ProjectStatus =
+    | 'Não Iniciado'
+    | 'Em progresso'
+    | 'Concluído'
+    | 'Bloqueado';

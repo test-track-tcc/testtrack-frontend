@@ -28,10 +28,10 @@ export default function Projects() {
       };
       fetchProjects();
     }
-  }, [orgId]); // Executa sempre que o orgId mudar
+  }, [orgId]);
 
   if (loading) {
-    return <PageLayout><Typography>Carregando projetos...</Typography></PageLayout>;
+    return <PageLayout><div className="project-item"><Typography>Carregando projetos...</Typography></div></PageLayout>;
   }
 
   return (
@@ -66,7 +66,11 @@ export default function Projects() {
             </Box>
           ))
         ) : (
-          <Typography>Nenhum projeto encontrado para esta organização.</Typography>
+              <Box className="projects-list" sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', width: '100%', justifyContent: 'center', alignItems: 'center', height: '70vh' }}>
+                <div className="project-item">
+                  <Typography>Nenhum projeto encontrado para esta organização.</Typography>
+                </div>
+              </Box>
         )}
       </Box>
     </PageLayout>

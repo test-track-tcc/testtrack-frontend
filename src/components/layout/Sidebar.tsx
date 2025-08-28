@@ -10,7 +10,9 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import Avatar from '@mui/material/Avatar';
 import { useAuth } from '../../functions/AuthFunctions';
 import { type Organization } from '../../types/Organization';
-import { OrganizationService } from '../../services/OrganizationService'; // 1. Importar o serviço
+import { OrganizationService } from '../../services/OrganizationService';
+import { getInitials } from '../../utils/getInitials';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 
 const drawerItems = [
     { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
@@ -29,8 +31,8 @@ export default function Sidebar() {
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [selectedOrg, setSelectedOrg] = useState<string>('');
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<{ name: string } | null>(null);
 
-    // 3. Buscar organizações da API quando o componente montar
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
@@ -48,26 +50,27 @@ export default function Sidebar() {
             }
         };
 
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
+
         fetchOrganizations();
     }, [orgId]); 
 
     const handleItemClick = (path: string) => {
-        // Garante que a navegação interna mantenha o contexto da organização
         if (selectedOrg) {
              if(path === '/projects') {
                 navigate(`/organization/${selectedOrg}/projects`);
             } else {
-                // Adapte outras rotas conforme necessário
                 navigate(path)
             }
         }
     };
     
-    // 4. Função para lidar com a mudança de organização
     const handleOrgChange = (event: SelectChangeEvent<string>) => {
         const newOrgId = event.target.value;
         setSelectedOrg(newOrgId);
-        // Navega para a página de projetos da nova organização selecionada
         navigate(`/organization/${newOrgId}/projects`);
     };
 
@@ -83,7 +86,7 @@ export default function Sidebar() {
 
             <Box>
                 <Box className="organization-div">
-                    <p>Organização</p>
+                    <a href='/organization'>Organização <ArrowRightAltIcon></ArrowRightAltIcon></a>
                     <Select
                         value={loading ? '' : selectedOrg}
                         onChange={handleOrgChange}
@@ -121,9 +124,9 @@ export default function Sidebar() {
 
             <Box flexGrow={1} />
             <Box display={'flex'} flexDirection={'row'} p={2} className="user-info" gap={"10px"}>
-                <Avatar>JD</Avatar>
+                <Avatar>{user ? getInitials(user.name) : ''}</Avatar>
                 <Box flexDirection={'column'} className="user-details">
-                    <p className='user-name'>John Doe</p>
+                    <p className='user-name'>{user?.name}</p>
                     <p className='user-role'>Gestor de Projeto</p>
                 </Box>
             </Box>

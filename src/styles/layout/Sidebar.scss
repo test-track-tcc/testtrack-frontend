@@ -4,9 +4,13 @@
     gap: 4px;
     padding: 10px;
 
-    p {
+    a {
+        display: flex;
+        gap: 4px;
         font-weight: bold;
+        text-decoration: none;
         margin-bottom: 4px;
+        align-items: center;
     }
 
     .organization-select {

@@ -35,7 +35,7 @@ export function useAuth() {
       if (data.firstAccess) {
         navigate('/onboarding');
       } else {
-        navigate('/projects');
+        navigate('/organization');
       }
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro.');

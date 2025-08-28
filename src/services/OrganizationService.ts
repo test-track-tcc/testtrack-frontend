@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type OrganizationPayload, type Organization } from '../types/Organization';
+import { type OrganizationPayload, type Organization, type AddUserPayload } from '../types/Organization';
 
 export const OrganizationService = {
     create: async (data: OrganizationPayload): Promise<OrganizationPayload> => {
@@ -21,4 +21,14 @@ export const OrganizationService = {
             throw error;
         }
     },
-};
+
+    addUserToOrganization: async (data: AddUserPayload) => {
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/organization/addUser`, data);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar usuário à organização:', error);
+            throw error;
+        }
+    }
+}

@@ -1,4 +1,5 @@
-import { getItem } from "../../utils/authStorage";
+import { Avatar } from "@mui/material";
+import { getInitials } from "../../utils/getInitials";
 
 function SimpleHeader() {
   const storedUser = localStorage.getItem("userData");
@@ -8,7 +9,11 @@ function SimpleHeader() {
     <>
       <header className="simple-header">
         <h1>TestTrack</h1>
-        {userData?.name && <p>Olá, {userData?.name ?? "Usuário"}</p>}
+
+        <div className="photo-name-user">
+          {userData?.name && <p>Olá, {userData?.name ?? "Usuário"}</p>}
+          <Avatar>{userData ? getInitials(userData.name) : ''}</Avatar>
+        </div>
       </header>
     </>
   )

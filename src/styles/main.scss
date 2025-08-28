@@ -35,6 +35,14 @@ section.form {
     border-radius: 12px;
 }
 
+.flex-row-between-items-center {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 form {
     display: flex;
     flex-direction: column;
@@ -122,6 +130,9 @@ button.primary-button {
     text-transform: none;
     font-weight: normal;
     letter-spacing: normal;
+    gap: 0;
+}.css-1sh91j5-MuiButton-startIcon {
+    margin-left: 0;
 }
 
 .btn.secondary.icon {
@@ -186,9 +197,12 @@ button.primary-button {
 }
 
 .centered-container {
+    @include flex-column(center, center, 24px);
     padding: 1em 2em;
     width: 100%;
+    height: calc(100vh - 110px);
     .centered-section {
+        width: 95%;
         background-color: #FFFFFF;
         padding: 24px;
         border-radius: 20px;
@@ -204,9 +218,18 @@ button.primary-button {
         gap: 16px;
     }
 
-    h2 {
-        font-size: 20px;
+    .organization-name-header {
+        h2 {
+            font-size: 20px;   
+        }
+        .MuiButtonBase-root {
+            min-width: 0 !important;
+            padding: 0px 8px;
+            color: variables.$black-100
+        }
     }
+
+    
 
     .organization-container {
         @include flex-column(start, stretch, 16px);

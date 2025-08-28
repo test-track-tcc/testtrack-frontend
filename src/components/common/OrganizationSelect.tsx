@@ -3,6 +3,8 @@ import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { OrganizationService } from '../../services/OrganizationService';
 import { type Organization } from '../../types/Organization';
+import { IconButton } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 export default function OrganizationSelect() {
   const navigate = useNavigate();
@@ -38,7 +40,12 @@ export default function OrganizationSelect() {
       {organizations.map((org) => (
         <div className="project-organization-select" key={org.id}>
           <div className="project-organization-infos">
-            <label htmlFor="">{org.name}</label>
+            <div className='organization-name-header'>
+              <label htmlFor="">{org.name}</label>
+              <IconButton aria-label="delete" color="primary">
+                <MoreHorizIcon />
+              </IconButton>
+            </div>
             <p>{org.description}</p>
           </div>
           <div>

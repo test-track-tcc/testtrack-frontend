@@ -11,7 +11,13 @@ export interface Organization {
 }
 
 export interface OrganizationPayload {
+    id?: string;
     name: string,
     description: string,
     adminId: string
+}
+
+export interface AddUserPayload {
+    userId: string;
+    organizationId: string;
 }
