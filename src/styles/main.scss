@@ -68,7 +68,7 @@ button.primary-button {
     }
 }
 
-.MuiInputBase-input, .MuiFormLabel-root {
+.MuiInputBase-input, .MuiFormLabel-root, .MuiTypography-root, .MuiTypography-body1 {
     font-family: "Inter", sans-serif !important;
 }
 
@@ -229,8 +229,6 @@ button.primary-button {
         }
     }
 
-    
-
     .organization-container {
         @include flex-column(start, stretch, 16px);
     }
@@ -266,4 +264,11 @@ button.primary-button {
 
 .input-container {
     @include flex(start, start, 16px);
+}
+
+.title-header-link {
+    a {
+        color: black;
+        text-decoration: none;
+    }
 }

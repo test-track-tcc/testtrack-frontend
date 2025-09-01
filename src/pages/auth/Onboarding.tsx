@@ -23,7 +23,7 @@ function Onboarding() {
                   <h3>Ideal para líderes técnicos, gestores de qualidade ou coordenadores de equipes de QA</h3>
                   <p>Responsável por configurar e gerenciar a estrutura da organização no sistema.</p>
                 </div>
-                <Button className="primary-button" variant="contained" onClick={() => navigate("/projects")}>Escolher perfil</Button>
+                <Button className="primary-button" variant="contained" onClick={() => navigate("/create-organization/step-1")}>Escolher perfil</Button>
               </div>
               <div className="onboarding-box">
                 <Groups2OutlinedIcon/>

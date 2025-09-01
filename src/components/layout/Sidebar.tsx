@@ -78,7 +78,7 @@ export default function Sidebar() {
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Toolbar>
                 <Box className="sidebar-logo">
-                    <h1>TestTrack</h1>
+                    <h1 className="title-header-link"><a href={user ? "/organization" : "/login"}>TestTrack</a></h1>
                     <p>Automatize, gerencie, evolua seus projetos</p>
                 </Box>
             </Toolbar>

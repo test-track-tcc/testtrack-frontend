@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Onboarding from "./pages/auth/Onboarding";
 import Register from "./pages/auth/Register";
@@ -13,25 +13,49 @@ import CreateOrganization3 from "./pages/organization/form/CreateOrganization3";
 import CreateOrganization4 from "./pages/organization/form/CreateOrganization4";
 
 function App() {
+  const user = localStorage.getItem("userData");
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={user ? <Navigate to="/organization" replace /> : <Login />}
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/organization" replace /> : <Login />}
+        />
+
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/testCase" element={<TestCase />} />
         <Route path="/addTestCase" element={<TestCaseForm />} />
-        <Route path="/organization" element={<SelectOrganization />} /> 
-        <Route path="/organization/:orgId/projects" element={<Projects />} />
-        <Route path="/create-organization/step-1" element={<CreateOrganization1 />} /> 
-        <Route path="/create-organization/step-2" element={<CreateOrganization2 />} /> 
-        <Route path="/create-organization/step-3" element={<CreateOrganization3 />} /> 
-        <Route path="/create-organization/step-4" element={<CreateOrganization4 />} />
+        <Route path="/organization" element={<SelectOrganization />} />
+        <Route
+          path="/organization/:orgId/projects"
+          element={<Projects />}
+        />
+        <Route
+          path="/create-organization/step-1"
+          element={<CreateOrganization1 />}
+        />
+        <Route
+          path="/create-organization/step-2"
+          element={<CreateOrganization2 />}
+        />
+        <Route
+          path="/create-organization/step-3"
+          element={<CreateOrganization3 />}
+        />
+        <Route
+          path="/create-organization/step-4"
+          element={<CreateOrganization4 />}
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
-export default App
+export default App;
