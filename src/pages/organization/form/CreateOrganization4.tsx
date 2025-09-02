@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SimpleHeader from "../../../components/layout/SimpleHeader";
 import CenteredSection from "../../../components/layout/CenteredSection";
 import { TextField, ButtonGroup, Button, InputLabel, Box, FormControl, IconButton, CircularProgress, Alert, Typography } from "@mui/material";
 import MenuItem from '@mui/material/MenuItem';
-import Select, { type SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AddIcon from '@mui/icons-material/Add';
@@ -30,7 +30,6 @@ export default function CreateOrganization4() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-
     useEffect(() => {
         const savedData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
         setMembers(savedData.members || []);
@@ -44,17 +43,22 @@ export default function CreateOrganization4() {
         setIsLoading(true);
         setError('');
         setFoundUser(null);
-        const user = await UsersService.getUserByEmail(newMemberEmail);
-        setIsLoading(false);
-        if (user) {
-            setFoundUser(user);
-        } else {
-            setError('Usuário não encontrado.');
+        try {
+            const user = await UsersService.getUserByEmail(newMemberEmail);
+            if (user) {
+                setFoundUser(user);
+            } else {
+                setError('Usuário não encontrado.');
+            }
+        } catch (err) {
+            setError('Falha ao buscar usuário. Tente novamente.');
+        } finally {
+            setIsLoading(false);
         }
     };
     
     const handleAddMember = () => {
-        if (foundUser && newMemberRole) {
+        if (foundUser && foundUser.id && foundUser.email && newMemberRole) {
             const memberExists = members.some(member => member.id === foundUser.id);
             if (memberExists) {
                 setError('Este usuário já foi adicionado.');
@@ -79,30 +83,31 @@ export default function CreateOrganization4() {
 
         try {
             const orgData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
-            
-            const organizationId = createdOrg.id;
+            const organizationId = orgData.organizationId;
 
             if (!organizationId) {
-                throw new Error("Não foi possível obter o ID da organização criada.");
+                throw new Error("ID da organização não encontrado. Por favor, volte ao passo anterior.");
             }
 
-            for (const member of members) {
-                await OrganizationService.addUserToOrganization({
-                    userId: member.id,
-                    organizationId: organizationId
-                });
-            }
+            await Promise.all(
+                members.map(member => 
+                    OrganizationService.addUserToOrganization({
+                        userId: member.id,
+                        organizationId: organizationId
+                    })
+                )
+            );
 
-            setSuccess('Organização e membros adicionados com sucesso!');
+            setSuccess('Membros adicionados com sucesso!');
             localStorage.removeItem('onboardingData');
             
             setTimeout(() => {
-                navigate('/projects');
-            }, 2000);
+                navigate(`/organization/${organizationId}/projects`);
+            }, 3000);
 
         } catch (err) {
-            console.error("Falha ao finalizar o cadastro:", err);
-            setError("Ocorreu um erro ao salvar a organização. Tente novamente.");
+            console.error("Falha ao adicionar membros:", err);
+            setError("Ocorreu um erro ao adicionar os membros. Tente novamente.");
         } finally {
             setIsSubmitting(false);
         }
@@ -110,7 +115,7 @@ export default function CreateOrganization4() {
 
     return (
         <div>
-            <title>Criar Organização | TestTrack</title>
+            <title>Adicionar Membros | TestTrack</title>
             <SimpleHeader/>
             <main>
                 <CenteredSection>
@@ -118,7 +123,6 @@ export default function CreateOrganization4() {
                         <div className="organization-title">
                            <h1>{JSON.parse(localStorage.getItem('onboardingData') || '{}').orgName || 'Organização'}</h1>
                         </div>
-
                         <h2>Quem está na sua organização?</h2>
                         
                         {members.map((member, index) => (
@@ -127,15 +131,13 @@ export default function CreateOrganization4() {
                                     label='E-mail do usuário'
                                     style={{ minWidth: 300 }}
                                     value={member.email}
-                                    InputProps={{ readOnly: true }}
                                 />
                                 <TextField
                                     label="Função"
                                     value={member.role}
                                     style={{ minWidth: 150 }}
-                                    InputProps={{ readOnly: true }}
                                 />
-                                <IconButton onClick={() => handleRemoveMember(index)} color="error" disabled={isSubmitting}>
+                                <IconButton onClick={() => handleRemoveMember(index)} color="error" className='delete-button' disabled={isSubmitting}>
                                     <DeleteIcon />
                                 </IconButton>
                             </Box>
@@ -155,8 +157,8 @@ export default function CreateOrganization4() {
                             </Button>
                         </Box>
                         
-                        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-                        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+                        {error && <Alert severity="error" sx={{ mt: 2, width: 'fit-content' }}>{error}</Alert>}
+                        {success && <Alert severity="success" sx={{ mt: 2, width: 'fit-content' }}>{success}</Alert>}
 
                         {foundUser && (
                             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
@@ -179,13 +181,12 @@ export default function CreateOrganization4() {
                             </Box>
                         )}
 
-
                         <ButtonGroup variant="contained" className='group-btn buttons-section' sx={{ mt: 4 }}>
                             <Button variant="outlined" startIcon={<NotificationsIcon />} onClick={() => navigate('/projects')} disabled={isSubmitting}>
                                 Lembre-me mais tarde
                             </Button>
                             <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={handleFinish} disabled={isSubmitting}>
-                                {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Finalizar'}
+                                {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Finalizar e Adicionar'}
                             </Button>
                         </ButtonGroup>
                     </div>

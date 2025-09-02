@@ -4,9 +4,14 @@
     gap: 4px;
     padding: 10px;
 
-    a {
+    a,
+    a:link,
+    a:visited,
+    a:hover,
+    a:active {
         display: flex;
         gap: 4px;
+        color: black;
         font-weight: bold;
         text-decoration: none;
         margin-bottom: 4px;

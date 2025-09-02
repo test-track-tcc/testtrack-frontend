@@ -45,6 +45,7 @@ export default function CreateOrganization3() {
         const adminId = userDataString ? JSON.parse(userDataString).id : null;
         if (!adminId) {
             setIsError(true);
+            setError('Não foi possível identificar o administrador. Faça login novamente.');
             return;
         }
 
@@ -55,15 +56,10 @@ export default function CreateOrganization3() {
         };
 
         try {
-            try {
-                await OrganizationService.create(payload);
-            } catch (error) {
-                console.error("Falha ao criar organização:", error);
-                setIsError(true);
-                if (axios.isAxiosError(error)) {
-                    setError(String(error.response?.data?.message || 'Erro ao criar organização'));
-                 }
-                 return;
+            const createdOrg = await OrganizationService.create(payload);
+
+            if (!createdOrg || !createdOrg.id) {
+                throw new Error("A API não retornou um ID para a organização.");
             }
 
             const onboardingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
@@ -72,12 +68,18 @@ export default function CreateOrganization3() {
                 orgName,
                 orgDescription,
                 isAdmin,
+                organizationId: createdOrg.id, 
             }));
             navigate('/create-organization/step-4');
 
         } catch (error) {
             console.error("Falha ao criar organização:", error);
             setIsError(true);
+            if (axios.isAxiosError(error)) {
+                setError(String(error.response?.data?.message || 'Erro ao criar organização'));
+            } else {
+                setError('Ocorreu um erro inesperado.');
+            }
         }
     };
 

@@ -218,13 +218,17 @@ button.primary-button {
         gap: 16px;
     }
 
+    .MuiBox-root {
+        margin-top: 0;
+    }
+
     .organization-name-header {
+        @include flex(start, center, 4px);
         h2 {
             font-size: 20px;   
         }
         .MuiButtonBase-root {
-            min-width: 0 !important;
-            padding: 0px 8px;
+            padding: 0;
             color: variables.$black-100
         }
     }
