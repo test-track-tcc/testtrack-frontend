@@ -1,3 +1,11 @@
 header.simple-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 1em 2em;
+    .photo-name-user {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
 }

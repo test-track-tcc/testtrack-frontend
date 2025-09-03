@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type UserRegister } from '../types/User';
+import { type UserRegister, type User } from '../types/User';
 
 export const UsersService = {
 
@@ -14,4 +14,17 @@ export const UsersService = {
       throw error;
     }
   },
+
+  getUserByEmail: async (email: string): Promise<User | null> => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/email/${email}`);
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                return null;
+            }
+            console.error('Erro ao buscar usuário por email:', error);
+            throw error;
+        }
+    }
 };

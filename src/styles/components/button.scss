@@ -1,0 +1,64 @@
+@use "../base/variables";
+
+// Componente Geral de Botão
+button.MuiButtonBase-root {
+    letter-spacing: normal;
+    font-family: variables.$font-inter;
+    text-transform: none;
+    border-radius: 8px;
+    letter-spacing: 0;
+}
+
+// Primary Button (Contained)
+button.MuiButton-contained.MuiButton-containedPrimary {
+    background-color: variables.$primary-color;
+    color: white;
+}
+
+// Secondary Button (Outline)
+button.MuiButton-outlined.MuiButton-outlinedPrimary {
+    border-color: #B1ADAD;
+    color: #7C7C7C;
+}
+
+// Button Group Component
+.group-btn.buttons-section {
+    box-shadow: none;
+    justify-content: space-between;
+    margin-top: 8px;
+
+    button {
+        min-width: 120px;
+    }
+
+    .MuiButtonGroup-firstButton {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .MuiButtonGroup-lastButton {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+}
+
+.MuiToggleButtonGroup-root.toggle-button-select {
+            flex-wrap: wrap;
+            gap: 12px;
+            button {
+                padding: 4px 12px;
+                border: 1px solid #B1ADAD;
+                border-left: 1px solid #B1ADAD;
+                border-right: 1px solid #B1ADAD;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+            }
+    }
+
+    .toggle-button-select button.Mui-selected {
+        border: none;
+        background-color: #2E819D;
+        color: white
+    }

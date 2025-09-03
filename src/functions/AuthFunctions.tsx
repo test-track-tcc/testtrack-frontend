@@ -30,12 +30,12 @@ export function useAuth() {
       const data = await AuthService.login(credentials);
 
       localStorage.setItem('authToken', data.access_token);
-      localStorage.setItem('userData', JSON.stringify({ id: data.id, email: data.email, firstAccess: data.firstAccess}));
+      localStorage.setItem('userData', JSON.stringify({ id: data.id, name: data.name, email: data.email, firstAccess: data.firstAccess}));
 
       if (data.firstAccess) {
         navigate('/onboarding');
       } else {
-        navigate('/projects');
+        navigate('/organization');
       }
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro.');

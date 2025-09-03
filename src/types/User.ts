@@ -1,3 +1,9 @@
+export interface User {
+    id?: string | undefined;
+    name?: string;
+    email?: string;  
+}
+
 export interface UserRegister {
     name: string;
     email: string;
@@ -13,6 +19,7 @@ export interface UserLoginData {
 export interface AuthResponse {
   id: string;
   email: string;
+  name: string;
   access_token: string;
   firstAccess: boolean;
 }
