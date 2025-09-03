@@ -12,6 +12,16 @@ export const OrganizationService = {
         }
      },
 
+    update: async (id: string, payload: Partial<OrganizationPayload>): Promise<Organization> => {
+        try {
+        const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/organization/${id}`, payload);
+        return response.data;
+        } catch (error) {
+        console.error("Error updating organization:", error);
+        throw error;
+        }
+    },
+
     get: async (): Promise<Organization[]> => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/organization`);

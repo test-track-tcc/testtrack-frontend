@@ -1,0 +1,20 @@
+.add-modal, .MuiDialog-container {
+    .MuiDialogContent-root, .MuiTypography-root {
+        padding: 0;
+    }
+
+    .MuiPaper-root {
+        padding: 20px;
+    }
+
+    #modal-modal-title {
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .MuiBox-root {
+        width: 600px;
+        border-radius: 16px;
+    }
+}
+

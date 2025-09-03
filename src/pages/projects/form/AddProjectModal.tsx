@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, ButtonGroup } from '@mui/material';
 import { type ProjectStatusType, ProjectStatus } from '../../../types/Project';
 
 const style = {
@@ -44,6 +44,7 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
     <Modal
       open={open}
       onClose={handleClose}
+      className='add-modal'
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -55,6 +56,7 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
           label="Nome do Projeto"
           variant="outlined"
           value={name}
+          autoComplete='off'
           onChange={(e) => setName(e.target.value)}
         />
         <TextField
@@ -63,22 +65,12 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
           multiline
           rows={4}
           value={description}
+          autoComplete='off'
           onChange={(e) => setDescription(e.target.value)}
         />
-        <TextField
-          label="Data de Início"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-        <TextField
-          label="Previsão de Finalização"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          onChange={(e) => setEstimateEnd(e.target.value)}
-        />
+
         <FormControl fullWidth>
-          <InputLabel>Status</InputLabel>
+          <InputLabel>Status do Projeto</InputLabel>
           <Select
             value={status}
             label="Status"
@@ -90,10 +82,25 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
             <MenuItem value={ProjectStatus.BLOCKED}>Bloqueado</MenuItem>
           </Select>
         </FormControl>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-          <Button onClick={handleClose}>Cancelar</Button>
+
+        <TextField
+          label="Data de Início"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+
+        <TextField
+          label="Previsão de Finalização"
+          type="date"
+          slotProps={{ inputLabel: { shrink: true } }}
+          onChange={(e) => setEstimateEnd(e.target.value)}
+        />
+
+        <ButtonGroup variant="contained" className='group-btn buttons-section'>
+          <Button variant="outlined" onClick={handleClose}>Cancelar</Button>
           <Button variant="contained" onClick={onSave}>Salvar</Button>
-        </Box>
+        </ButtonGroup>
       </Box>
     </Modal>
   );

@@ -26,7 +26,10 @@ button.MuiButton-outlined.MuiButton-outlinedPrimary {
     box-shadow: none;
     justify-content: space-between;
     margin-top: 8px;
-    
+
+    button {
+        min-width: 120px;
+    }
 
     .MuiButtonGroup-firstButton {
         border-top-right-radius: 8px;

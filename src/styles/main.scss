@@ -7,6 +7,7 @@
 @use "./layout/Register.scss";
 @use "./layout/Sidebar.scss";
 @use "./components/button.scss";
+@use "./layout/Modal.scss";
 
 body {
     font-family: variables.$font-inter !important;
@@ -207,6 +208,10 @@ button.primary-button {
         padding: 24px;
         border-radius: 20px;
     }
+}
+
+.centered-section:has(.organization-section) {
+    height: 75vh;
 }
 
 .organization-section {
