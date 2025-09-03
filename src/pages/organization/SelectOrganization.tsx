@@ -13,7 +13,7 @@ export default function SelectOrganization() {
         <SimpleHeader></SimpleHeader>
         <main>
             <CenteredSection>
-                <div className="organization-section">
+                <div className="organization-section all-organizations">
                   <div className="organization-title">
                     <div className="flex-row-between-items-center">
                       <h1>Selecione a organização</h1>
