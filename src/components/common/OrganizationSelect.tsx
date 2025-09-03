@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Button, IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+  CircularProgress 
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { OrganizationService } from '../../services/OrganizationService';
 import { type Organization } from '../../types/Organization';
@@ -21,7 +31,6 @@ export default function OrganizationSelect() {
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingOrg, setDeletingOrg] = useState<Organization | null>(null);
-
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>, orgId: string) => {
     setAnchorEl(event.currentTarget);
@@ -94,8 +103,23 @@ export default function OrganizationSelect() {
     fetchOrganizations();
   }, []);
 
-  if (loading) return <div>Carregando organizações...</div>;
-  if (error) return <div>{error}</div>;
+  // 2. Estilize a mensagem de Carregamento
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // 3. Estilize a mensagem de Erro
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -104,53 +128,59 @@ export default function OrganizationSelect() {
           organizations.map((org) => (
             <div className="project-organization-select" key={org.id}>
               <div className="project-organization-infos">
-          <div className='organization-name-header'>
-            <label>{org.name}</label>
-            <IconButton
-              aria-label="more"
-              id={`long-button-${org.id}`}
-              aria-haspopup="true"
-              onClick={(e) => handleMenuClick(e, org.id)}
-            >
-              <MoreHorizIcon />
-            </IconButton>
-          </div>
-          <p>{org.description}</p>
+                <div className='organization-name-header'>
+                  <label>{org.name}</label>
+                  <IconButton
+                    aria-label="more"
+                    id={`long-button-${org.id}`}
+                    aria-haspopup="true"
+                    onClick={(e) => handleMenuClick(e, org.id)}
+                  >
+                    <MoreHorizIcon />
+                  </IconButton>
+                </div>
+                <p>{org.description}</p>
               </div>
               <div>
-          <Button
-            className="primary-button"
-            variant="contained"
-            onClick={() => navigate(`/organization/${org.id}/projects`)}
-          >
-            Entrar
-          </Button>
+                <Button
+                  className="primary-button"
+                  variant="contained"
+                  onClick={() => navigate(`/organization/${org.id}/projects`)}
+                >
+                  Entrar
+                </Button>
               </div>
             </div>
           ))
         ) : (
-          <h1>Você não tem nenhuma organização!</h1>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '50vh'}}>
+            <Typography variant="h5" color="text.secondary">
+              Você ainda não faz parte de nenhuma organização!
+            </Typography>
+          </Box>
         )}
 
-        <Menu
-          id="long-menu"
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={handleOpenEditModal}>
-            <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Editar organização</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={handleMenuClose}>
-            <ListItemIcon><GroupIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Gerenciar membros</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={handleOpenDeleteModal} sx={{ color: 'error.main' }}>
-            <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
-            <ListItemText>Deletar organização</ListItemText>
-          </MenuItem>
-        </Menu>
+        {organizations.length > 0 && (
+            <Menu
+              id="long-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={handleOpenEditModal}>
+                <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+                <ListItemText>Editar organização</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={handleMenuClose}>
+                <ListItemIcon><GroupIcon fontSize="small" /></ListItemIcon>
+                <ListItemText>Gerenciar membros</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={handleOpenDeleteModal} sx={{ color: 'error.main' }}>
+                <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                <ListItemText>Deletar organização</ListItemText>
+              </MenuItem>
+            </Menu>
+        )}
       </section>
 
       <EditOrganizationModal 
