@@ -30,9 +30,15 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/testCase" element={<TestCase />} />
-        <Route path="/addTestCase" element={<TestCaseForm />} />
+        
+        <Route path="/projects/:projectId/test-cases" element={<TestCase />} />
+        
+        <Route path="/projects/:projectId/test-cases/new" element={<TestCaseForm />} />
+        
+        <Route path="/projects/:projectId/test-cases/:testCaseId/edit" element={<TestCaseForm />} />
+
         <Route path="/organization" element={<SelectOrganization />} />
+
         <Route
           path="/organization/:orgId/projects"
           element={<Projects />}

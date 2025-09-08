@@ -166,7 +166,7 @@ export default function TestCaseForm() {
               </ul>
             )}
           <Box className='button-group'>
-            <Button onClick={() => navigate("/testCase")} className='btn icon secondary'>
+            <Button onClick={() => navigate("/test-cases")} className='btn icon secondary'>
               Voltar
             </Button>
             <Button type="submit" className='btn icon primary'>

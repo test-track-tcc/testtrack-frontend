@@ -21,4 +21,14 @@ export const ProjectService = {
             throw error;
         }
     },
+
+    getById: async (projectId: string): Promise<Project> => {
+        try {
+            const response = await axios.get<Project>(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar o projeto ${projectId}:`, error);
+            throw error;
+        }
+    },
 };

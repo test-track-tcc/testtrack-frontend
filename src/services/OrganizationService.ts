@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { type OrganizationPayload, type Organization, type AddUserPayload } from '../types/Organization';
+import { type User } from '../types/User';
 
 export const OrganizationService = {
     get: async (): Promise<Organization[]> => {
@@ -50,5 +51,15 @@ export const OrganizationService = {
             console.error('Erro ao adicionar usuário à organização:', error);
             throw error;
         }
-    }
+    },
+
+    getUsers: async (organizationId: string): Promise<User[]> => {
+        try {
+            const response = await axios.get<User[]>(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar usuários da organização ${organizationId}:`, error);
+            throw error;
+        }
+    },
 }
