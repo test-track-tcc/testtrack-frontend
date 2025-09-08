@@ -11,14 +11,24 @@ import { type TestCase as TestCaseType } from '../../types/TestCase';
 import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import AddTestCaseModal from './form/AddTestCaseModal';
+import EditTestCaseModal from './form/EditTestCaseModal';
 
 export default function TestCase() {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<ProjectType | null>(null);
   const [testCases, setTestCases] = useState<TestCaseType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
+
+  const handleEdit = (id: string) => {
+    setEditingTestCaseId(id);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingTestCaseId(null);
+  };
 
   const fetchData = async () => {
     if (!projectId) return;
@@ -54,8 +64,6 @@ export default function TestCase() {
         }
     }
   };
-
-  const handleEdit = (id: string) => { /* ... */ };
 
   const columns: GridColDef<TestCaseType>[] = [
     { 
@@ -102,7 +110,7 @@ export default function TestCase() {
         <h1>Casos de Teste: {project?.name || 'Projeto'}</h1>
         <Button
           className='btn primary icon'
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsCreateModalOpen(true)}
           startIcon={<AddIcon />}
         >
           Adicionar Caso de Teste
@@ -113,11 +121,20 @@ export default function TestCase() {
 
       {project && (
         <AddTestCaseModal
-            open={isModalOpen}
+            open={isCreateModalOpen}
             projectId={project.id}
             organizationId={project.organization.id}
-            handleClose={() => setIsModalOpen(false)}
+            handleClose={() => setIsCreateModalOpen(false)}
             onSaveSuccess={fetchData} 
+        />
+      )}
+
+      {project && (
+        <EditTestCaseModal
+          open={!!editingTestCaseId}
+          testCaseId={editingTestCaseId}
+          handleClose={handleCloseEditModal}
+          onSaveSuccess={fetchData}
         />
       )}
 

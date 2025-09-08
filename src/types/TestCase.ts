@@ -11,10 +11,12 @@ export interface CreateTestCasePayload {
   responsibleId?: string;
   timeEstimated?: string;
   steps: string;
+  status: string;
   expectedResult: string;
   taskLink?: string;
   scripts?: File[];
 }
+export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
 
 export const TestType = {
   FUNCIONAL: 'FUNCIONAL',
@@ -38,9 +40,9 @@ export const Priority = {
 export type Priority = typeof Priority[keyof typeof Priority];
 
 export const TestCaseStatus = {
-  NAO_INICIADO: 'NAO_INICIADO',
+  NAO_INICIADO: 'NÃO INICIADO',
   PENDENTE: 'PENDENTE',
-  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  EM_ANDAMENTO: 'EM ANDAMENTO',
   APROVADO: 'APROVADO',
   REPROVADO: 'REPROVADO',
   BLOQUEADO: 'BLOQUEADO',

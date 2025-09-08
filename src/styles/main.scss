@@ -281,3 +281,12 @@ button.primary-button {
         text-decoration: none;
     }
 }
+
+.MuiDataGrid-columnHeaderTitleContainerContent {
+    .MuiDataGrid-columnHeaderTitle {
+        font-weight: bold;
+        font-family: variables.$font-inter;
+    }
+}
+
+
