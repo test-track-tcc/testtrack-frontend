@@ -72,6 +72,7 @@ export interface TestCase {
   taskLink: string | null;
   status: TestCaseStatus;
   project: Project;
+  projectSequenceId: number;
   comments: Comment[] | null;
   attachment: string[] | null;
   scripts: string[] | null;

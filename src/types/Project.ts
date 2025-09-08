@@ -10,6 +10,7 @@ export interface Project {
   startDate: string | null;
   estimateEnd: string | null;
   conclusionDate: string | null;
+  prefix: string;
   status: ProjectStatusType;
   createdAt: string;
   updatedAt: string;

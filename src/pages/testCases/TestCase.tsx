@@ -58,7 +58,14 @@ export default function TestCase() {
   const handleEdit = (id: string) => { /* ... */ };
 
   const columns: GridColDef<TestCaseType>[] = [
-    { field: 'id', headerName: 'ID' },
+    { 
+      field: 'projectSequenceId', 
+      headerName: 'ID',
+      width: 100,
+      valueGetter: (value, row) => {
+        return `${row.project.prefix}-${row.projectSequenceId}`;
+      }
+    },
     { field: 'title', headerName: 'Caso de Teste', flex: 2 },
     { field: 'status', headerName: 'Status', flex: 1 },
     { field: 'priority', headerName: 'Prioridade', flex: 1 },
