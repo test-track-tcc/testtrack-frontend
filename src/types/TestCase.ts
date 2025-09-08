@@ -1,4 +1,5 @@
 import { type Project } from './Project';
+import { type User } from './User';
 
 export interface CreateTestCasePayload {
   projectId: string;
@@ -6,8 +7,8 @@ export interface CreateTestCasePayload {
   description: string;
   testType: string;
   priority: string;
-  idCreatedBy: string;
-  idResponsible?: string;
+  createdById: string;
+  responsibleId?: string;
   timeEstimated?: string;
   steps: string;
   expectedResult: string;
@@ -37,13 +38,16 @@ export const Priority = {
 export type Priority = typeof Priority[keyof typeof Priority];
 
 export const TestCaseStatus = {
+  NAO_INICIADO: 'NAO_INICIADO',
   PENDENTE: 'PENDENTE',
   EM_ANDAMENTO: 'EM_ANDAMENTO',
   APROVADO: 'APROVADO',
   REPROVADO: 'REPROVADO',
   BLOQUEADO: 'BLOQUEADO',
   CANCELADO: 'CANCELADO',
+  CONCLUIDO: 'CONCLUIDO',
 } as const;
+
 export type TestCaseStatus = typeof TestCaseStatus[keyof typeof TestCaseStatus];
 
 export interface Comment {
@@ -58,8 +62,9 @@ export interface TestCase {
   description: string;
   testType: TestType;
   priority: Priority;
-  idCreatedBy: string;
   idResponsible: string | null;
+  createdBy: User;
+  responsible: User | null;
   timeEstimated: string | null;
   timeSpent: string;
   steps: string;

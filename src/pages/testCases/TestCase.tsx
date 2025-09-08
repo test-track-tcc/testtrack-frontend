@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { DataGrid, type GridRenderCellParams, type GridColDef } from '@mui/x-data-grid';
-import { Box, Button, IconButton, Typography, CircularProgress } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { DataGrid, type GridRenderCellParams, type GridColDef  } from '@mui/x-data-grid'; 
+import { Box, Button, IconButton, Typography, CircularProgress, Alert } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -18,11 +18,13 @@ export default function TestCase() {
   const [testCases, setTestCases] = useState<TestCaseType[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchData = async () => {
     if (!projectId) return;
     try {
       setLoading(true);
+      setError('');
       const [projectData, testCasesData] = await Promise.all([
         ProjectService.getById(projectId),
         TestCaseService.getByProjectId(projectId)
@@ -31,6 +33,7 @@ export default function TestCase() {
       setTestCases(testCasesData);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+      setError('Não foi possível carregar os dados do projeto.');
     } finally {
       setLoading(false);
     }
@@ -40,24 +43,42 @@ export default function TestCase() {
     fetchData();
   }, [projectId]);
   
-  const handleDelete = async (id: string) => { /* ... */ };
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
+        try {
+            await TestCaseService.delete(id);
+            fetchData();
+        } catch (err) {
+            console.error('Erro ao deletar caso de teste:', err);
+            setError('Falha ao excluir o caso de teste.');
+        }
+    }
+  };
+
   const handleEdit = (id: string) => { /* ... */ };
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef<TestCaseType>[] = [
     { field: 'id', headerName: 'ID' },
     { field: 'title', headerName: 'Caso de Teste', flex: 2 },
     { field: 'status', headerName: 'Status', flex: 1 },
     { field: 'priority', headerName: 'Prioridade', flex: 1 },
     { field: 'testType', headerName: 'Tipo de Teste', flex: 1 },
-    { field: 'idResponsible', headerName: 'Responsável', flex: 1 },
+    {
+      field: 'responsible',
+      headerName: 'Responsável',
+      flex: 1,
+      valueGetter: (value, row) => {
+        return row.responsible?.name || 'Nenhum';
+      },
+    },
     { field: 'timeEstimated', headerName: 'Tempo Est.', flex: 1 },
     {
       field: 'actions',
       headerName: 'Ações',
       renderCell: (params: GridRenderCellParams<TestCaseType>) => (
         <Box>
-          <IconButton color='info' onClick={() => handleEdit(params.row.id!)}><EditIcon /></IconButton>
-          <IconButton color='error' onClick={() => handleDelete(params.row.id!)}><DeleteIcon /></IconButton>
+          <IconButton color="info" onClick={() => handleEdit(params.row.id!)}><EditIcon /></IconButton>
+          <IconButton color="error" onClick={() => handleDelete(params.row.id!)}><DeleteIcon /></IconButton>
         </Box>
       ),
     },
@@ -81,6 +102,8 @@ export default function TestCase() {
         </Button>
       </Box>
 
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
       {project && (
         <AddTestCaseModal
             open={isModalOpen}
@@ -93,7 +116,11 @@ export default function TestCase() {
 
       {testCases.length > 0 ? (
         <div style={{ height: 600, width: '100%' }}>
-          <DataGrid rows={testCases} columns={columns} getRowId={(row) => row.id!} />
+          <DataGrid<TestCaseType>
+            rows={testCases}
+            columns={columns}
+            getRowId={(row) => row.id!}
+          />
         </div>
       ) : (
         <Typography align="center" sx={{ mt: 5 }}>

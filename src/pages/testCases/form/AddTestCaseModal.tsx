@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Modal, Box, Button, MenuItem, Select, TextField, FormControl, InputLabel, Typography, CircularProgress, Alert } from '@mui/material';
+import { Modal, Box, Button, MenuItem, Select, TextField, FormControl, InputLabel, Typography, CircularProgress, Alert, type SelectChangeEvent } from '@mui/material';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { type User } from '../../../types/User';
 import { TestCaseService } from '../../../services/TestCaseService';
-import { type CreateTestCasePayload } from '../../../types/TestCase';
 import { OrganizationService } from '../../../services/OrganizationService';
+import { type CreateTestCasePayload } from '../../../types/TestCase';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -37,19 +37,23 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
     description: '',
     testType: '',
     priority: '',
-    idResponsible: '',
+    responsibleId: '',
     timeEstimated: '',
-    timeSpent: '',
-    status: TestCaseStatus.PENDENTE,
     steps: '',
     expectedResult: '',
     taskLink: '',
+    status: TestCaseStatus.NAO_INICIADO,
   });
 
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
   const [scripts, setScripts] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // 1. CORREÇÃO: Definição das listas de opções
+  const tipos = Object.values(TestType);
+  const prioridades = Object.values(Priority);
+  const statusList = Object.values(TestCaseStatus);
 
   useEffect(() => {
     if (open && organizationId) {
@@ -65,8 +69,13 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
     }
   }, [open, organizationId]);
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
+  };
+
+  // 2. CORREÇÃO: Função para lidar com a mudança nos Selects
+  const handleSelectChange = (name: keyof typeof formData) => (event: SelectChangeEvent<string>) => {
+    setFormData(prev => ({ ...prev, [name]: event.target.value }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,22 +84,13 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
     }
   };
 
-  const clearForm = () => {
-    setFormData({
-      title: '', description: '', testType: '', priority: '', idResponsible: '',
-      timeEstimated: '', timeSpent: '', status: TestCaseStatus.PENDENTE, steps: '',
-      expectedResult: '', taskLink: ''
-    });
-    setScripts([]);
-    setError('');
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError('');
     const userDataString = localStorage.getItem('userData');
-    const idCreatedBy = userDataString ? JSON.parse(userDataString).id : null;
+    const createdById = userDataString ? JSON.parse(userDataString).id : null;
 
-    if (!idCreatedBy) {
+    if (!createdById) {
       setError("Usuário criador não identificado. Faça login novamente.");
       return;
     }
@@ -99,13 +99,12 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
     const payload: CreateTestCasePayload = {
       ...formData,
       projectId: projectId,
-      idCreatedBy: idCreatedBy,
+      createdById: createdById,
       scripts: scripts,
     };
 
     try {
       await TestCaseService.create(payload);
-      clearForm();
       handleClose();
       onSaveSuccess();
     } catch (err) {
@@ -117,47 +116,44 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <Box sx={style} component="form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+      <Box sx={style} component="form" onSubmit={handleSave}>
         <Typography variant="h5" component="h2">Novo Caso de Teste</Typography>
-
+        
         <TextField name="title" label="Título" value={formData.title} onChange={handleChange} required autoComplete='off' />
         <TextField name="description" label="Descrição" value={formData.description} onChange={handleChange} multiline rows={3} autoComplete='off' />
-
+        
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
           <FormControl fullWidth>
             <InputLabel>Tipo de Teste</InputLabel>
-            <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleChange}>
-              {Object.values(TestType).map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+            <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleSelectChange('testType')}>
+              {tipos.map(t => <MenuItem key={t} value={t}>{t.replace('_', ' ')}</MenuItem>)}
             </Select>
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>Prioridade</InputLabel>
-            <Select name="priority" label="Prioridade" value={formData.priority} onChange={handleChange}>
-              {Object.values(Priority).map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+            <Select name="priority" label="Prioridade" value={formData.priority} onChange={handleSelectChange('priority')}>
+              {prioridades.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
 
         <FormControl fullWidth>
           <InputLabel>Status</InputLabel>
-          <Select name="status" label="Status" value={formData.status} onChange={handleChange}>
-            {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+          <Select name="status" label="Status" value={formData.status} onChange={handleSelectChange('status')}>
+            {statusList.map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
           </Select>
         </FormControl>
 
         <FormControl fullWidth>
           <InputLabel>Responsável (Opcional)</InputLabel>
-          <Select name="idResponsible" label="Responsável (Opcional)" value={formData.idResponsible} onChange={handleChange}>
+          <Select name="responsibleId" label="Responsável (Opcional)" value={formData.responsibleId} onChange={handleSelectChange('responsibleId')}>
             <MenuItem value=""><em>Nenhum</em></MenuItem>
             {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
           </Select>
         </FormControl>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          <TextField name="timeEstimated" label="Tempo Estimado (ex: 2h 30m)" value={formData.timeEstimated} onChange={handleChange} />
-          <TextField name="timeSpent" label="Tempo Gasto" value={formData.timeSpent} onChange={handleChange} helperText="Atualizado durante a execução" />
-        </Box>
-
+        <TextField name="timeEstimated" label="Tempo Estimado (ex: 2h 30m)" value={formData.timeEstimated} onChange={handleChange} />
+        
         <TextField name="steps" label="Passos (Steps)" value={formData.steps} onChange={handleChange} multiline rows={3} required autoComplete='off' />
         <TextField name="expectedResult" label="Resultado Esperado" value={formData.expectedResult} onChange={handleChange} multiline rows={3} required autoComplete='off' />
         <TextField name="taskLink" label="Vincular Requisito/Task (Opcional)" value={formData.taskLink} onChange={handleChange} autoComplete='off' />
@@ -169,7 +165,7 @@ export default function AddTestCaseModal({ open, projectId, organizationId, hand
         {scripts.length > 0 && <Typography variant="body2" color="text.secondary">{scripts.length} arquivo(s) selecionado(s).</Typography>}
 
         {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-
+        
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
           <Button onClick={handleClose}>Cancelar</Button>
           <Button type="submit" variant="contained" disabled={isSubmitting}>
