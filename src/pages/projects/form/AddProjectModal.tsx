@@ -25,18 +25,23 @@ interface AddProjectModalProps {
 export default function AddProjectModal({ open, handleClose, handleSave }: AddProjectModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [estimateEnd, setEstimateEnd] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState('');
+  const [estimateEnd, setEstimateEnd] = useState('');
   const [status, setStatus] = useState<ProjectStatusType>(ProjectStatus.NOT_STARTED);
 
   const onSave = () => {
     handleSave({
       name,
       description,
-      startDate,
-      estimateEnd,
+      startDate: startDate || null,
+      estimateEnd: estimateEnd || null,
       status,
     });
+    setName('');
+    setDescription('');
+    setStartDate('');
+    setEstimateEnd('');
+    setStatus(ProjectStatus.NOT_STARTED);
     handleClose();
   };
 
@@ -86,14 +91,16 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
         <TextField
           label="Data de Início"
           type="date"
-          slotProps={{ inputLabel: { shrink: true } }}
+          value={startDate}
+          InputLabelProps={{ shrink: true }} 
           onChange={(e) => setStartDate(e.target.value)}
         />
 
         <TextField
           label="Previsão de Finalização"
           type="date"
-          slotProps={{ inputLabel: { shrink: true } }}
+          value={estimateEnd}
+          InputLabelProps={{ shrink: true }} 
           onChange={(e) => setEstimateEnd(e.target.value)}
         />
 

@@ -148,6 +148,7 @@ export default function CreateOrganization4() {
                                 label='Adicione o e-mail do usuário'
                                 placeholder='ex: johndoe@testrack.com.br'
                                 style={{ minWidth: 300 }}
+                                autoComplete='off'
                                 value={newMemberEmail}
                                 onChange={(e) => setNewMemberEmail(e.target.value)}
                                 disabled={isSubmitting}
