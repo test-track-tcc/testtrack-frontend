@@ -3,7 +3,6 @@ import Login from "./pages/auth/Login";
 import Onboarding from "./pages/auth/Onboarding";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/home/Dashboard";
-import TestCaseForm from "./pages/testCases/form/TestCaseForm";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
 import SelectOrganization from "./pages/organization/SelectOrganization";
@@ -32,10 +31,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         
         <Route path="/projects/:projectId/test-cases" element={<TestCase />} />
-        
-        <Route path="/projects/:projectId/test-cases/new" element={<TestCaseForm />} />
-        
-        <Route path="/projects/:projectId/test-cases/:testCaseId/edit" element={<TestCaseForm />} />
 
         <Route path="/organization" element={<SelectOrganization />} />
 

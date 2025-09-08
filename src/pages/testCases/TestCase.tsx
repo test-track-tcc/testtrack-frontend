@@ -12,6 +12,7 @@ import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import AddTestCaseModal from './form/AddTestCaseModal';
 import EditTestCaseModal from './form/EditTestCaseModal';
+import TestCaseDetailModal from './form/TestCaseDetailModal';
 
 export default function TestCase() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -21,6 +22,15 @@ export default function TestCase() {
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
+  const [viewingTestCaseId, setViewingTestCaseId] = useState<string | null>(null);
+
+  const handleViewDetails = (id: string) => {
+    setViewingTestCaseId(id);
+  };
+
+  const handleCloseViewModal = () => {
+    setViewingTestCaseId(null);
+  };
 
   const handleEdit = (id: string) => {
     setEditingTestCaseId(id);
@@ -137,6 +147,12 @@ export default function TestCase() {
           onSaveSuccess={fetchData}
         />
       )}
+
+      <TestCaseDetailModal
+        open={!!viewingTestCaseId}
+        testCaseId={viewingTestCaseId}
+        handleClose={handleCloseViewModal}
+      />
 
       {testCases.length > 0 ? (
         <div style={{ height: 600, width: '100%' }}>
