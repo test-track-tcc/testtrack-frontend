@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { DataGrid, type GridRenderCellParams, type GridColDef  } from '@mui/x-data-grid'; 
-import { Box, Button, IconButton, Typography, CircularProgress, Alert } from '@mui/material';
+import { useEffect, useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { DataGrid, type GridRenderCellParams, type GridColDef } from '@mui/x-data-grid';
+import { Box, Button, IconButton, Typography, CircularProgress, Alert, Select, MenuItem, FormControl, InputLabel, TextField, type SelectChangeEvent } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { TestCaseService } from '../../services/TestCaseService';
 import { ProjectService } from '../../services/ProjectService';
-import { type TestCase as TestCaseType } from '../../types/TestCase';
+import { type TestCase as TestCaseType, TestCaseStatus } from '../../types/TestCase';
 import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import EditTestCaseModal from './form/EditTestCaseModal';
@@ -15,20 +15,18 @@ import CreateTestCaseModal from './form/CreateTestCaseModal';
 
 export default function TestCase() {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const [project, setProject] = useState<ProjectType | null>(null);
+  const [allProjects, setAllProjects] = useState<ProjectType[]>([]);
   const [testCases, setTestCases] = useState<TestCaseType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
-
-  const handleEdit = (id: string) => {
-    setEditingTestCaseId(id);
-  };
-
-  const handleCloseEditModal = () => {
-    setEditingTestCaseId(null);
-  };
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const handleEdit = (id: string) => setEditingTestCaseId(id);
+  const handleCloseEditModal = () => setEditingTestCaseId(null);
 
   const fetchData = async () => {
     if (!projectId) return;
@@ -37,10 +35,12 @@ export default function TestCase() {
       setError('');
       const [projectData, testCasesData] = await Promise.all([
         ProjectService.getById(projectId),
-        TestCaseService.getByProjectId(projectId)
+        TestCaseService.getByProjectId(projectId),
+        // ProjectService.getProjectsByOrganization() 
       ]);
       setProject(projectData);
       setTestCases(testCasesData);
+      // setAllProjects(allProjectsData);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setError('Não foi possível carregar os dados do projeto.');
@@ -55,24 +55,44 @@ export default function TestCase() {
   
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
-        try {
-            await TestCaseService.delete(id);
-            fetchData();
-        } catch (err) {
-            console.error('Erro ao deletar caso de teste:', err);
-            setError('Falha ao excluir o caso de teste.');
-        }
+      try {
+        await TestCaseService.delete(id);
+        fetchData();
+      } catch (err) {
+        console.error('Erro ao deletar caso de teste:', err);
+        setError('Falha ao excluir o caso de teste.');
+      }
     }
   };
+  
+  const handleProjectChange = (event: SelectChangeEvent<string>) => {
+    const newProjectId = event.target.value;
+    if (newProjectId && newProjectId !== projectId) {
+      navigate(`/projects/${newProjectId}/test-cases`);
+    }
+  };
+
+  const filteredTestCases = useMemo(() => {
+    return testCases.filter(tc => {
+      const fullId = `${tc.project.prefix}-${tc.projectSequenceId}`;
+      const searchLower = searchQuery.toLowerCase().trim();
+
+      const searchMatch = searchLower === '' || 
+        tc.title.toLowerCase().includes(searchLower) ||
+        fullId.toLowerCase().includes(searchLower);
+      
+      const statusMatch = statusFilter === '' || tc.status === statusFilter;
+
+      return searchMatch && statusMatch;
+    });
+  }, [testCases, searchQuery, statusFilter]);
 
   const columns: GridColDef<TestCaseType>[] = [
     { 
       field: 'projectSequenceId', 
       headerName: 'ID',
       width: 100,
-      valueGetter: (_value, row) => {
-        return `${row.project.prefix}-${row.projectSequenceId}`;
-      }
+      valueGetter: (_value, row) => `${row.project.prefix}-${row.projectSequenceId}`
     },
     { field: 'title', headerName: 'Caso de Teste', flex: 2 },
     { field: 'status', headerName: 'Status', flex: 1 },
@@ -82,9 +102,7 @@ export default function TestCase() {
       field: 'responsible',
       headerName: 'Responsável',
       flex: 1,
-      valueGetter: (_value, row) => {
-        return row.responsible?.name || 'Nenhum';
-      },
+      valueGetter: (_value, row) => row.responsible?.name || 'Nenhum',
     },
     { field: 'timeEstimated', headerName: 'Tempo Est.', flex: 1 },
     {
@@ -100,7 +118,7 @@ export default function TestCase() {
   ];
 
   if (loading) {
-    return <PageLayout><Box sx={{textAlign: 'center', p: 3}}><CircularProgress /></Box></PageLayout>;
+    return <PageLayout><Box sx={{display: 'flex', justifyContent: 'center', p: 4}}><CircularProgress /></Box></PageLayout>;
   }
 
   return (
@@ -119,6 +137,72 @@ export default function TestCase() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
+      <section className='page-body'>
+        <Box className='section-datagrid-filter'>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Projeto</InputLabel>
+            <Select
+              value={projectId || ''}
+              label="Projeto"
+              onChange={handleProjectChange}
+            >
+              {allProjects.map((proj) => (
+                <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          <TextField 
+            label="Pesquisa" 
+            variant="outlined" 
+            placeholder="ID, Título..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ flexGrow: 1 }}
+          />
+          
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={statusFilter}
+              label="Status"
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value=""><em>Todos</em></MenuItem>
+              {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 150 }} disabled>
+            <InputLabel>Script</InputLabel>
+            <Select value="" label="Script">
+              <MenuItem value=""><em>Todos</em></MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        
+        {filteredTestCases.length > 0 ? (
+          <Box className="box-datagrid">
+            <div style={{ height: 600, width: '100%' }}>
+              <DataGrid<TestCaseType>
+                rows={filteredTestCases}
+                columns={columns}
+                getRowId={(row) => row.id!}
+                disableColumnFilter
+                disableColumnMenu
+                disableColumnResize
+              />
+            </div>
+          </Box>
+        ) : (
+          <Box className="box-datagrid" height={ 600 }>
+            <Typography align="center">
+              Nenhum caso de teste encontrado com os filtros aplicados.
+            </Typography>
+          </Box>
+        )}
+      </section>
+
       {project && (
         <CreateTestCaseModal
             open={isCreateModalOpen}
@@ -130,7 +214,7 @@ export default function TestCase() {
         />
       )}
 
-      {project && (
+      {editingTestCaseId && (
         <EditTestCaseModal
           open={!!editingTestCaseId}
           testCaseId={editingTestCaseId}
@@ -138,33 +222,6 @@ export default function TestCase() {
           onSaveSuccess={fetchData}
         />
       )}
-
-      <section className='page-body'>
-        <Box className='section-datagrid-filter'>
-          <label>Projeto</label>
-
-          <label>Pesquisa</label>
-
-          <label>Status</label>
-
-          <label>Script</label>
-        </Box>
-        {testCases.length > 0 ? (
-          <Box className="box-datagrid">
-            <div style={{ height: 600, width: '100%' }}>
-              <DataGrid<TestCaseType>
-                rows={testCases}
-                columns={columns}
-                getRowId={(row) => row.id!}
-              />
-            </div>
-          </Box>
-        ) : (
-          <Typography align="center" sx={{ mt: 5 }}>
-            Nenhum caso de teste cadastrado para este projeto.
-          </Typography>
-        )}
-      </section>
     </PageLayout>
   );
 }

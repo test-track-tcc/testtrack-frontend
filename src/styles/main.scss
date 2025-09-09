@@ -299,6 +299,7 @@ button.primary-button {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 16px;
     padding: 20px;
     background-color: variables.$background-color-secondary;
     border-radius: 16px;
