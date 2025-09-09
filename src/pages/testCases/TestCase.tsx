@@ -10,9 +10,8 @@ import { ProjectService } from '../../services/ProjectService';
 import { type TestCase as TestCaseType } from '../../types/TestCase';
 import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
-import AddTestCaseModal from './form/AddTestCaseModal';
 import EditTestCaseModal from './form/EditTestCaseModal';
-import TestCaseDetailModal from './form/TestCaseDetailModal';
+import CreateTestCaseModal from './form/CreateTestCaseModal';
 
 export default function TestCase() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -22,15 +21,6 @@ export default function TestCase() {
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
-  const [viewingTestCaseId, setViewingTestCaseId] = useState<string | null>(null);
-
-  const handleViewDetails = (id: string) => {
-    setViewingTestCaseId(id);
-  };
-
-  const handleCloseViewModal = () => {
-    setViewingTestCaseId(null);
-  };
 
   const handleEdit = (id: string) => {
     setEditingTestCaseId(id);
@@ -80,7 +70,7 @@ export default function TestCase() {
       field: 'projectSequenceId', 
       headerName: 'ID',
       width: 100,
-      valueGetter: (value, row) => {
+      valueGetter: (_value, row) => {
         return `${row.project.prefix}-${row.projectSequenceId}`;
       }
     },
@@ -92,7 +82,7 @@ export default function TestCase() {
       field: 'responsible',
       headerName: 'Responsável',
       flex: 1,
-      valueGetter: (value, row) => {
+      valueGetter: (_value, row) => {
         return row.responsible?.name || 'Nenhum';
       },
     },
@@ -130,9 +120,10 @@ export default function TestCase() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       {project && (
-        <AddTestCaseModal
+        <CreateTestCaseModal
             open={isCreateModalOpen}
             projectId={project.id}
+            projectName={project.name}
             organizationId={project.organization.id}
             handleClose={() => setIsCreateModalOpen(false)}
             onSaveSuccess={fetchData} 
@@ -148,25 +139,32 @@ export default function TestCase() {
         />
       )}
 
-      <TestCaseDetailModal
-        open={!!viewingTestCaseId}
-        testCaseId={viewingTestCaseId}
-        handleClose={handleCloseViewModal}
-      />
+      <section className='page-body'>
+        <Box className='section-datagrid-filter'>
+          <label>Projeto</label>
 
-      {testCases.length > 0 ? (
-        <div style={{ height: 600, width: '100%' }}>
-          <DataGrid<TestCaseType>
-            rows={testCases}
-            columns={columns}
-            getRowId={(row) => row.id!}
-          />
-        </div>
-      ) : (
-        <Typography align="center" sx={{ mt: 5 }}>
-          Nenhum caso de teste cadastrado para este projeto.
-        </Typography>
-      )}
+          <label>Pesquisa</label>
+
+          <label>Status</label>
+
+          <label>Script</label>
+        </Box>
+        {testCases.length > 0 ? (
+          <Box className="box-datagrid">
+            <div style={{ height: 600, width: '100%' }}>
+              <DataGrid<TestCaseType>
+                rows={testCases}
+                columns={columns}
+                getRowId={(row) => row.id!}
+              />
+            </div>
+          </Box>
+        ) : (
+          <Typography align="center" sx={{ mt: 5 }}>
+            Nenhum caso de teste cadastrado para este projeto.
+          </Typography>
+        )}
+      </section>
     </PageLayout>
   );
 }

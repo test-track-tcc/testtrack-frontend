@@ -289,4 +289,36 @@ button.primary-button {
     }
 }
 
+.page-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
+.section-datagrid-filter {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 20px;
+    background-color: variables.$background-color-secondary;
+    border-radius: 16px;
+    border: 2px solid #C8C6C6;
+
+    label {
+        font-weight: bold;
+    }
+}
+
+.box-datagrid {
+    background-color: variables.$background-color-secondary;
+    border: 2px solid #C8C6C6;
+    border-radius: 16px;
+    .MuiDataGrid-root {
+        border-radius: 16px;
+        border: 0;
+    }
+}
+
+.css-1yeiifd {
+    height: fit-content;
+}
