@@ -103,7 +103,6 @@ export default function OrganizationSelect() {
     fetchOrganizations();
   }, []);
 
-  // 2. Estilize a mensagem de Carregamento
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -112,7 +111,6 @@ export default function OrganizationSelect() {
     );
   }
 
-  // 3. Estilize a mensagem de Erro
   if (error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>

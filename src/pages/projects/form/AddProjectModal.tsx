@@ -92,7 +92,7 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
           label="Data de Início"
           type="date"
           value={startDate}
-          InputLabelProps={{ shrink: true }} 
+          InputLabelProps={{ shrink: true }}
           onChange={(e) => setStartDate(e.target.value)}
         />
 
@@ -100,7 +100,7 @@ export default function AddProjectModal({ open, handleClose, handleSave }: AddPr
           label="Previsão de Finalização"
           type="date"
           value={estimateEnd}
-          InputLabelProps={{ shrink: true }} 
+          InputLabelProps={{ shrink: true }}
           onChange={(e) => setEstimateEnd(e.target.value)}
         />
 

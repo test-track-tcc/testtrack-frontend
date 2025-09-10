@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type Project, type CreateProjectPayload } from '../types/Project';
+import { type Project, type CreateProjectPayload, type UpdateProjectPayload } from '../types/Project';
 
 export const ProjectService = {
     create : async (projectData: CreateProjectPayload): Promise<CreateProjectPayload> => {
@@ -28,6 +28,26 @@ export const ProjectService = {
             return response.data;
         } catch (error) {
             console.error(`Erro ao buscar o projeto ${projectId}:`, error);
+            throw error;
+        }
+    },
+
+    update: async (projectId: string, projectData: UpdateProjectPayload): Promise<Project[]> => {
+        try {
+            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}`, projectData);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar projetos para a organização ${projectId}:`, error);
+            throw error;
+        }
+    },
+
+    delete : async (projectId: string): Promise<Project[]> => {
+        try {
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar projetos para a organização ${projectId}:`, error);
             throw error;
         }
     },

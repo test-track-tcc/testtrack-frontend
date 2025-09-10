@@ -5,17 +5,18 @@ export interface CreateTestCasePayload {
   projectId: string;
   title: string;
   description: string;
-  testType: string;
-  priority: string;
+  testType: TestType;
+  priority: Priority;
   createdById: string;
   responsibleId?: string;
   timeEstimated?: string;
   steps: string;
-  status: string;
+  status: TestCaseStatus; 
   expectedResult: string;
   taskLink?: string;
   scripts?: File[];
 }
+
 export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
 
 export const TestType = {
@@ -64,7 +65,6 @@ export interface TestCase {
   description: string;
   testType: TestType;
   priority: Priority;
-  idResponsible: string | null;
   createdBy: User;
   responsible: User | null;
   timeEstimated: string | null;
