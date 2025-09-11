@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, Box, Typography, TextField, Button, CircularProgress, Divider, IconButton, FormControl, InputLabel, Select, MenuItem, ButtonGroup } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, CircularProgress, Divider, IconButton, FormControl, InputLabel, Select, MenuItem, ButtonGroup, type SelectChangeEvent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type Project, type UpdateProjectPayload, ProjectStatus, type ProjectStatusType } from '../../../types/Project';
 import { ProjectService } from '../../../services/ProjectService';
@@ -43,7 +43,7 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
                 status: project.status || ProjectStatus.NOT_STARTED,
                 startDate: formatDateForInput(project.startDate),
                 estimateEnd: formatDateForInput(project.estimateEnd),
-                endDate: formatDateForInput(project.endDate),
+                conclusionDate: formatDateForInput(project.conclusionDate),
             });
         }
     }, [project]);
@@ -63,7 +63,7 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
                 ...formData,
                 startDate: formData.startDate || undefined,
                 estimateEnd: formData.estimateEnd || undefined,
-                endDate: formData.endDate || undefined,
+                conclusionDate: formData.conclusionDate || undefined,
             });
             onSaveSuccess();
         } catch (error) {
@@ -74,7 +74,8 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
     };
 
     return (
-        <Modal open={open} onClose={handleClose}>
+        <Modal open={open} onClose={handleClose} className='add-modal' aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description">
             <Box sx={style}>
                  <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6">Editar Projeto</Typography>
@@ -91,7 +92,7 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
                 </FormControl>
                 <TextField name="startDate" label="Data de Início" type="date" value={formData.startDate || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
                 <TextField name="estimateEnd" label="Previsão de Finalização" type="date" value={formData.estimateEnd || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
-                <TextField name="endDate" label="Data de Finalização" type="date" value={formData.endDate || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
+                <TextField name="conclusionDate" label="Data de Finalização" type="date" value={formData.conclusionDate || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
                 <ButtonGroup variant="contained" sx={{ mt: 2, justifyContent: 'flex-end' }}>
                     <Button variant="outlined" onClick={handleClose}>Cancelar</Button>
                     <Button onClick={handleSave} disabled={loading}>

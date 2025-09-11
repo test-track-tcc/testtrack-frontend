@@ -9,7 +9,7 @@ export interface Project {
   description: string;
   startDate?: string;
   estimateEnd?: string;
-  endDate?: string;
+  conclusionDate?: string;
   prefix: string;
   status: ProjectStatusType;
   createdAt: string;
@@ -33,6 +33,7 @@ export interface UpdateProjectPayload {
   description?: string;
   startDate?: string;
   estimateEnd?: string;
+  conclusionDate?: string;
   status?: string;
 }
 
