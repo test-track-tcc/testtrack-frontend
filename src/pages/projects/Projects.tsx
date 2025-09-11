@@ -4,11 +4,10 @@ import PageLayout from '../../components/layout/PageLayout';
 import { Box, Button, Typography, CircularProgress, Alert, IconButton, Menu, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { type Project, type CreateProjectPayload, type ProjectStatusType, ProjectStatus } from '../../types/Project';
+import { type Project, type CreateProjectPayload, ProjectStatus } from '../../types/Project';
 import { ProjectService } from '../../services/ProjectService';
 import AddProjectModal from './form/AddProjectModal';
 import EditProjectModal from './form/EditProjectModal';
-import {  } from '../../types/Project';
 
 const statusDisplayMap = {
     [ProjectStatus.NOT_STARTED]: 'Não Iniciado',
@@ -22,6 +21,12 @@ const statusStyleMap = {
   [ProjectStatus.IN_PROGRESS]: { backgroundColor: '#2196f3', color: '#fff' },
   [ProjectStatus.FINISHED]: { backgroundColor: '#4caf50', color: '#fff' },
   [ProjectStatus.BLOCKED]: { backgroundColor: '#f44336', color: '#fff' },
+};
+
+const formatDate = (dateString: string | Date | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    const date = new Date(`${dateString}T00:00:00`);
+    return date.toLocaleDateString();
 };
 
 export default function Projects() {
@@ -150,9 +155,9 @@ export default function Projects() {
                             </Box>
                             
                             <p>{project.description || 'Sem descrição.'}</p>
-                            <p><strong>Início:</strong> {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong style={{ color: '#CC8809' }}>Previsão de Finalização:</strong> {project.estimateEnd ? new Date(project.estimateEnd).toLocaleDateString() : 'N/A'}</p>
-                            {project.conclusionDate && <p><strong style={{ color: '#C34646' }}>Data de Finalização:</strong> {project.conclusionDate ? new Date(project.conclusionDate).toLocaleDateString() : 'N/A'}</p>}
+                            <p><strong>Início:</strong> {formatDate(project.startDate)}</p>
+                            <p><strong style={{ color: '#CC8809' }}>Previsão de Finalização:</strong> {formatDate(project.estimateEnd)}</p>
+                            {project.conclusionDate && <p><strong style={{ color: '#C34646' }}>Data de Finalização:</strong> {formatDate(project.conclusionDate)}</p>}
                             <p>
                                 <strong>Status: </strong>
                                 <span

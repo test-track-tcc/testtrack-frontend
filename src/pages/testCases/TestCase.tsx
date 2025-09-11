@@ -196,8 +196,8 @@ export default function TestCase() {
           </Box>
         ) : (
           <Box className="box-datagrid" height={ 600 }>
-            <Typography align="center">
-              Nenhum caso de teste encontrado com os filtros aplicados.
+            <Typography variant='h6' align="center" style={{ position: 'relative', top: '50%'  }}>
+              <strong>Nenhum caso de teste encontrado.</strong>
             </Typography>
           </Box>
         )}
