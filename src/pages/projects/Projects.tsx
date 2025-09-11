@@ -4,10 +4,25 @@ import PageLayout from '../../components/layout/PageLayout';
 import { Box, Button, Typography, CircularProgress, Alert, IconButton, Menu, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { type Project, type CreateProjectPayload } from '../../types/Project';
+import { type Project, type CreateProjectPayload, type ProjectStatusType, ProjectStatus } from '../../types/Project';
 import { ProjectService } from '../../services/ProjectService';
 import AddProjectModal from './form/AddProjectModal';
 import EditProjectModal from './form/EditProjectModal';
+import {  } from '../../types/Project';
+
+const statusDisplayMap = {
+    [ProjectStatus.NOT_STARTED]: 'Não Iniciado',
+    [ProjectStatus.IN_PROGRESS]: 'Em Progresso',
+    [ProjectStatus.FINISHED]: 'Concluído',
+    [ProjectStatus.BLOCKED]: 'Bloqueado',
+};
+
+const statusStyleMap = {
+  [ProjectStatus.NOT_STARTED]: { backgroundColor: '#e0e0e0', color: '#000' },
+  [ProjectStatus.IN_PROGRESS]: { backgroundColor: '#2196f3', color: '#fff' },
+  [ProjectStatus.FINISHED]: { backgroundColor: '#4caf50', color: '#fff' },
+  [ProjectStatus.BLOCKED]: { backgroundColor: '#f44336', color: '#fff' },
+};
 
 export default function Projects() {
     const navigate = useNavigate();
@@ -136,8 +151,23 @@ export default function Projects() {
                             
                             <p>{project.description || 'Sem descrição.'}</p>
                             <p><strong>Início:</strong> {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Previsão:</strong> {project.estimateEnd ? new Date(project.estimateEnd).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Status: {project.status}</strong></p>
+                            <p><strong style={{ color: '#CC8809' }}>Previsão de Finalização:</strong> {project.estimateEnd ? new Date(project.estimateEnd).toLocaleDateString() : 'N/A'}</p>
+                            {project.conclusionDate && <p><strong style={{ color: '#C34646' }}>Data de Finalização:</strong> {project.conclusionDate ? new Date(project.conclusionDate).toLocaleDateString() : 'N/A'}</p>}
+                            <p>
+                                <strong>Status: </strong>
+                                <span
+                                    style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '16px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                    backgroundColor: statusStyleMap[project.status]?.backgroundColor || '#ccc',
+                                    color: statusStyleMap[project.status]?.color || '#000',
+                                    }}
+                                >
+                                    {statusDisplayMap[project.status] || project.status}
+                                </span>
+                            </p>
 
                             <Box className="button-group" sx={{ marginTop: 'auto', paddingTop: '16px' }}>
                                 <Button className="btn icon secondary" onClick={() => setEditingProject(project)}>Editar projeto</Button>

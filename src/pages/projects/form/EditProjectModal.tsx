@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, CircularProgress, Divider, IconButton, FormControl, InputLabel, Select, MenuItem, ButtonGroup, type SelectChangeEvent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { type Project, type UpdateProjectPayload, ProjectStatus, type ProjectStatusType } from '../../../types/Project';
+import { type Project, type UpdateProjectPayload, ProjectStatus } from '../../../types/Project';
 import { ProjectService } from '../../../services/ProjectService';
 import { format } from 'date-fns';
 
@@ -78,7 +78,7 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
         aria-describedby="modal-modal-description">
             <Box sx={style}>
                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">Editar Projeto</Typography>
+                    <Typography variant="h6"><strong>Editar Projeto</strong></Typography>
                     <IconButton onClick={handleClose}><CloseIcon /></IconButton>
                 </Box>
                 <Divider />
@@ -87,13 +87,16 @@ export default function EditProjectModal({ open, project, handleClose, onSaveSuc
                 <FormControl fullWidth>
                     <InputLabel>Status</InputLabel>
                     <Select name="status" value={formData.status || ''} label="Status" onChange={handleChange}>
-                        {Object.values(ProjectStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+                        <MenuItem value={ProjectStatus.NOT_STARTED}>Não Iniciado</MenuItem>
+                        <MenuItem value={ProjectStatus.IN_PROGRESS}>Em progresso</MenuItem>
+                        <MenuItem value={ProjectStatus.FINISHED}>Concluído</MenuItem>
+                        <MenuItem value={ProjectStatus.BLOCKED}>Bloqueado</MenuItem>
                     </Select>
                 </FormControl>
                 <TextField name="startDate" label="Data de Início" type="date" value={formData.startDate || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
                 <TextField name="estimateEnd" label="Previsão de Finalização" type="date" value={formData.estimateEnd || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
                 <TextField name="conclusionDate" label="Data de Finalização" type="date" value={formData.conclusionDate || ''} InputLabelProps={{ shrink: true }} onChange={handleChange} fullWidth />
-                <ButtonGroup variant="contained" sx={{ mt: 2, justifyContent: 'flex-end' }}>
+                <ButtonGroup variant="contained" className='group-btn buttons-section'>
                     <Button variant="outlined" onClick={handleClose}>Cancelar</Button>
                     <Button onClick={handleSave} disabled={loading}>
                         {loading ? <CircularProgress size={24} /> : 'Salvar'}
