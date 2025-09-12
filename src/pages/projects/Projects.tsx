@@ -8,6 +8,9 @@ import { type Project, type CreateProjectPayload, ProjectStatus } from '../../ty
 import { ProjectService } from '../../services/ProjectService';
 import AddProjectModal from './form/AddProjectModal';
 import EditProjectModal from './form/EditProjectModal';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import AddUserToProjectModal from '../../components/common/AddUserProjectModal';
+
 
 const statusDisplayMap = {
     [ProjectStatus.NOT_STARTED]: 'Não Iniciado',
@@ -42,6 +45,7 @@ export default function Projects() {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const isMenuOpen = Boolean(anchorEl);
+    const [addingUsersToProject, setAddingUsersToProject] = useState<Project | null>(null);
 
     const fetchProjects = async () => {
         if (!orgId) {
@@ -60,6 +64,14 @@ export default function Projects() {
             setLoading(false);
         }
     };
+
+    const handleAddUserClick = () => {
+      const project = projects.find(p => p.id === selectedProjectId);
+      if (project) {
+          setAddingUsersToProject(project);
+      }
+      handleMenuClose();
+  };
 
     useEffect(() => {
         fetchProjects();
@@ -193,8 +205,18 @@ export default function Projects() {
                 open={isMenuOpen}
                 onClose={handleMenuClose}
             >
+                <MenuItem onClick={handleAddUserClick}><GroupAddIcon fontSize="small" sx={{mr: 1}} /> Adicionar Usuário</MenuItem>
                 <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>Excluir projeto</MenuItem>
             </Menu>
+
+            <AddUserToProjectModal
+                open={!!addingUsersToProject}
+                project={addingUsersToProject}
+                handleClose={() => setAddingUsersToProject(null)}
+                onSuccess={() => {
+                    setAddingUsersToProject(null);
+                }}
+            />
         </PageLayout>
     );
 }

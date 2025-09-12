@@ -37,6 +37,10 @@ export interface UpdateProjectPayload {
   status?: string;
 }
 
+export interface AddUserToProjectPayload {
+  userId: string;
+}
+
 export const ProjectStatus = {
   NOT_STARTED: 'NAO_INICIADO',
   IN_PROGRESS: 'EM_PROGRESSO',

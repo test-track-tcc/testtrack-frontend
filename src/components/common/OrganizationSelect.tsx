@@ -178,7 +178,6 @@ export default function OrganizationSelect() {
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={() => {
-                  // Limpa o ID se o menu for fechado sem clicar numa opção
                   handleMenuClose();
                   setSelectedOrgId(null);
               }}
