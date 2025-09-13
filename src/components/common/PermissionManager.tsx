@@ -34,7 +34,7 @@ function PermissionForm({
     };
 
     return (
-        <Box sx={{ my: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+        <Box sx={{ my: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }} className="group-acess-form">
             <Typography variant="h6">{permission?.id ? 'Editar' : 'Nova'} Permissão</Typography>
             <TextField label="Nome da Permissão" value={name} onChange={(e) => setName(e.target.value)} fullWidth margin="normal" />
             <TextField label="Descrição" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth margin="normal" />
@@ -73,7 +73,7 @@ export default function PermissionManager({ organization }: { organization: Orga
         try {
             const [perms, projs] = await Promise.all([
                 PermissionService.findAllByOrg(organization.id),
-                ProjectService.findAllInOrg(organization.id)
+                ProjectService.getProjectsByOrganization(organization.id)
             ]);
             if (Array.isArray(perms)) setPermissions(perms);
             if (Array.isArray(projs)) setProjects(projs);

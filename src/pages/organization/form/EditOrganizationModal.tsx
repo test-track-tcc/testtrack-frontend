@@ -14,6 +14,7 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import ManageAccessGroupsModal from '../../../components/common/ManageAccessGroupsModal';
+import AddUserOrganization from '../../../components/common/AddUserOrganization';
 
 interface EditOrganizationModalProps {
   open: boolean;
@@ -26,6 +27,8 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     if (organization) {
@@ -36,14 +39,8 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
 
   const handleSave = async () => {
     if (!organization) return;
-
     try {
-
-      const payload = {
-        name,
-        description,
-      };
-
+      const payload = { name, description };
       const updatedOrganization = await OrganizationService.update(organization.id, payload);
       onUpdate(updatedOrganization);
       onClose(); 
@@ -55,6 +52,21 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
   if (!organization) {
     return null;
   }
+
+  const handleCloseMembersModal = () => {
+    setIsMembersModalOpen(false);
+    setSelectedOrgId(null);
+  }
+  
+  // ▼▼▼ NOVA FUNÇÃO ADICIONADA ▼▼▼
+  // Esta função define os estados para abrir o modal de membros
+  const handleOpenMembersModal = () => {
+    if (organization) {
+        setSelectedOrgId(organization.id);
+        setIsMembersModalOpen(true);
+    }
+  }
+  // ▲▲▲ FIM DA NOVA FUNÇÃO ▲▲▲
 
   return (
     <>
@@ -87,15 +99,15 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
             onChange={(e) => setDescription(e.target.value)}
           />
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
-              <Button variant="outlined" startIcon={<GroupOutlinedIcon />}>
-                  Gerenciar membros
-              </Button>
-              <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />} onClick={() => setPermissionsModalOpen(true)}>
-                Gerenciar grupos de acesso
-              </Button>
-              <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
-                  Gerenciar tipos de teste
-              </Button>
+            <Button variant="outlined" startIcon={<GroupOutlinedIcon />} onClick={handleOpenMembersModal}>
+              Gerenciar membros
+            </Button>
+            <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />} onClick={() => setPermissionsModalOpen(true)}>
+              Gerenciar grupos de acesso
+            </Button>
+            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
+              Gerenciar tipos de teste
+            </Button>
           </Box>
         </DialogContent>
         <ButtonGroup variant="contained" className='group-btn buttons-section'>
@@ -105,11 +117,16 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
       </Dialog>
       
       <ManageAccessGroupsModal
-          
-          open={permissionsModalOpen}
-          onClose={() => setPermissionsModalOpen(false)}
-          organization={organization}
-        />
+        open={permissionsModalOpen}
+        onClose={() => setPermissionsModalOpen(false)}
+        organization={organization}
+      />
+
+      <AddUserOrganization
+        open={isMembersModalOpen}
+        handleClose={handleCloseMembersModal}
+        organizationId={selectedOrgId}
+      />
     </>
   );
 }
