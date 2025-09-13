@@ -4,7 +4,7 @@ import SimpleHeader from "../../../components/layout/SimpleHeader";
 import CenteredSection from "../../../components/layout/CenteredSection";
 import { TextField, ButtonGroup, Button, InputLabel, Box, FormControl, IconButton, CircularProgress, Alert, Typography } from "@mui/material";
 import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+import Select, { type SelectChangeEvent } from '@mui/material/Select';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,17 +13,20 @@ import { UsersService } from '../../../services/UsersService';
 import { OrganizationService } from '../../../services/OrganizationService';
 import { type User } from '../../../types/User';
 
+type OrganizationRole = 'ADMIN' | 'MEMBER' | 'DEVELOPER';
+
 interface Member {
     id: string;
     email: string;
-    role: string;
+    role: OrganizationRole;
 }
 
 export default function CreateOrganization4() {
     const navigate = useNavigate();
     const [members, setMembers] = useState<Member[]>([]);
     const [newMemberEmail, setNewMemberEmail] = useState('');
-    const [newMemberRole, setNewMemberRole] = useState('');
+    // Define um cargo padrão para evitar erros
+    const [newMemberRole, setNewMemberRole] = useState<OrganizationRole>('MEMBER');
     const [foundUser, setFoundUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,14 +69,14 @@ export default function CreateOrganization4() {
             }
             setMembers([...members, { id: foundUser.id, email: foundUser.email, role: newMemberRole }]);
             setNewMemberEmail('');
-            setNewMemberRole('');
+            setNewMemberRole('MEMBER'); // Reseta para o padrão
             setFoundUser(null);
             setError('');
         }
     };
 
-    const handleRemoveMember = (indexToRemove: number) => {
-        setMembers(members.filter((_, index) => index !== indexToRemove));
+    const handleRemoveMember = (idToRemove: string) => {
+        setMembers(members.filter(member => member.id !== idToRemove));
     };
 
     const handleFinish = async () => {
@@ -89,21 +92,23 @@ export default function CreateOrganization4() {
                 throw new Error("ID da organização não encontrado. Por favor, volte ao passo anterior.");
             }
 
+            // AJUSTE: Mapeia os membros e agora envia o 'role' de cada um
             await Promise.all(
                 members.map(member => 
                     OrganizationService.addUserToOrganization({
                         userId: member.id,
-                        organizationId: organizationId
+                        organizationId: organizationId,
+                        role: member.role // <-- Enviando o cargo
                     })
                 )
             );
 
-            setSuccess('Membros adicionados com sucesso!');
-            localStorage.removeItem('onboardingData');
+            setSuccess('Membros adicionados com sucesso! Redirecionando...');
+            localStorage.removeItem('onboardingData'); // Limpa o localStorage
             
             setTimeout(() => {
                 navigate(`/organization/${organizationId}/projects`);
-            }, 3000);
+            }, 2000);
 
         } catch (err) {
             console.error("Falha ao adicionar membros:", err);
@@ -111,6 +116,12 @@ export default function CreateOrganization4() {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // NOVA FUNÇÃO: Limpa o storage e navega
+    const handleLater = () => {
+        localStorage.removeItem('onboardingData');
+        navigate('/dashboard'); // Navega para a dashboard principal
     };
 
     return (
@@ -121,23 +132,25 @@ export default function CreateOrganization4() {
                 <CenteredSection>
                     <div className='organization-section'>
                         <div className="organization-title">
-                           <h1>{JSON.parse(localStorage.getItem('onboardingData') || '{}').orgName || 'Organização'}</h1>
+                            <h1>{JSON.parse(localStorage.getItem('onboardingData') || '{}').orgName || 'Organização'}</h1>
                         </div>
                         <h2>Quem está na sua organização?</h2>
                         
-                        {members.map((member, index) => (
-                            <Box key={index} className="input-container" sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+                        {members.map((member) => (
+                            <Box key={member.id} className="input-container" sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                                 <TextField
                                     label='E-mail do usuário'
                                     style={{ minWidth: 300 }}
                                     value={member.email}
+                                    disabled // Desabilitado para não permitir edição
                                 />
                                 <TextField
                                     label="Função"
                                     value={member.role}
                                     style={{ minWidth: 150 }}
+                                    disabled // Desabilitado para não permitir edição
                                 />
-                                <IconButton onClick={() => handleRemoveMember(index)} color="error" className='delete-button' disabled={isSubmitting}>
+                                <IconButton onClick={() => handleRemoveMember(member.id)} color="error" className='delete-button' disabled={isSubmitting}>
                                     <DeleteIcon />
                                 </IconButton>
                             </Box>
@@ -169,11 +182,12 @@ export default function CreateOrganization4() {
                                     <Select
                                         label="Função"
                                         value={newMemberRole}
-                                        onChange={(e) => setNewMemberRole(e.target.value)}
+                                        onChange={(e: SelectChangeEvent<OrganizationRole>) => setNewMemberRole(e.target.value as OrganizationRole)}
                                     >
-                                        <MenuItem value={"Administrador"}>Administrador</MenuItem>
-                                        <MenuItem value={"Membro"}>Membro</MenuItem>
-                                        <MenuItem value={"Desenvolvedor"}>Desenvolvedor</MenuItem>
+                                        {/* AJUSTE: valores alinhados com o back-end (ADMIN, MEMBER, DEVELOPER) */}
+                                        <MenuItem value={"ADMIN"}>Administrador</MenuItem>
+                                        <MenuItem value={"MEMBER"}>Membro</MenuItem>
+                                        <MenuItem value={"DEVELOPER"}>Desenvolvedor</MenuItem>
                                     </Select>
                                 </FormControl>
                                 <Button startIcon={<AddIcon />} onClick={handleAddMember} variant="contained" disabled={isSubmitting}>
@@ -183,7 +197,8 @@ export default function CreateOrganization4() {
                         )}
 
                         <ButtonGroup variant="contained" className='group-btn buttons-section' sx={{ mt: 4 }}>
-                            <Button variant="outlined" startIcon={<NotificationsIcon />} onClick={() => navigate('/projects')} disabled={isSubmitting}>
+                            {/* AJUSTE: onClick agora chama a função handleLater para limpar o storage */}
+                            <Button variant="outlined" startIcon={<NotificationsIcon />} onClick={handleLater} disabled={isSubmitting}>
                                 Lembre-me mais tarde
                             </Button>
                             <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={handleFinish} disabled={isSubmitting}>

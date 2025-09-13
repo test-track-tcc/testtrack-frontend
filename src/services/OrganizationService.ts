@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { type OrganizationPayload, type Organization, type AddUserPayload } from '../types/Organization';
-import { type User } from '../types/User';
+import { type OrganizationPayload, type Organization, type AddUserPayload, type OrganizationRole, type OrganizationMember } from '../types/Organization';
 
 export const OrganizationService = {
     get: async (): Promise<Organization[]> => {
@@ -53,9 +52,29 @@ export const OrganizationService = {
         }
     },
 
-    getUsers: async (organizationId: string): Promise<User[]> => {
+    removeUserFromOrganization: async (organizationId: string, userId: string) => {
         try {
-            const response = await axios.get<User[]>(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users`);
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar usuário à organização:', error);
+            throw error;
+        }
+    },
+
+    updateUserRole: async (organizationId: string, userId: string, role: OrganizationRole) => {
+        try {
+            const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users/${userId}/role`, { role });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar usuário à organização:', error);
+            throw error;
+        }
+    },
+
+    getUsers: async (organizationId: string): Promise<OrganizationMember[]> => {
+        try {
+            const response = await axios.get<OrganizationMember[]>(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users`);
             return response.data;
         } catch (error) {
             console.error(`Erro ao buscar usuários da organização ${organizationId}:`, error);

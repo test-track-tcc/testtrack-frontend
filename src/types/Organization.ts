@@ -1,3 +1,5 @@
+import { type User } from "./User";
+
 export interface Organization {
   id: string;
   name: string;
@@ -20,4 +22,11 @@ export interface OrganizationPayload {
 export interface AddUserPayload {
     userId: string;
     organizationId: string;
+    role: string;
+}
+
+export type OrganizationRole = 'ADMIN' | 'MEMBER' | 'DEVELOPER';
+
+export interface OrganizationMember extends User {
+  role: OrganizationRole;
 }

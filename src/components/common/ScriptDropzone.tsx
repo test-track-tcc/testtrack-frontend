@@ -13,7 +13,6 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
   const [isDragActive, setIsDragActive] = useState(false);
 
   const onDrop = (acceptedFiles: File[]) => {
-    // Evita adicionar arquivos duplicados na lista
     const newFiles = acceptedFiles.filter(
       newFile => !files.some(existingFile => existingFile.name === newFile.name && existingFile.size === newFile.size)
     );
@@ -50,7 +49,7 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
           justifyContent: 'center'
         }}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} accept='.py, .js, .java, .feature, .robot, .spec.js, .sh, .yml e .yaml, .json, .zip' />
         <UploadFileIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
         <Typography variant="body1">
           Arraste e solte os scripts aqui, ou clique para selecionar
