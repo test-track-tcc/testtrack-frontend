@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type OrganizationPayload, type Organization, type AddUserPayload } from '../types/Organization';
+import { type OrganizationPayload, type Organization, type AddUserPayload, type OrganizationRole, type OrganizationMember } from '../types/Organization';
 
 export const OrganizationService = {
     get: async (): Promise<Organization[]> => {
@@ -11,6 +11,17 @@ export const OrganizationService = {
             throw error;
         }
     },
+
+    getUsersOrganization: async (userId: string): Promise<Organization[]> => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/organizations`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar organizações:', error);
+            throw error;
+        }
+    },
+
 
     create: async (data: OrganizationPayload): Promise<OrganizationPayload> => {
         try {
@@ -50,5 +61,35 @@ export const OrganizationService = {
             console.error('Erro ao adicionar usuário à organização:', error);
             throw error;
         }
-    }
+    },
+
+    removeUserFromOrganization: async (organizationId: string, userId: string) => {
+        try {
+            const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar usuário à organização:', error);
+            throw error;
+        }
+    },
+
+    updateUserRole: async (organizationId: string, userId: string, role: OrganizationRole) => {
+        try {
+            const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users/${userId}/role`, { role });
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao adicionar usuário à organização:', error);
+            throw error;
+        }
+    },
+
+    getUsers: async (organizationId: string): Promise<OrganizationMember[]> => {
+        try {
+            const response = await axios.get<OrganizationMember[]>(`${import.meta.env.VITE_API_BASE_URL}/organization/${organizationId}/users`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar usuários da organização ${organizationId}:`, error);
+            throw error;
+        }
+    },
 }

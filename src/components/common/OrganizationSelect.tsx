@@ -19,6 +19,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditOrganizationModal from '../../pages/organization/form/EditOrganizationModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import AddUserOrganization from './AddUserOrganization';
 
 export default function OrganizationSelect() {
   const navigate = useNavigate();
@@ -31,15 +32,16 @@ export default function OrganizationSelect() {
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingOrg, setDeletingOrg] = useState<Organization | null>(null);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>, orgId: string) => {
     setAnchorEl(event.currentTarget);
     setSelectedOrgId(orgId);
   };
 
+  // CORREÇÃO 1: Esta função agora só fecha o menu.
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedOrgId(null);
   };
 
   const handleOpenEditModal = () => {
@@ -48,12 +50,13 @@ export default function OrganizationSelect() {
       setEditingOrg(orgToEdit);
       setIsEditModalOpen(true);
     }
-    handleMenuClose();
+    handleMenuClose(); // Fecha o menu, mas não limpa o ID
   };
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingOrg(null);
+    setSelectedOrgId(null); // Limpa o ID aqui, ao fechar o modal
   };
 
   const handleOrganizationUpdate = (updatedOrg: Organization) => {
@@ -74,6 +77,7 @@ export default function OrganizationSelect() {
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setDeletingOrg(null);
+    setSelectedOrgId(null); // Limpa o ID aqui
   };
 
   const handleConfirmDelete = async () => {
@@ -88,6 +92,16 @@ export default function OrganizationSelect() {
     }
   };
 
+  // CORREÇÃO 2: Esta função agora só abre o modal de membros e fecha o menu.
+  const handleOpenMembersModal = () => {
+    setIsMembersModalOpen(true);
+    handleMenuClose();
+  };
+  
+  const handleCloseMembersModal = () => {
+      setIsMembersModalOpen(false);
+      setSelectedOrgId(null); // Limpa o ID aqui
+  }
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -103,7 +117,6 @@ export default function OrganizationSelect() {
     fetchOrganizations();
   }, []);
 
-  // 2. Estilize a mensagem de Carregamento
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -112,7 +125,6 @@ export default function OrganizationSelect() {
     );
   }
 
-  // 3. Estilize a mensagem de Erro
   if (error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -165,13 +177,16 @@ export default function OrganizationSelect() {
               id="long-menu"
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
+              onClose={() => {
+                  handleMenuClose();
+                  setSelectedOrgId(null);
+              }}
             >
               <MenuItem onClick={handleOpenEditModal}>
                 <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Editar organização</ListItemText>
               </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
+              <MenuItem onClick={handleOpenMembersModal}>
                 <ListItemIcon><GroupIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Gerenciar membros</ListItemText>
               </MenuItem>
@@ -196,6 +211,12 @@ export default function OrganizationSelect() {
         onConfirm={handleConfirmDelete}
         title="Confirmar Deleção"
         message={`Tem certeza que deseja deletar a organização "${deletingOrg?.name}"? Esta ação não pode ser desfeita.`}
+      />
+      
+      <AddUserOrganization
+        open={isMembersModalOpen}
+        handleClose={handleCloseMembersModal}
+        organizationId={selectedOrgId}
       />
     </>
   );

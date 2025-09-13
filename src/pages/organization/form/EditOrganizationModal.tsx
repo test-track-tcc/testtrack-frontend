@@ -13,6 +13,9 @@ import { OrganizationService } from '../../../services/OrganizationService';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import ManageAccessGroupsModal from '../../../components/common/ManageAccessGroupsModal';
+import AddUserOrganization from '../../../components/common/AddUserOrganization';
+import ManageTestTypesModal from '../../../components/common/ManageTestTypesModal';
 
 interface EditOrganizationModalProps {
   open: boolean;
@@ -24,6 +27,10 @@ interface EditOrganizationModalProps {
 export default function EditOrganizationModal({ open, onClose, organization, onUpdate }: EditOrganizationModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [isTestTypesModalOpen, setIsTestTypesModalOpen] = useState(false);
 
   useEffect(() => {
     if (organization) {
@@ -34,14 +41,8 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
 
   const handleSave = async () => {
     if (!organization) return;
-
     try {
-
-      const payload = {
-        name,
-        description,
-      };
-
+      const payload = { name, description };
       const updatedOrganization = await OrganizationService.update(organization.id, payload);
       onUpdate(updatedOrganization);
       onClose(); 
@@ -54,51 +55,86 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
     return null;
   }
 
+  const handleCloseMembersModal = () => {
+    setIsMembersModalOpen(false);
+    setSelectedOrgId(null);
+  }
+  
+  // ▼▼▼ NOVA FUNÇÃO ADICIONADA ▼▼▼
+  // Esta função define os estados para abrir o modal de membros
+  const handleOpenMembersModal = () => {
+    if (organization) {
+        setSelectedOrgId(organization.id);
+        setIsMembersModalOpen(true);
+    }
+  }
+  // ▲▲▲ FIM DA NOVA FUNÇÃO ▲▲▲
+
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3, padding: 2 } }}>
-      <DialogTitle id='modal-modal-title' sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-        Editar Organização
-      </DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="name"
-          label="Nome da Organização"
-          type="text"
-          fullWidth
-          variant="outlined"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextField
-          margin="dense"
-          id="description"
-          label="Descrição"
-          type="text"
-          fullWidth
-          multiline
-          rows={4}
-          variant="outlined"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
-            <Button variant="outlined" startIcon={<GroupOutlinedIcon />}>
-                Gerenciar membros
+    <>
+      <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3, padding: 2 } }}>
+        <DialogTitle id='modal-modal-title' sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+          Editar Organização
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Nome da Organização"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            id="description"
+            label="Descrição"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
+            <Button variant="outlined" startIcon={<GroupOutlinedIcon />} onClick={handleOpenMembersModal}>
+              Gerenciar membros
             </Button>
-            <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />}>
-                Gerenciar cargos
+            <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />} onClick={() => setPermissionsModalOpen(true)}>
+              Gerenciar grupos de acesso
             </Button>
-            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
-                Gerenciar projetos
+            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />} onClick={() => setIsTestTypesModalOpen(true)}>
+                Gerenciar tipos de teste
             </Button>
-        </Box>
-      </DialogContent>
-      <ButtonGroup variant="contained" className='group-btn buttons-section'>
-        <Button onClick={onClose} variant="outlined">Fechar</Button>
-        <Button onClick={handleSave} variant="contained" className='primary-button'>Salvar</Button>
-      </ButtonGroup>
-    </Dialog>
+          </Box>
+        </DialogContent>
+        <ButtonGroup variant="contained" className='group-btn buttons-section'>
+          <Button onClick={onClose} variant="outlined">Fechar</Button>
+          <Button onClick={handleSave} variant="contained" className='primary-button'>Salvar</Button>
+        </ButtonGroup>
+      </Dialog>
+      
+      <ManageAccessGroupsModal
+        open={permissionsModalOpen}
+        onClose={() => setPermissionsModalOpen(false)}
+        organization={organization}
+      />
+
+      <AddUserOrganization
+        open={isMembersModalOpen}
+        handleClose={handleCloseMembersModal}
+        organizationId={selectedOrgId}
+      />
+
+      <ManageTestTypesModal
+        open={isTestTypesModalOpen}
+        onClose={() => setIsTestTypesModalOpen(false)}
+        organization={organization}
+      />
+    </>
   );
 }

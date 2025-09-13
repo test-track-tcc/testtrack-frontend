@@ -13,8 +13,17 @@
     }
 
     .MuiBox-root {
-        width: 600px;
         border-radius: 16px;
     }
 }
 
+.manage-modal {
+    .MuiBox-root {
+        width: 100% !important;
+        border-radius: 16px;
+    }
+
+    .group-acess-form {
+        width: 90% !important;
+    }
+}

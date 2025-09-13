@@ -115,7 +115,7 @@ function TestCaseFormFunctions() {
         // await TestCaseService.createTeste(formData);
       }
       console.log('Caso de teste salvo com sucesso!');
-      navigate('/testCase');
+      navigate('/test-cases');
     } catch (error) {
       console.error('Erro ao salvar caso de teste:', error);
     }

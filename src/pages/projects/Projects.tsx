@@ -1,22 +1,51 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '../../components/layout/PageLayout';
-import { Box, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Alert, IconButton, Menu, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { type Project, type CreateProjectPayload } from '../../types/Project';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { type Project, type CreateProjectPayload, ProjectStatus } from '../../types/Project';
 import { ProjectService } from '../../services/ProjectService';
 import AddProjectModal from './form/AddProjectModal';
+import EditProjectModal from './form/EditProjectModal';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import AddUserToProjectModal from '../../components/common/AddUserProjectModal';
+
+
+const statusDisplayMap = {
+    [ProjectStatus.NOT_STARTED]: 'Não Iniciado',
+    [ProjectStatus.IN_PROGRESS]: 'Em Progresso',
+    [ProjectStatus.FINISHED]: 'Concluído',
+    [ProjectStatus.BLOCKED]: 'Bloqueado',
+};
+
+const statusStyleMap = {
+  [ProjectStatus.NOT_STARTED]: { backgroundColor: '#e0e0e0', color: '#000' },
+  [ProjectStatus.IN_PROGRESS]: { backgroundColor: '#2196f3', color: '#fff' },
+  [ProjectStatus.FINISHED]: { backgroundColor: '#4caf50', color: '#fff' },
+  [ProjectStatus.BLOCKED]: { backgroundColor: '#f44336', color: '#fff' },
+};
+
+const formatDate = (dateString: string | Date | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    const date = new Date(`${dateString}T00:00:00`);
+    return date.toLocaleDateString();
+};
 
 export default function Projects() {
     const navigate = useNavigate();
     const { orgId } = useParams<{ orgId: string }>();
-    const [open, setOpen] = useState(false);
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+    const [editingProject, setEditingProject] = useState<Project | null>(null);
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const isMenuOpen = Boolean(anchorEl);
+    const [addingUsersToProject, setAddingUsersToProject] = useState<Project | null>(null);
 
     const fetchProjects = async () => {
         if (!orgId) {
@@ -36,6 +65,14 @@ export default function Projects() {
         }
     };
 
+    const handleAddUserClick = () => {
+      const project = projects.find(p => p.id === selectedProjectId);
+      if (project) {
+          setAddingUsersToProject(project);
+      }
+      handleMenuClose();
+  };
+
     useEffect(() => {
         fetchProjects();
     }, [orgId]);
@@ -45,29 +82,44 @@ export default function Projects() {
             setError("Não é possível salvar, pois o ID da organização é desconhecido.");
             return;
         }
-
         const userDataString = localStorage.getItem('userData');
         const ownerId = userDataString ? JSON.parse(userDataString).id : null;
-
         if (!ownerId) {
             setError("Não foi possível identificar o usuário. Faça login novamente.");
             return;
         }
-        
-        const projectPayload: CreateProjectPayload = {
-            ...formData,
-            organizationId: orgId,
-            ownerId: ownerId,
-        };
-
+        const projectPayload: CreateProjectPayload = { ...formData, organizationId: orgId, ownerId: ownerId };
         try {
-            console.log("Salvando novo projeto:", projectPayload);
             await ProjectService.create(projectPayload);
-            handleClose();
-            fetchProjects(); // Recarrega a lista para mostrar o novo projeto
+            setCreateModalOpen(false);
+            fetchProjects();
         } catch (error) {
             console.error("Erro ao salvar projeto:", error);
             setError("Ocorreu uma falha ao salvar o projeto.");
+        }
+    };
+
+    const handleMenuClick = (event: React.MouseEvent<HTMLElement>, projectId: string) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedProjectId(projectId);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+        setSelectedProjectId(null);
+    };
+
+    const handleDelete = async () => {
+        if (!selectedProjectId) return;
+        if (window.confirm('Tem certeza que deseja excluir este projeto?')) {
+            try {
+                await ProjectService.delete(selectedProjectId);
+                fetchProjects();
+            } catch (err) {
+                setError('Falha ao excluir o projeto.');
+            } finally {
+                handleMenuClose();
+            }
         }
     };
 
@@ -80,21 +132,25 @@ export default function Projects() {
             <title>Projetos | TestTrack</title>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <h1>Projetos</h1>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpen} // Ação do botão agora abre o modal
-                    startIcon={<AddIcon />}
-                    className="btn primary icon"
-                >
+                <Button variant="contained" color="primary" onClick={() => setCreateModalOpen(true)} startIcon={<AddIcon />}>
                     Adicionar Projeto
                 </Button>
             </Box>
 
             <AddProjectModal 
-                open={open}
-                handleClose={handleClose}
+                open={isCreateModalOpen}
+                handleClose={() => setCreateModalOpen(false)}
                 handleSave={handleSaveProject}
+            />
+
+            <EditProjectModal 
+                open={!!editingProject}
+                project={editingProject}
+                handleClose={() => setEditingProject(null)}
+                onSaveSuccess={() => {
+                    setEditingProject(null);
+                    fetchProjects();
+                }}
             />
             
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -103,24 +159,64 @@ export default function Projects() {
                 {projects.length > 0 ? (
                     projects.map(project => (
                         <Box className="project-item" key={project.id}>
-                            <h2>{project.name}</h2>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <h2>{project.name}</h2>
+                                <IconButton onClick={(e) => handleMenuClick(e, project.id)}>
+                                    <MoreHorizIcon />
+                                </IconButton>
+                            </Box>
+                            
                             <p>{project.description || 'Sem descrição.'}</p>
-                            <p><strong>Início:</strong> {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Previsão:</strong> {project.estimateEnd ? new Date(project.estimateEnd).toLocaleDateString() : 'N/A'}</p>
-                            <p><strong>Status: {project.status}</strong></p>
+                            <p><strong>Início:</strong> {formatDate(project.startDate)}</p>
+                            <p><strong style={{ color: '#CC8809' }}>Previsão de Finalização:</strong> {formatDate(project.estimateEnd)}</p>
+                            {project.conclusionDate && <p><strong style={{ color: '#C34646' }}>Data de Finalização:</strong> {formatDate(project.conclusionDate)}</p>}
+                            <p>
+                                <strong>Status: </strong>
+                                <span
+                                    style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '16px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                    backgroundColor: statusStyleMap[project.status]?.backgroundColor || '#ccc',
+                                    color: statusStyleMap[project.status]?.color || '#000',
+                                    }}
+                                >
+                                    {statusDisplayMap[project.status] || project.status}
+                                </span>
+                            </p>
+
                             <Box className="button-group" sx={{ marginTop: 'auto', paddingTop: '16px' }}>
-                                <Button className="btn icon secondary" onClick={() => navigate(`/projects/${project.id}/edit`)}>Editar projeto</Button>
-                                <Button className="btn icon primary" onClick={() => navigate(`/projects/${project.id}/testCase`)}>Ver detalhes</Button>
+                                <Button className="btn icon secondary" onClick={() => setEditingProject(project)}>Editar projeto</Button>
+                                <Button className="btn icon primary" onClick={() => navigate(`/projects/${project.id}/test-cases`)}>Ver detalhes</Button>
                             </Box>
                         </Box>
                     ))
                 ) : (
                     <Box sx={{ width: '100%', textAlign: 'center', mt: 5 }}>
                         <Typography>Nenhum projeto encontrado para esta organização.</Typography>
-                        <Button variant="contained" onClick={handleOpen} sx={{mt: 2}}>Criar meu primeiro projeto</Button>
+                        <Button variant="contained" onClick={() => setCreateModalOpen(true)} sx={{mt: 2}}>Criar meu primeiro projeto</Button>
                     </Box>
                 )}
             </Box>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={isMenuOpen}
+                onClose={handleMenuClose}
+            >
+                <MenuItem onClick={handleAddUserClick}><GroupAddIcon fontSize="small" sx={{mr: 1}} /> Adicionar Usuário</MenuItem>
+                <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>Excluir projeto</MenuItem>
+            </Menu>
+
+            <AddUserToProjectModal
+                open={!!addingUsersToProject}
+                project={addingUsersToProject}
+                handleClose={() => setAddingUsersToProject(null)}
+                onSuccess={() => {
+                    setAddingUsersToProject(null);
+                }}
+            />
         </PageLayout>
     );
 }

@@ -7,9 +7,10 @@ export interface Project {
   id: string;
   name: string;
   description: string;
-  startDate: string | null;
-  estimateEnd: string | null;
-  conclusionDate: string | null;
+  startDate?: string;
+  estimateEnd?: string;
+  conclusionDate?: string;
+  prefix: string;
   status: ProjectStatusType;
   createdAt: string;
   updatedAt: string;
@@ -27,9 +28,22 @@ export interface CreateProjectPayload {
     ownerId: string;
 }
 
+export interface UpdateProjectPayload {
+  name?: string;
+  description?: string;
+  startDate?: string;
+  estimateEnd?: string;
+  conclusionDate?: string;
+  status?: string;
+}
+
+export interface AddUserToProjectPayload {
+  userId: string;
+}
+
 export const ProjectStatus = {
-  NOT_STARTED: 'Não Iniciado',
-  IN_PROGRESS: 'Em progresso',
-  FINISHED: 'Concluído',
-  BLOCKED: 'Bloqueado',
+  NOT_STARTED: 'NAO_INICIADO',
+  IN_PROGRESS: 'EM_PROGRESSO',
+  FINISHED: 'CONCLUIDO',
+  BLOCKED: 'BLOQUEADO',
 } as const;

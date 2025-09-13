@@ -1,26 +1,85 @@
-import type { ScriptFile } from "./ScriptFile";
-import type { TestType, PriorityType, StatusType } from "./TestTypes";
+import { type Project } from './Project';
+import { type User } from './User';
 
-export interface Comment {
-  idUsuario: string;
-  comentario: string;
-  data: Date;
+export interface CreateTestCasePayload {
+  projectId: string;
+  title: string;
+  description: string;
+  testType?: TestType | null;
+  customTestTypeId?: string | null;
+  priority: Priority;
+  createdById: string;
+  responsibleId?: string;
+  estimatedTime?: string;
+  steps: string;
+  status: TestCaseStatus;
+  expectedResult: string;
+  taskLink?: string;
+  scripts?: File[];
 }
 
-export interface TestFormData {
-  id?: string;
-  titulo: string;
-  descricao: string;
-  tipoTeste: TestType;
-  prioridade: PriorityType;
-  id_userCriacao: string;
-  idResponsavel: string;
-  tempoEstimado: string;
+export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
+
+export const TestType = {
+  FUNCIONAL: 'FUNCIONAL',
+  REGRESSAO: 'REGRESSAO',
+  DESEMPENHO: 'DESEMPENHO',
+  SEGURANCA: 'SEGURANCA',
+  USABILIDADE: 'USABILIDADE',
+  INTEGRACAO: 'INTEGRACAO',
+  ACEITACAO: 'ACEITACAO',
+  AUTOMATIZADO: 'AUTOMATIZADO',
+  MANUAL: 'MANUAL',
+} as const;
+export type TestType = typeof TestType[keyof typeof TestType];
+
+export const Priority = {
+  NONE: 'NENHUM',
+  LOW: 'BAIXA',
+  MEDIUM: 'MEDIA',
+  HIGH: 'ALTA',
+  CRITICAL: 'CRITICA',
+} as const;
+export type Priority = typeof Priority[keyof typeof Priority];
+
+export const TestCaseStatus = {
+  NAO_INICIADO: 'NAO_INICIADO',
+  PENDENTE: 'PENDENTE',
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  APROVADO: 'APROVADO',
+  REPROVADO: 'REPROVADO',
+  BLOQUEADO: 'BLOQUEADO',
+  CANCELADO: 'CANCELADO',
+  CONCLUIDO: 'CONCLUIDO',
+} as const;
+export type TestCaseStatus = typeof TestCaseStatus[keyof typeof TestCaseStatus];
+
+export interface Comment {
+  idUser: string;
+  comment: string;
+  date: string;
+}
+
+export interface TestCase {
+  id: string;
+  title: string;
+  description: string;
+  testType?: TestType | null;
+  customTestTypeId?: string | null;
+  priority: Priority;
+  createdBy: User;
+  responsible: User | null;
+  estimatedTime: string | null;
+  timeSpent: string;
   steps: string;
-  resultadoEsperado: string;
-  requisitoVinculado: string;
-  status: StatusType;
-  comentarios: Comment[];
-  anexos: string[];
-  scripts: ScriptFile[];
+  expectedResult: string;
+  taskLink: string | null;
+  status: TestCaseStatus;
+  project: Project;
+  projectSequenceId: number;
+  comments: Comment[] | null;
+  attachments: string[] | null;
+  scripts: any[] | null;
+  createdAt: string;
+  updatedAt: string;
 }

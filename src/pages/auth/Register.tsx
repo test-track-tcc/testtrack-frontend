@@ -1,7 +1,6 @@
 import React from "react";
 import SimpleHeader from "../../components/layout/SimpleHeader";
-import { FormControl } from "@mui/base/FormControl";
-import { TextField, Button } from "@mui/material";
+import { TextField, Button, FormControl } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useRegisterFunctions } from "../../functions/RegisterFunctions";
 import "../../i18n";

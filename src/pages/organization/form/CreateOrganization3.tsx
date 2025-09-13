@@ -103,6 +103,7 @@ export default function CreateOrganization3() {
                             placeholder='ex: TestTrack Organization'
                             value={orgName}
                             onChange={(e) => setOrgName(e.target.value)}
+                            autoComplete='off'
                         />
                         <TextField
                             id="standard-multiline-static"
@@ -112,6 +113,7 @@ export default function CreateOrganization3() {
                             rows={4}
                             value={orgDescription}
                             onChange={(e) => setOrgDescription(e.target.value)}
+                            autoComplete='off'
                         />
 
                         <FormControlLabel

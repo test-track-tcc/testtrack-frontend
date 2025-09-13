@@ -1,6 +1,5 @@
 import SimpleHeader from "../../components/layout/SimpleHeader";
-import { FormControl } from '@mui/base/FormControl';
-import { TextField, Button, Alert, CircularProgress, Box } from '@mui/material';
+import { TextField, Button, Alert, CircularProgress, Box, FormControl } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
 import { useAuth } from '../../functions/AuthFunctions';
