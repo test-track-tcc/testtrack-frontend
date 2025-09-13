@@ -5,7 +5,8 @@ export interface CreateTestCasePayload {
   projectId: string;
   title: string;
   description: string;
-  testType: TestType;
+  testType?: TestType | null;
+  customTestTypeId?: string | null;
   priority: Priority;
   createdById: string;
   responsibleId?: string;
@@ -63,7 +64,8 @@ export interface TestCase {
   id: string;
   title: string;
   description: string;
-  testType: TestType;
+  testType?: TestType | null;
+  customTestTypeId?: string | null;
   priority: Priority;
   createdBy: User;
   responsible: User | null;

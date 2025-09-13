@@ -15,6 +15,7 @@ import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlin
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import ManageAccessGroupsModal from '../../../components/common/ManageAccessGroupsModal';
 import AddUserOrganization from '../../../components/common/AddUserOrganization';
+import ManageTestTypesModal from '../../../components/common/ManageTestTypesModal';
 
 interface EditOrganizationModalProps {
   open: boolean;
@@ -29,6 +30,7 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [isTestTypesModalOpen, setIsTestTypesModalOpen] = useState(false);
 
   useEffect(() => {
     if (organization) {
@@ -105,8 +107,8 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
             <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />} onClick={() => setPermissionsModalOpen(true)}>
               Gerenciar grupos de acesso
             </Button>
-            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
-              Gerenciar tipos de teste
+            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />} onClick={() => setIsTestTypesModalOpen(true)}>
+                Gerenciar tipos de teste
             </Button>
           </Box>
         </DialogContent>
@@ -126,6 +128,12 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
         open={isMembersModalOpen}
         handleClose={handleCloseMembersModal}
         organizationId={selectedOrgId}
+      />
+
+      <ManageTestTypesModal
+        open={isTestTypesModalOpen}
+        onClose={() => setIsTestTypesModalOpen(false)}
+        organization={organization}
       />
     </>
   );

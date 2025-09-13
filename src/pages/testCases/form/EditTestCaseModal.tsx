@@ -4,6 +4,8 @@ import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { type User } from '../../../types/User';
 import { TestCaseService } from '../../../services/TestCaseService';
 import { OrganizationService } from '../../../services/OrganizationService';
+import { CustomTestTypeService } from '../../../services/CustomTypeService';
+import { type CustomTestType } from '../../../types/CustomTestType';
 import { type UpdateTestCasePayload } from '../../../types/TestCase';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
 
@@ -27,7 +29,7 @@ const style = {
 interface EditTestCaseModalProps {
   open: boolean;
   testCaseId: string;
-  organizationId: string; // <-- 1. ADICIONADA NOVA PROP
+  organizationId: string;
   handleClose: () => void;
   onSaveSuccess: () => void;
 }
@@ -35,26 +37,33 @@ interface EditTestCaseModalProps {
 export default function EditTestCaseModal({ open, testCaseId, organizationId, handleClose, onSaveSuccess }: EditTestCaseModalProps) {
   const [formData, setFormData] = useState<Partial<UpdateTestCasePayload>>({});
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
+  const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
+  const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
   const [scripts, setScripts] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
-  const tipos = Object.values(TestType);
   const prioridades = Object.values(Priority);
   const statusList = Object.values(TestCaseStatus);
 
   useEffect(() => {
-    if (open && testCaseId) {
+    if (open && testCaseId && organizationId) {
       const fetchInitialData = async () => {
         setLoading(true);
         setError('');
         try {
-          const testCaseData = await TestCaseService.getById(testCaseId);
+          const [testCaseData, users, customTypes] = await Promise.all([
+            TestCaseService.getById(testCaseId),
+            OrganizationService.getUsers(organizationId),
+            CustomTestTypeService.findAllByOrg(organizationId)
+          ]);
+
           setFormData({
             title: testCaseData.title,
             description: testCaseData.description,
-            testType: testCaseData.testType,
+            testType: testCaseData.customTestTypeId ? null : testCaseData.testType,
+            customTestTypeId: testCaseData.customTestTypeId ?? undefined,
             priority: testCaseData.priority,
             responsibleId: testCaseData.responsible?.id || '',
             estimatedTime: testCaseData.estimatedTime || '',
@@ -64,10 +73,9 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             status: testCaseData.status,
           });
           
-          // --- 2. CORREÇÃO: Usar a prop organizationId diretamente ---
-          if (organizationId) {
-            const users = await OrganizationService.getUsers(organizationId);
-            setOrganizationUsers(users);
+          setOrganizationUsers(users);
+          if (Array.isArray(customTypes)) {
+            setCustomTestTypes(customTypes);
           }
 
         } catch (err) {
@@ -80,6 +88,13 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
       fetchInitialData();
     }
   }, [open, testCaseId, organizationId]);
+
+  useEffect(() => {
+    const standardTypes = Object.values(TestType).map(t => ({ value: t, label: t.replace(/_/g, ' ') }));
+    const customTypesFormatted = customTestTypes.map(ct => ({ value: ct.id, label: `${ct.name} (Personalizado)` }));
+    setCombinedTestTypes([...standardTypes, ...customTypesFormatted]);
+  }, [customTestTypes]);
+
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
@@ -94,8 +109,12 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
     setError('');
     setIsSubmitting(true);
 
+    const isCustomType = customTestTypes.some(ct => ct.id === formData.testType);
+
     const payload: UpdateTestCasePayload = {
       ...formData,
+      testType: isCustomType ? null : (formData.testType as TestType),
+      customTestTypeId: isCustomType ? formData.testType : null,
       scripts: scripts.length > 0 ? scripts : undefined, 
     };
 
@@ -130,7 +149,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
           <FormControl fullWidth>
             <InputLabel>Tipo de Teste</InputLabel>
             <Select name="testType" label="Tipo de Teste" value={formData.testType || ''} onChange={handleSelectChange('testType')}>
-              {tipos.map(t => <MenuItem key={t} value={t}>{t.replace('_', ' ')}</MenuItem>)}
+              {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
             </Select>
           </FormControl>
           <FormControl fullWidth>

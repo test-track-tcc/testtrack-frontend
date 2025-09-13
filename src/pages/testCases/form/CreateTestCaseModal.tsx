@@ -1,24 +1,27 @@
 import { useState, useEffect } from 'react';
-import { 
-  Modal, 
-  Box, 
-  Typography, 
-  IconButton, 
-  CircularProgress, 
-  Divider, 
-  TextField, 
-  Button, 
-  Select, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  type SelectChangeEvent, 
+import {
+  Modal,
+  Box,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Divider,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Alert,
+  type SelectChangeEvent,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type User } from '../../../types/User';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { TestCaseService } from '../../../services/TestCaseService';
 import { OrganizationService } from '../../../services/OrganizationService';
+import { CustomTestTypeService } from '../../../services/CustomTypeService';
+import { type CustomTestType } from '../../../types/CustomTestType';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
 
 const modalStyle = {
@@ -59,30 +62,43 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   });
   const [scriptFiles, setScriptFiles] = useState<File[]>([]);
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
+  const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
+  const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Efeito para buscar usuários da organização quando o modal abre
+  // Efeito para buscar usuários e tipos de teste da organização
   useEffect(() => {
     if (open && organizationId) {
-      OrganizationService.getUsers(organizationId)
-        .then(setOrganizationUsers)
-        .catch(() => setError('Não foi possível carregar os usuários da organização.'));
+      Promise.all([
+        OrganizationService.getUsers(organizationId),
+        CustomTestTypeService.findAllByOrg(organizationId)
+      ])
+      .then(([users, customTypes]) => {
+        setOrganizationUsers(users);
+        if (Array.isArray(customTypes)) {
+          setCustomTestTypes(customTypes);
+        }
+      })
+      .catch(() => setError('Não foi possível carregar os dados da organização.'));
     }
   }, [open, organizationId]);
 
+  // Efeito para unir os tipos de teste (padrão + personalizados)
+  useEffect(() => {
+    const standardTypes = Object.values(TestType).map(t => ({ value: t, label: t.replace(/_/g, ' ') }));
+    const customTypesFormatted = customTestTypes.map(ct => ({ value: ct.id, label: `${ct.name} (Personalizado)` }));
+    setCombinedTestTypes([...standardTypes, ...customTypesFormatted]);
+  }, [customTestTypes]);
+
+
+  // Efeito para limpar o formulário ao fechar o modal
   useEffect(() => {
     if (!open) {
       setFormData({
-        title: '',
-        description: '',
-        testType: '',
-        priority: '',
-        responsibleId: '',
-        timeEstimated: '',
-        steps: '',
-        expectedResult: '',
-        status: TestCaseStatus.NAO_INICIADO,
+        title: '', description: '', testType: '', priority: '',
+        responsibleId: '', timeEstimated: '', steps: '',
+        expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
       });
       setScriptFiles([]);
       setError('');
@@ -107,13 +123,16 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     setError('');
 
     try {
+      const isCustomType = customTestTypes.some(ct => ct.id === formData.testType);
+
       const payload = {
         projectId,
         title: formData.title,
         description: formData.description,
-        testType: formData.testType as TestType,
+        testType: isCustomType ? null : (formData.testType as TestType),
+        customTestTypeId: isCustomType ? formData.testType : null,
         priority: formData.priority as Priority,
-        responsibleId: formData.responsibleId,
+        responsibleId: formData.responsibleId || undefined,
         timeEstimated: formData.timeEstimated,
         steps: formData.steps,
         expectedResult: formData.expectedResult,
@@ -149,15 +168,15 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Tipo de Teste</InputLabel>
-              <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleChange}>
-                {Object.values(TestType).map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleChange} required>
+                {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
               </Select>
             </FormControl>
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Status</InputLabel>
               <Select name="status" label="Status" value={formData.status} onChange={handleChange}>
-                {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+                {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
               </Select>
             </FormControl>
             
@@ -171,7 +190,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Prioridade</InputLabel>
-              <Select name="priority" label="Prioridade" value={formData.priority} onChange={handleChange}>
+              <Select name="priority" label="Prioridade" value={formData.priority} onChange={handleChange} required>
                 {Object.values(Priority).map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
               </Select>
             </FormControl>
@@ -196,7 +215,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         
         <Divider sx={{ mt: 2 }} />
         <Box sx={{ flexShrink: 0 }}>
-          {/* {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>} */}
+          {error && <Alert severity="error" sx={{ mb: 2, width: 'fit-content', mx: 'auto' }}>{error}</Alert>}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
             <Button onClick={handleClose} variant="outlined">Cancelar</Button>
             <Button type="submit" variant="contained" disabled={isSubmitting}>
