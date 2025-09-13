@@ -55,7 +55,7 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
           Arraste e solte os scripts aqui, ou clique para selecionar
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Os arquivos serão enviados ao salvar o caso de teste.
+          Os arquivos serão enviados ao salvar o caso de teste. (devem conter menos de 15mb.)
         </Typography>
       </Paper>
 

@@ -23,6 +23,11 @@ export const ProjectService = {
         }
     },
 
+    findAllInOrg: async (orgId: string): Promise<Project[]> => {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/project/organization/${orgId}`);
+        return response.data;
+    },
+
     getById: async (projectId: string): Promise<Project> => {
         try {
             const response = await axios.get<Project>(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectId}`);

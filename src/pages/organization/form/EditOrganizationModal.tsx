@@ -13,6 +13,7 @@ import { OrganizationService } from '../../../services/OrganizationService';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import ManageAccessGroupsModal from '../../../components/common/ManageAccessGroupsModal';
 
 interface EditOrganizationModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ interface EditOrganizationModalProps {
 export default function EditOrganizationModal({ open, onClose, organization, onUpdate }: EditOrganizationModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
 
   useEffect(() => {
     if (organization) {
@@ -55,50 +57,59 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
   }
 
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3, padding: 2 } }}>
-      <DialogTitle id='modal-modal-title' sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
-        Editar Organização
-      </DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="name"
-          label="Nome da Organização"
-          type="text"
-          fullWidth
-          variant="outlined"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+    <>
+      <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3, padding: 2 } }}>
+        <DialogTitle id='modal-modal-title' sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+          Editar Organização
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Nome da Organização"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            id="description"
+            label="Descrição"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
+              <Button variant="outlined" startIcon={<GroupOutlinedIcon />}>
+                  Gerenciar membros
+              </Button>
+              <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />} onClick={() => setPermissionsModalOpen(true)}>
+                Gerenciar grupos de acesso
+              </Button>
+              <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
+                  Gerenciar tipos de teste
+              </Button>
+          </Box>
+        </DialogContent>
+        <ButtonGroup variant="contained" className='group-btn buttons-section'>
+          <Button onClick={onClose} variant="outlined">Fechar</Button>
+          <Button onClick={handleSave} variant="contained" className='primary-button'>Salvar</Button>
+        </ButtonGroup>
+      </Dialog>
+      
+      <ManageAccessGroupsModal
+          
+          open={permissionsModalOpen}
+          onClose={() => setPermissionsModalOpen(false)}
+          organization={organization}
         />
-        <TextField
-          margin="dense"
-          id="description"
-          label="Descrição"
-          type="text"
-          fullWidth
-          multiline
-          rows={4}
-          variant="outlined"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 3 }}>
-            <Button variant="outlined" startIcon={<GroupOutlinedIcon />}>
-                Gerenciar membros
-            </Button>
-            <Button variant="outlined" startIcon={<ManageAccountsOutlinedIcon />}>
-                Gerenciar cargos
-            </Button>
-            <Button variant="outlined" startIcon={<AccountTreeOutlinedIcon />}>
-                Gerenciar projetos
-            </Button>
-        </Box>
-      </DialogContent>
-      <ButtonGroup variant="contained" className='group-btn buttons-section'>
-        <Button onClick={onClose} variant="outlined">Fechar</Button>
-        <Button onClick={handleSave} variant="contained" className='primary-button'>Salvar</Button>
-      </ButtonGroup>
-    </Dialog>
+    </>
   );
 }
