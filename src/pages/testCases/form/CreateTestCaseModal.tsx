@@ -13,7 +13,6 @@ import {
   FormControl, 
   InputLabel, 
   type SelectChangeEvent, 
-  Alert 
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type User } from '../../../types/User';
@@ -40,7 +39,7 @@ const modalStyle = {
 interface CreateTestCaseModalProps {
   open: boolean;
   projectId: string;
-  projectName: string;
+  projectName?: string;
   organizationId: string;
   handleClose: () => void;
   onSaveSuccess: () => void;
@@ -112,13 +111,13 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         projectId,
         title: formData.title,
         description: formData.description,
-        testType: formData.testType,
-        priority: formData.priority,
+        testType: formData.testType as TestType,
+        priority: formData.priority as Priority,
         responsibleId: formData.responsibleId,
         timeEstimated: formData.timeEstimated,
         steps: formData.steps,
         expectedResult: formData.expectedResult,
-        status: formData.status,
+        status: formData.status as TestCaseStatus,
         createdById,
         scripts: scriptFiles,
       };

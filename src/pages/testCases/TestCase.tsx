@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DataGrid, type GridRenderCellParams, type GridColDef } from '@mui/x-data-grid';
+import { DataGrid, type GridRenderCellParams, type GridColDef, type GridRowParams } from '@mui/x-data-grid';
 import { Box, Button, IconButton, Typography, CircularProgress, Alert, Select, MenuItem, FormControl, InputLabel, TextField, type SelectChangeEvent } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,6 +12,7 @@ import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import EditTestCaseModal from './form/EditTestCaseModal';
 import CreateTestCaseModal from './form/CreateTestCaseModal';
+import ViewTestCaseModal from './form/ViewTestCaseModal';
 
 export default function TestCase() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -27,6 +28,10 @@ export default function TestCase() {
   const [statusFilter, setStatusFilter] = useState('');
   const handleEdit = (id: string) => setEditingTestCaseId(id);
   const handleCloseEditModal = () => setEditingTestCaseId(null);
+  const [viewingTestCaseId, setViewingTestCaseId] = useState<string | null>(null);
+
+  const handleView = (id: string) => setViewingTestCaseId(id);
+  const handleCloseViewModal = () => setViewingTestCaseId(null);
 
   const fetchData = async () => {
     if (!projectId) return;
@@ -47,6 +52,10 @@ export default function TestCase() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRowDoubleClick = (params: GridRowParams) => {
+    handleView(params.id as string);
   };
 
   useEffect(() => {
@@ -188,6 +197,7 @@ export default function TestCase() {
                 rows={filteredTestCases}
                 columns={columns}
                 getRowId={(row) => row.id!}
+                onRowDoubleClick={handleRowDoubleClick}
                 disableColumnFilter
                 disableColumnMenu
                 disableColumnResize
@@ -214,12 +224,21 @@ export default function TestCase() {
         />
       )}
 
-      {editingTestCaseId && (
+      {editingTestCaseId && project && (
         <EditTestCaseModal
           open={!!editingTestCaseId}
           testCaseId={editingTestCaseId}
+          organizationId={project.organization.id} 
           handleClose={handleCloseEditModal}
           onSaveSuccess={fetchData}
+        />
+      )}
+
+      {viewingTestCaseId && (
+        <ViewTestCaseModal
+          open={!!viewingTestCaseId}
+          testCaseId={viewingTestCaseId}
+          handleClose={handleCloseViewModal}
         />
       )}
     </PageLayout>
