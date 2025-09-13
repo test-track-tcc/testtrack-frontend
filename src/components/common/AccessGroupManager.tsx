@@ -31,7 +31,7 @@ function AccessGroupForm({ group, allPermissions, onSave, onCancel }: { group: P
     };
 
     return (
-        <Box sx={{ mt: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+        <Box sx={{ mt: 2, p: 2, border: '1px solid #ddd', borderRadius: 2 }} className="group-acess-form">
             <Typography variant="h6">{group?.id ? 'Editar' : 'Novo'} Grupo de Acesso</Typography>
             <TextField label="Nome do Grupo" value={name} onChange={(e) => setName(e.target.value)} fullWidth margin="normal" />
             <TextField label="Descrição" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth margin="normal" />
@@ -84,7 +84,14 @@ export default function AccessGroupManager({ organization }: { organization: Org
             if (groupId) {
                 await AccessGroupService.update(groupId, data);
             } else {
-                const payload: CreateAccessGroupPayload = { ...data, name: data.name!, organizationId: organization.id, createdById: 'mock-user-id' };
+                const payload: CreateAccessGroupPayload = { ...data, name: data.name!, organizationId: organization.id, createdById: (() => {
+                        const userData = localStorage.getItem('userData');
+                        try {
+                            return userData ? JSON.parse(userData).id ?? '' : '';
+                        } catch {
+                            return '';
+                        }
+                    })(), };
                 await AccessGroupService.create(payload);
             }
             setIsFormOpen(false); setEditingGroup(null); loadData();

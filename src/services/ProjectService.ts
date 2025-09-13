@@ -24,8 +24,13 @@ export const ProjectService = {
     },
 
     findAllInOrg: async (orgId: string): Promise<Project[]> => {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/project/organization/${orgId}`);
-        return response.data;
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/project/by-organization/${orgId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao buscar projetos para a organização ${orgId}:`, error);
+            throw error;
+        }
     },
 
     getById: async (projectId: string): Promise<Project> => {

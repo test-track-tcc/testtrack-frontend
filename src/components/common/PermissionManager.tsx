@@ -10,7 +10,6 @@ import { type Organization } from '../../types/Organization';
 import { type Project } from '../../types/Project';
 import { ProjectService } from '../../services/ProjectService';
 
-// Formulário para criar/editar uma permissão
 function PermissionForm({
     permission,
     projects,
@@ -24,7 +23,7 @@ function PermissionForm({
 }) {
     const [name, setName] = useState(permission?.name || '');
     const [description, setDescription] = useState(permission?.description || '');
-    const [projectId, setProjectId] = useState(''); // Estado para o projeto selecionado
+    const [projectId, setProjectId] = useState('');
 
     const handleSave = () => {
         if (!name || !projectId) {
@@ -45,7 +44,7 @@ function PermissionForm({
                     value={projectId}
                     label="Projeto"
                     onChange={(e) => setProjectId(e.target.value)}
-                    disabled={!!permission?.id} // Desabilita a troca de projeto na edição
+                    disabled={!!permission?.id}
                 >
                     {projects.map(proj => (
                         <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
@@ -60,7 +59,6 @@ function PermissionForm({
     );
 }
 
-// Componente principal para gerenciar permissões
 export default function PermissionManager({ organization }: { organization: Organization }) {
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [projects, setProjects] = useState<Project[]>([]);
@@ -108,7 +106,14 @@ export default function PermissionManager({ organization }: { organization: Orga
             } else {
                 const payload: CreatePermissionPayload = {
                     ...data,
-                    createdById: 'mock-user-id', // TODO: Substituir pelo ID do usuário logado
+                    createdById: (() => {
+                        const userData = localStorage.getItem('userData');
+                        try {
+                            return userData ? JSON.parse(userData).id ?? '' : '';
+                        } catch {
+                            return '';
+                        }
+                    })(),
                 };
                 await PermissionService.create(payload);
             }
