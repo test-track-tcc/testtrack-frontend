@@ -13,6 +13,7 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
   const [isDragActive, setIsDragActive] = useState(false);
 
   const onDrop = (acceptedFiles: File[]) => {
+    // Evita adicionar arquivos duplicados na lista
     const newFiles = acceptedFiles.filter(
       newFile => !files.some(existingFile => existingFile.name === newFile.name && existingFile.size === newFile.size)
     );
@@ -55,7 +56,7 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
           Arraste e solte os scripts aqui, ou clique para selecionar
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Arquivos permitidos: .js, .ts, .py, .robot, etc.
+          Os arquivos serão enviados ao salvar o caso de teste.
         </Typography>
       </Paper>
 
@@ -63,7 +64,7 @@ export default function ScriptDropzone({ files, onFilesChange }: ScriptDropzoneP
         <List dense sx={{ mt: 2 }}>
           {files.map(file => (
             <ListItem
-              key={file.name}
+              key={`${file.name}-${file.lastModified}`}
               secondaryAction={
                 <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveFile(file.name)}>
                   <DeleteIcon />

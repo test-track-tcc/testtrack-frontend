@@ -9,9 +9,9 @@ export interface CreateTestCasePayload {
   priority: Priority;
   createdById: string;
   responsibleId?: string;
-  timeEstimated?: string;
+  estimatedTime?: string;
   steps: string;
-  status: TestCaseStatus; 
+  status: TestCaseStatus;
   expectedResult: string;
   taskLink?: string;
   scripts?: File[];
@@ -33,24 +33,24 @@ export const TestType = {
 export type TestType = typeof TestType[keyof typeof TestType];
 
 export const Priority = {
-  BAIXA: 'BAIXA',
-  MEDIA: 'MEDIA',
-  ALTA: 'ALTA',
-  CRITICA: 'CRITICA',
+  NONE: 'NENHUM',
+  LOW: 'BAIXA',
+  MEDIUM: 'MEDIA',
+  HIGH: 'ALTA',
+  CRITICAL: 'CRITICA',
 } as const;
 export type Priority = typeof Priority[keyof typeof Priority];
 
 export const TestCaseStatus = {
-  NAO_INICIADO: 'NÃO INICIADO',
+  NAO_INICIADO: 'NAO_INICIADO',
   PENDENTE: 'PENDENTE',
-  EM_ANDAMENTO: 'EM ANDAMENTO',
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
   APROVADO: 'APROVADO',
   REPROVADO: 'REPROVADO',
   BLOQUEADO: 'BLOQUEADO',
   CANCELADO: 'CANCELADO',
   CONCLUIDO: 'CONCLUIDO',
 } as const;
-
 export type TestCaseStatus = typeof TestCaseStatus[keyof typeof TestCaseStatus];
 
 export interface Comment {
@@ -67,7 +67,7 @@ export interface TestCase {
   priority: Priority;
   createdBy: User;
   responsible: User | null;
-  timeEstimated: string | null;
+  estimatedTime: string | null;
   timeSpent: string;
   steps: string;
   expectedResult: string;
@@ -76,8 +76,8 @@ export interface TestCase {
   project: Project;
   projectSequenceId: number;
   comments: Comment[] | null;
-  attachment: string[] | null;
-  scripts: string[] | null;
+  attachments: string[] | null;
+  scripts: any[] | null;
   createdAt: string;
   updatedAt: string;
 }

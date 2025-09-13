@@ -15,15 +15,17 @@ export const TestCaseService = {
   create: async (payload: CreateTestCasePayload): Promise<TestCase> => {
     const formData = new FormData();
 
+    // Adiciona todos os campos ao FormData, exceto 'scripts'
     Object.entries(payload).forEach(([key, value]) => {
       if (key !== 'scripts' && value) {
         formData.append(key, value as string);
       }
     });
 
+    // Adiciona os arquivos de script, se existirem
     if (payload.scripts && payload.scripts.length > 0) {
       payload.scripts.forEach((file) => {
-        formData.append('scripts', file);
+        formData.append('scripts', file); // O backend espera 'scripts' (plural)
       });
     }
 
@@ -34,6 +36,22 @@ export const TestCaseService = {
       return response.data;
     } catch (error) {
       console.error('Erro ao criar caso de teste:', error);
+      throw error;
+    }
+  },
+
+  // --- NOVA FUNÇÃO PARA ADICIONAR SCRIPT ---
+  addScript: async (testCaseId: string, scriptFile: File): Promise<TestCase> => {
+    const formData = new FormData();
+    formData.append('script', scriptFile); // O backend espera 'script' (singular)
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/test-cases/${testCaseId}/scripts`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao adicionar script ao caso de teste ${testCaseId}:`, error);
       throw error;
     }
   },
