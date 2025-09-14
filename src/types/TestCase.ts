@@ -11,6 +11,8 @@ export interface CreateTestCasePayload {
   createdById: string;
   responsibleId?: string;
   estimatedTime?: string;
+  timeSpent?: string;
+  executionDate?: string | null;
   steps: string;
   status: TestCaseStatus;
   expectedResult: string;
@@ -71,6 +73,7 @@ export interface TestCase {
   responsible: User | null;
   estimatedTime: string | null;
   timeSpent: string;
+  executionDate: string;
   steps: string;
   expectedResult: string;
   taskLink: string | null;

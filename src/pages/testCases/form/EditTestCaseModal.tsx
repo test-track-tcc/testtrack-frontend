@@ -8,6 +8,7 @@ import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
 import { type UpdateTestCasePayload } from '../../../types/TestCase';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
+import { format } from 'date-fns'; // Importe a função 'format'
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -24,6 +25,15 @@ const style = {
   gap: 2,
   maxHeight: '90vh',
   overflowY: 'auto'
+};
+
+// Função auxiliar para formatar a data para o input
+const formatDateForInput = (dateString?: string | Date | null) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const timezoneOffset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() + timezoneOffset);
+    return format(localDate, 'yyyy-MM-dd');
 };
 
 interface EditTestCaseModalProps {
@@ -66,11 +76,14 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             customTestTypeId: testCaseData.customTestTypeId ?? undefined,
             priority: testCaseData.priority,
             responsibleId: testCaseData.responsible?.id || '',
-            estimatedTime: testCaseData.estimatedTime || '',
+            status: testCaseData.status,
             steps: testCaseData.steps,
             expectedResult: testCaseData.expectedResult,
             taskLink: testCaseData.taskLink || '',
-            status: testCaseData.status,
+            estimatedTime: testCaseData.estimatedTime || '',
+            // ADICIONE OS NOVOS CAMPOS AO ESTADO INICIAL
+            timeSpent: testCaseData.timeSpent || '',
+            executionDate: formatDateForInput(testCaseData.executionDate),
           });
           
           setOrganizationUsers(users);
@@ -116,6 +129,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
       testType: isCustomType ? null : (formData.testType as TestType),
       customTestTypeId: isCustomType ? formData.testType : null,
       scripts: scripts.length > 0 ? scripts : undefined, 
+      executionDate: formData.executionDate || null,
     };
 
     try {
@@ -146,34 +160,40 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
         <TextField name="description" label="Descrição" value={formData.description || ''} onChange={handleChange} multiline rows={3} autoComplete='off' />
         
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel>Tipo de Teste</InputLabel>
-            <Select name="testType" label="Tipo de Teste" value={formData.testType || ''} onChange={handleSelectChange('testType')}>
-              {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Prioridade</InputLabel>
-            <Select name="priority" label="Prioridade" value={formData.priority || ''} onChange={handleSelectChange('priority')}>
-              {prioridades.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
-            </Select>
-          </FormControl>
+            <FormControl fullWidth>
+                <InputLabel>Tipo de Teste</InputLabel>
+                <Select name="testType" label="Tipo de Teste" value={formData.customTestTypeId || formData.testType || ''} onChange={handleSelectChange('testType')}>
+                    {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
+                </Select>
+            </FormControl>
+            <FormControl fullWidth>
+                <InputLabel>Prioridade</InputLabel>
+                <Select name="priority" label="Prioridade" value={formData.priority || ''} onChange={handleSelectChange('priority')}>
+                    {prioridades.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+                </Select>
+            </FormControl>
         </Box>
 
         <FormControl fullWidth>
-          <InputLabel>Status</InputLabel>
-          <Select name="status" label="Status" value={formData.status || ''} onChange={handleSelectChange('status')}>
-            {statusList.map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
-          </Select>
+            <InputLabel>Status</InputLabel>
+            <Select name="status" label="Status" value={formData.status || ''} onChange={handleSelectChange('status')}>
+                {statusList.map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
+            </Select>
         </FormControl>
 
         <FormControl fullWidth>
-          <InputLabel>Responsável (Opcional)</InputLabel>
-          <Select name="responsibleId" label="Responsável (Opcional)" value={formData.responsibleId || ''} onChange={handleSelectChange('responsibleId')}>
-            <MenuItem value=""><em>Nenhum</em></MenuItem>
-            {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
-          </Select>
+            <InputLabel>Responsável (Opcional)</InputLabel>
+            <Select name="responsibleId" label="Responsável (Opcional)" value={formData.responsibleId || ''} onChange={handleSelectChange('responsibleId')}>
+                <MenuItem value=""><em>Nenhum</em></MenuItem>
+                {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
+            </Select>
         </FormControl>
+
+        {/* ADICIONE OS DOIS CAMPOS ABAIXO */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <TextField name="timeSpent" label="Tempo Gasto (ex: 2h 30m)" value={formData.timeSpent || ''} onChange={handleChange} />
+            <TextField name="executionDate" label="Data de Execução" type="date" value={formData.executionDate || ''} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        </Box>
 
         <TextField name="estimatedTime" label="Tempo Estimado (ex: 2h 30m)" value={formData.estimatedTime || ''} onChange={handleChange} />
         
