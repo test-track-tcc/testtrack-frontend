@@ -1,3 +1,4 @@
+import type { CustomTestType } from './CustomTestType';
 import { type Project } from './Project';
 import { type User } from './User';
 
@@ -11,6 +12,8 @@ export interface CreateTestCasePayload {
   createdById: string;
   responsibleId?: string;
   estimatedTime?: string;
+  timeSpent?: string;
+  executionDate?: string | null;
   steps: string;
   status: TestCaseStatus;
   expectedResult: string;
@@ -66,11 +69,13 @@ export interface TestCase {
   description: string;
   testType?: TestType | null;
   customTestTypeId?: string | null;
+  customTestType?: CustomTestType;
   priority: Priority;
   createdBy: User;
   responsible: User | null;
   estimatedTime: string | null;
   timeSpent: string;
+  executionDate: string;
   steps: string;
   expectedResult: string;
   taskLink: string | null;

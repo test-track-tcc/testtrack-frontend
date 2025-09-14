@@ -46,13 +46,14 @@ function Register() {
             Crie sua conta e comece a gerenciar seus testes automatizados com
             mais eficiência
           </p>
-          <FormControl required>
+          <FormControl className="login-form" required>
             <TextField
               name="name"
               label="Nome"
               variant="outlined"
               value={formData.name}
               onChange={handleChange}
+              autoComplete="off"
             />
             <TextField
               name="email"
@@ -60,6 +61,7 @@ function Register() {
               variant="outlined"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="off"
             />
             <TextField
               name="password"

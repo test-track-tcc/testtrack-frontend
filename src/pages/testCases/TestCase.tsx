@@ -113,7 +113,7 @@ export default function TestCase() {
       flex: 1,
       valueGetter: (_value, row) => row.responsible?.name || 'Nenhum',
     },
-    { field: 'timeEstimated', headerName: 'Tempo Est.', flex: 1 },
+    { field: 'estimatedTime', headerName: 'Tempo Est.', flex: 1 },
     {
       field: 'actions',
       headerName: 'Ações',

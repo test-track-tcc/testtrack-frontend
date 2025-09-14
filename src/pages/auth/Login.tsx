@@ -15,7 +15,7 @@ function Login() {
       <section className='center-container login-container'>
         <div className='login-box'>
           <h1>{t('login.welcome')}</h1>
-          <Box component="form" onSubmit={handleLogin}>
+          <Box className="login-form" component="form" onSubmit={handleLogin}>
             <FormControl required>
               <TextField
                 id="email-input"

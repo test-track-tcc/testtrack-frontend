@@ -111,7 +111,7 @@ export default function AddUserToProjectModal({ open, project, handleClose, onSu
   return (
     <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
-        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: 'bold' }}>
           Gerenciar membros do projeto "{project?.name}"
         </Typography>
 
@@ -132,7 +132,7 @@ export default function AddUserToProjectModal({ open, project, handleClose, onSu
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">Membro</Typography>
+              <Typography variant="body2" color="text.secondary"></Typography>
               <IconButton
                 color="error"
                 onClick={() => member.id && handleRemoveUser(member.id)}

@@ -127,7 +127,7 @@ export default function Sidebar() {
                 <Avatar>{user ? getInitials(user.name) : ''}</Avatar>
                 <Box flexDirection={'column'} className="user-details">
                     <p className='user-name'>{user?.name}</p>
-                    <p className='user-role'>Gestor de Projeto</p>
+                    <p className='user-role'></p>
                 </Box>
             </Box>
             

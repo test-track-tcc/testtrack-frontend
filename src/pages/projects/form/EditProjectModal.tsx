@@ -20,8 +20,14 @@ const style = {
 };
 
 const formatDateForInput = (dateString?: string | null) => {
-    if (!dateString) return '';
-    return format(new Date(dateString), 'yyyy-MM-dd');
+  if (!dateString) return '';
+  const date = new Date(dateString);
+
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+
+  const localDate = new Date(date.getTime() + timezoneOffset);
+
+  return format(localDate, 'yyyy-MM-dd');
 };
 
 interface EditProjectModalProps {
