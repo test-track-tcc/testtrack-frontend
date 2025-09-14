@@ -5,7 +5,6 @@ export function useRegisterFunctions() {
   const handleSubmit = async (formData: UserRegister) => {
     try {
       const response = await UsersService.create(formData);
-      console.log('Registration successful:', response);
       return response;
     } catch (error) {
       console.error('Registration error:', error);

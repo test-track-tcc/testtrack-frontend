@@ -1,6 +1,5 @@
 import SimpleHeader from "../../components/layout/SimpleHeader";
-import { FormControl } from '@mui/base/FormControl';
-import { TextField, Button, Alert, CircularProgress, Box } from '@mui/material';
+import { TextField, Button, Alert, CircularProgress, Box, FormControl } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import '../../i18n';
 import { useAuth } from '../../functions/AuthFunctions';
@@ -16,7 +15,7 @@ function Login() {
       <section className='center-container login-container'>
         <div className='login-box'>
           <h1>{t('login.welcome')}</h1>
-          <Box component="form" onSubmit={handleLogin}>
+          <Box className="login-form" component="form" onSubmit={handleLogin}>
             <FormControl required>
               <TextField
                 id="email-input"

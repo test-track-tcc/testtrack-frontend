@@ -1,7 +1,6 @@
 import React from "react";
 import SimpleHeader from "../../components/layout/SimpleHeader";
-import { FormControl } from "@mui/base/FormControl";
-import { TextField, Button } from "@mui/material";
+import { TextField, Button, FormControl } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useRegisterFunctions } from "../../functions/RegisterFunctions";
 import "../../i18n";
@@ -47,13 +46,14 @@ function Register() {
             Crie sua conta e comece a gerenciar seus testes automatizados com
             mais eficiência
           </p>
-          <FormControl required>
+          <FormControl className="login-form" required>
             <TextField
               name="name"
               label="Nome"
               variant="outlined"
               value={formData.name}
               onChange={handleChange}
+              autoComplete="off"
             />
             <TextField
               name="email"
@@ -61,6 +61,7 @@ function Register() {
               variant="outlined"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="off"
             />
             <TextField
               name="password"

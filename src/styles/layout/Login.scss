@@ -22,6 +22,17 @@ div:has(.login-container) {
         background-color: white;
         border-radius: 8px;
 
+        .login-form {
+             display: flex;
+            flex-direction: column;
+            gap: 12px;
+            .MuiFormControl-root {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+        }
         h1 {
             font-size: 30px;
             text-align: center;

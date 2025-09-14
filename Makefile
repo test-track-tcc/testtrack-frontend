@@ -1,7 +1,7 @@
 DEV_SERVICE = vite-dev
 PROD_SERVICE = vite-prod
 
-.PHONY: run-dev prod build-dev build-prod stop
+.PHONY: run-dev prod build-dev build-prod stop bash
 
 run-dev:
 	docker compose up $(DEV_SERVICE)
@@ -20,3 +20,6 @@ stop:
 
 restart:
 	docker compose restart
+
+bash:
+	docker compose exec -it vite-dev sh
