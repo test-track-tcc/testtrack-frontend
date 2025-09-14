@@ -55,7 +55,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     testType: '',
     priority: '',
     responsibleId: '',
-    timeEstimated: '',
+    estimatedTime: '',
     steps: '',
     expectedResult: '',
     status: TestCaseStatus.NAO_INICIADO,
@@ -97,7 +97,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     if (!open) {
       setFormData({
         title: '', description: '', testType: '', priority: '',
-        responsibleId: '', timeEstimated: '', steps: '',
+        responsibleId: '', estimatedTime: '', steps: '',
         expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
       });
       setScriptFiles([]);
@@ -133,7 +133,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         customTestTypeId: isCustomType ? formData.testType : null,
         priority: formData.priority as Priority,
         responsibleId: formData.responsibleId || undefined,
-        timeEstimated: formData.timeEstimated,
+        estimatedTime: formData.estimatedTime,
         steps: formData.steps,
         expectedResult: formData.expectedResult,
         status: formData.status as TestCaseStatus,
@@ -195,7 +195,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
               </Select>
             </FormControl>
             
-            <TextField name="timeEstimated" label="Estimativa (ex: 2h 30m)" fullWidth sx={{ mb: 2 }} value={formData.timeEstimated} onChange={handleChange} />
+            <TextField name="estimatedTime" label="Estimativa (ex: 2h 30m)" fullWidth sx={{ mb: 2 }} value={formData.estimatedTime} onChange={handleChange} autoComplete='off' />
             <TextField name="timeSpent" label="Horas Gastas" fullWidth sx={{ mb: 2 }} value={"0h"} disabled />
           </Box>
           

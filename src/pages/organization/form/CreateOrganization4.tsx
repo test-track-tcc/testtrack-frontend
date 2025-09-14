@@ -25,7 +25,6 @@ export default function CreateOrganization4() {
     const navigate = useNavigate();
     const [members, setMembers] = useState<Member[]>([]);
     const [newMemberEmail, setNewMemberEmail] = useState('');
-    // Define um cargo padrão para evitar erros
     const [newMemberRole, setNewMemberRole] = useState<OrganizationRole>('MEMBER');
     const [foundUser, setFoundUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
