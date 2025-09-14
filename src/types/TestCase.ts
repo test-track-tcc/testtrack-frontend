@@ -1,3 +1,4 @@
+import type { CustomTestType } from './CustomTestType';
 import { type Project } from './Project';
 import { type User } from './User';
 
@@ -68,6 +69,7 @@ export interface TestCase {
   description: string;
   testType?: TestType | null;
   customTestTypeId?: string | null;
+  customTestType?: CustomTestType;
   priority: Priority;
   createdBy: User;
   responsible: User | null;
