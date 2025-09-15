@@ -129,12 +129,21 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose }: Vie
                             <List dense>
                                 {testCase.scripts.map((script: any) => (
                                 <ListItem key={script.id} secondaryAction={
-                                    <IconButton edge="end" href={`${import.meta.env.VITE_API_BASE_URL}/${script.scriptPath}`} target="_blank" title="Baixar script">
-                                        <FileDownloadIcon />
-                                    </IconButton>
-                                }>
-                                    <ListItemText primary={script.scriptPath.split(/[\\/]/).pop()} secondary={`Versão: ${script.version}`} />
-                                </ListItem>
+                                  <IconButton
+                                      href={`${import.meta.env.VITE_API_URL}/${script.scriptPath}`} 
+                                      target="_blank" 
+                                      title="Baixar script"
+                                      download
+                                      sx={{ pointerEvents: 'auto' }}
+                                  >
+                                      <FileDownloadIcon />
+                                  </IconButton>
+                              }>
+                                  <ListItemText 
+                                      primary={script.scriptPath.split(/[\\/]/).pop()} 
+                                      secondary={`Versão: ${script.version}`} 
+                                  />
+                              </ListItem>
                                 ))}
                             </List>
                         </Paper>
