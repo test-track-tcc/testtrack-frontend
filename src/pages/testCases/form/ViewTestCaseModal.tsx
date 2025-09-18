@@ -84,7 +84,9 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose }: Vie
           <>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5" component="h2">
-                    {`[${testCase.project.prefix}-${testCase.projectSequenceId}] - ${testCase.title}`}
+                    <span>
+                      <span className='test-case-prefix'>{testCase.project.prefix}-{testCase.projectSequenceId} </span><strong>{testCase.title}</strong>
+                    </span>
                 </Typography>
                 <IconButton onClick={handleClose}><CloseIcon /></IconButton>
             </Box>
