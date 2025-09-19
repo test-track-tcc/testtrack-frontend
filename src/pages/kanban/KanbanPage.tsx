@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   DndContext,
-  DragEndEvent,
+  type DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { Box, CircularProgress } from '@mui/material';
 import { TestCaseService } from '../../services/TestCaseService';
-import { type TestCase, type TestCaseStatus } from '../../types/TestCase';
+import { type TestCase, type TestCaseStatus, type UpdateTestCasePayload } from '../../types/TestCase';
 import PageLayout from '../../components/layout/PageLayout';
 import KanbanCard from './KanbanCard';
 import KanbanColumn from './KanbanColumn';
@@ -21,30 +22,44 @@ const columnTitles: { [key in TestCaseStatus]: string } = {
   NAO_INICIADO: 'Não Iniciado',
   EM_ANDAMENTO: 'Em Andamento',
   CONCLUIDO: 'Concluído',
-  FALHA: 'Falha',
   BLOQUEADO: 'Bloqueado',
+  PENDENTE: 'Pendente',
+  APROVADO: 'Aprovado',
+  REPROVADO: 'Reprovado',
+  CANCELADO: 'Cancelado',
 };
 
 export default function KanbanPage() {
+  const { projectId } = useParams<{ projectId: string }>();
   const [columns, setColumns] = useState<Columns>({
     NAO_INICIADO: [],
     EM_ANDAMENTO: [],
     CONCLUIDO: [],
-    FALHA: [],
     BLOQUEADO: [],
+    PENDENTE: [],
+    APROVADO: [],
+    REPROVADO: [],
+    CANCELADO: [],
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCases = async () => {
       try {
-        const data = await TestCaseService.getByProjectId();
+        if (!projectId) {
+          setLoading(false);
+          return;
+        }
+        const data = await TestCaseService.getByProjectId(projectId);
         const newColumns: Columns = {
           NAO_INICIADO: [],
           EM_ANDAMENTO: [],
           CONCLUIDO: [],
-          FALHA: [],
           BLOQUEADO: [],
+          PENDENTE: [],
+          APROVADO: [],
+          REPROVADO: [],
+          CANCELADO: [],
         };
         data.forEach(tc => {
           if (newColumns[tc.status]) {
@@ -59,7 +74,7 @@ export default function KanbanPage() {
       }
     };
     fetchCases();
-  }, []);
+  }, [projectId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -72,24 +87,26 @@ export default function KanbanPage() {
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-  
+
     const activeId = String(active.id);
     const overId = String(over.id);
-  
+
+    // CORRIGIDO: A tipagem de sourceCard foi ajustada para TestCase
     const [sourceColumnId, sourceCard] = Object.entries(columns).reduce(
       (acc, [colId, cards]) => {
         const card = cards.find(c => c.id === activeId);
-        return card ? [colId as StatusType, card] : acc;
+        return card ? [colId as TestCaseStatus, card] : acc;
       },
-      [null, null] as [StatusType | null, TestFormData | null]
+      [null, null] as [TestCaseStatus | null, TestCase | null]
     );
-  
+
     if (!sourceColumnId || !sourceCard) return;
-  
+
+    // CORRIGIDO: Utiliza TestCaseStatus para consistência
     const destinationColumnId = Object.keys(columns).find(
-        (colId) => colId === overId || columns[colId as StatusType].some(c => c.id === overId)
-    ) as StatusType | undefined;
-  
+        (colId) => colId === overId || columns[colId as TestCaseStatus].some(c => c.id === overId)
+    ) as TestCaseStatus | undefined;
+
     if (!destinationColumnId) return;
 
     if (sourceColumnId !== destinationColumnId) {
@@ -98,7 +115,6 @@ export default function KanbanPage() {
             
             newColumns[sourceColumnId] = newColumns[sourceColumnId].filter(c => c.id !== activeId);
             
-            // Adiciona na nova coluna
             const overCardIndex = newColumns[destinationColumnId].findIndex(c => c.id === overId);
             const newCard = { ...sourceCard, status: destinationColumnId };
             
@@ -112,14 +128,15 @@ export default function KanbanPage() {
         });
 
         try {
-            await TestCaseService.update(activeId, destinationColumnId);
+            // CORRIGIDO: A chamada ao serviço de atualização agora passa um objeto com o novo status
+            const updatePayload: UpdateTestCasePayload = { status: destinationColumnId };
+            await TestCaseService.update(activeId, updatePayload);
         } catch (error) {
             console.error('Erro ao atualizar o status:', error);
-            // Reverter o estado se a API falhar (opcional)
+            // Implementar lógica para reverter o estado em caso de falha na API
         }
     }
   };
-  
 
   if (loading) {
     return (
@@ -138,7 +155,7 @@ export default function KanbanPage() {
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', padding: 2 }}>
           {Object.entries(columns).map(([columnId, items]) => (
-            <KanbanColumn key={columnId} id={columnId} title={columnTitles[columnId as StatusType]} items={items}>
+            <KanbanColumn key={columnId} id={columnId} title={columnTitles[columnId as TestCaseStatus]} items={items}>
               {items.map(item => (
                 <KanbanCard key={item.id} item={item} />
               ))}

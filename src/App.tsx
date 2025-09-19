@@ -5,6 +5,7 @@ import Register from "./pages/auth/Register";
 import Dashboard from "./pages/home/Dashboard";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
+import KanbanPage from "./pages/kanban/KanbanPage";
 import SelectOrganization from "./pages/organization/SelectOrganization";
 import CreateOrganization1 from "./pages/organization/form/CreateOrganization1";
 import CreateOrganization2 from "./pages/organization/form/CreateOrganization2";
@@ -33,6 +34,8 @@ function App() {
         <Route path="/projects/:projectId/test-cases" element={<TestCase />} />
 
         <Route path="/organization" element={<SelectOrganization />} />
+
+        <Route path="/projects/:projectId/kanban" element={<KanbanPage />} />
 
         <Route
           path="/organization/:orgId/projects"
