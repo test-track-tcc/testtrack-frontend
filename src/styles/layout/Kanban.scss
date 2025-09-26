@@ -1,0 +1,12 @@
+// main:has(.kanban-container) {
+//     width: auto;
+// }
+
+.kanban-container {
+    display: flex;
+    gap: 12px;
+    overflow-y: auto;
+    height: 80%;
+    width: 100%;
+    margin-top: 32px;
+}

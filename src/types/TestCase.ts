@@ -69,6 +69,7 @@ export interface TestCase {
   description: string;
   testType?: TestType | null;
   customTestTypeId?: string | null;
+  prefix: string;
   customTestType?: CustomTestType;
   priority: Priority;
   createdBy: User;

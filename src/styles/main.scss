@@ -8,6 +8,7 @@
 @use "./layout/Sidebar.scss";
 @use "./components/button.scss";
 @use "./layout/Modal.scss";
+@use "./layout//Kanban.scss";
 
 body {
     font-family: variables.$font-inter !important;
@@ -317,6 +318,10 @@ button.primary-button {
     .MuiDataGrid-root {
         border-radius: 16px;
         border: 0;
+    }
+
+    .MuiDataGrid-row {
+        font-family: 'Inter', sans-serif;
     }
 }
 

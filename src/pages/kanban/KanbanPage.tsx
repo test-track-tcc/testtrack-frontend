@@ -7,7 +7,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, Button, IconButton, Typography, CircularProgress, Alert, Select, MenuItem, FormControl, InputLabel, TextField, type SelectChangeEvent } from '@mui/material';
 import { TestCaseService } from '../../services/TestCaseService';
 import { type TestCase, type TestCaseStatus, type UpdateTestCasePayload } from '../../types/TestCase';
 import PageLayout from '../../components/layout/PageLayout';
@@ -33,13 +33,13 @@ export default function KanbanPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [columns, setColumns] = useState<Columns>({
     NAO_INICIADO: [],
-    EM_ANDAMENTO: [],
-    CONCLUIDO: [],
-    BLOQUEADO: [],
     PENDENTE: [],
+    EM_ANDAMENTO: [],
+    BLOQUEADO: [],
     APROVADO: [],
     REPROVADO: [],
     CANCELADO: [],
+    CONCLUIDO: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -53,13 +53,13 @@ export default function KanbanPage() {
         const data = await TestCaseService.getByProjectId(projectId);
         const newColumns: Columns = {
           NAO_INICIADO: [],
-          EM_ANDAMENTO: [],
-          CONCLUIDO: [],
-          BLOQUEADO: [],
           PENDENTE: [],
+          EM_ANDAMENTO: [],
+          BLOQUEADO: [],
           APROVADO: [],
           REPROVADO: [],
           CANCELADO: [],
+          CONCLUIDO: [],
         };
         data.forEach(tc => {
           if (newColumns[tc.status]) {
@@ -91,7 +91,6 @@ export default function KanbanPage() {
     const activeId = String(active.id);
     const overId = String(over.id);
 
-    // CORRIGIDO: A tipagem de sourceCard foi ajustada para TestCase
     const [sourceColumnId, sourceCard] = Object.entries(columns).reduce(
       (acc, [colId, cards]) => {
         const card = cards.find(c => c.id === activeId);
@@ -102,7 +101,6 @@ export default function KanbanPage() {
 
     if (!sourceColumnId || !sourceCard) return;
 
-    // CORRIGIDO: Utiliza TestCaseStatus para consistência
     const destinationColumnId = Object.keys(columns).find(
         (colId) => colId === overId || columns[colId as TestCaseStatus].some(c => c.id === overId)
     ) as TestCaseStatus | undefined;
@@ -128,12 +126,10 @@ export default function KanbanPage() {
         });
 
         try {
-            // CORRIGIDO: A chamada ao serviço de atualização agora passa um objeto com o novo status
             const updatePayload: UpdateTestCasePayload = { status: destinationColumnId };
             await TestCaseService.update(activeId, updatePayload);
         } catch (error) {
             console.error('Erro ao atualizar o status:', error);
-            // Implementar lógica para reverter o estado em caso de falha na API
         }
     }
   };
@@ -152,8 +148,51 @@ export default function KanbanPage() {
     <PageLayout>
       <title>Kanban | TestTrack</title>
       <h1>Quadro Kanban</h1>
+
+        <Box className='section-datagrid-filter'>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Projeto</InputLabel>
+            <Select
+              value={projectId || ''}
+              label="Projeto"
+              // onChange={handleProjectChange}
+            >
+              {/* {allProjects.map((proj) => (
+                <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+              ))} */}
+            </Select>
+          </FormControl>
+          
+          <TextField 
+            label="Pesquisa" 
+            variant="outlined" 
+            placeholder="ID, Título..." 
+            // value={searchQuery}
+            // onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ flexGrow: 1 }}
+          />
+          
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              // value={statusFilter}
+              label="Status"
+              // onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value=""><em>Todos</em></MenuItem>
+              {/* {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)} */}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 150 }} disabled>
+            <InputLabel>Script</InputLabel>
+            <Select value="" label="Script">
+              <MenuItem value=""><em>Todos</em></MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', padding: 2 }}>
+        <Box className="kanban-container">
           {Object.entries(columns).map(([columnId, items]) => (
             <KanbanColumn key={columnId} id={columnId} title={columnTitles[columnId as TestCaseStatus]} items={items}>
               {items.map(item => (

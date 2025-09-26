@@ -41,10 +41,14 @@ export default function KanbanCard({ item }: KanbanCardProps) {
         backgroundColor: 'white',
       }}
     >
-      <Typography variant="body1">{item.title}</Typography>
-      <Typography variant="body2" color="text.secondary">
-        Prioridade: {item.priority}
+      <Typography variant="body2" color="text.secondary" >
+        {item.priority}
       </Typography>
+      <div>
+        <Typography variant="body1">{`${item.project.prefix}-${item.projectSequenceId}`}</Typography>
+        <Typography variant="body1">{item.title}</Typography>
+      </div>
+      <Typography variant="body1">{item.estimatedTime}</Typography>
     </Paper>
   );
 }
