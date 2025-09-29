@@ -7,12 +7,13 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Box, Select, MenuItem, FormControl, InputLabel, TextField } from '@mui/material';
+import { Box, Select, MenuItem, FormControl, InputLabel, TextField, Typography, Button } from '@mui/material';
 import { TestCaseService } from '../../services/TestCaseService';
 import { type TestCase, type TestCaseStatus, type UpdateTestCasePayload } from '../../types/TestCase';
 import PageLayout from '../../components/layout/PageLayout';
 import KanbanCard from './KanbanCard';
 import KanbanColumn from './KanbanColumn';
+import AddIcon from '@mui/icons-material/Add';
 
 type Columns = {
   [key in TestCaseStatus]: TestCase[];
@@ -146,7 +147,13 @@ export default function KanbanPage() {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <h1>Quadro Kanban</h1>
 
-        
+        <Button
+          className='btn primary icon'
+          // onClick={() => setIsCreateModalOpen(true)}
+          startIcon={<AddIcon />}
+        >
+          Adicionar Caso de Teste
+        </Button>
       </Box>
 
       <Box className='section-datagrid-filter'>
@@ -192,17 +199,24 @@ export default function KanbanPage() {
         </FormControl>
       </Box>
 
-      <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <Box className="kanban-container">
-          {Object.entries(columns).map(([columnId, items]) => (
-            <KanbanColumn key={columnId} id={columnId} title={columnTitles[columnId as TestCaseStatus]} items={items}>
-              {items.map(item => (
-                <KanbanCard key={item.id} item={item} />
-              ))}
-            </KanbanColumn>
-          ))}
+      {loading ? (
+        <Box sx={{ textAlign: 'center', mt: 5 }}>
+          <Typography variant="h6">Carregando casos de teste...</Typography>
         </Box>
-      </DndContext>
+      ) : ( 
+        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+          <Box className="kanban-container">
+            {Object.entries(columns).map(([columnId, items]) => (
+              <KanbanColumn key={columnId} id={columnId} title={columnTitles[columnId as TestCaseStatus]} items={items}>
+                {items.map(item => (
+                  <KanbanCard key={item.id} item={item} />
+                ))}
+              </KanbanColumn>
+            ))}
+          </Box>
+        </DndContext>
+      )
+      }
     </PageLayout>
   );
 }

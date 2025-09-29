@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { List, ListItemButton, ListItemIcon, ListItemText, Box, Divider, Toolbar, Button, Select, MenuItem, type SelectChangeEvent } from '@mui/material';
+import { List, ListItemButton, ListItemIcon, ListItemText, Box, Toolbar, Button, Select, MenuItem, type SelectChangeEvent } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CasesIcon from '@mui/icons-material/Cases';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -12,7 +12,6 @@ import { useAuth } from '../../functions/AuthFunctions';
 import { type Organization } from '../../types/Organization';
 import { OrganizationService } from '../../services/OrganizationService';
 import { getInitials } from '../../utils/getInitials';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 
 const drawerItems = [
     { title: 'Área de Trabalho', path: '/home', icon: <BarChartIcon /> },
@@ -82,11 +81,10 @@ export default function Sidebar() {
                     <p>Automatize, gerencie, evolua seus projetos</p>
                 </Box>
             </Toolbar>
-            <Divider />
 
             <Box>
                 <Box className="organization-div">
-                    <a href='/organization'>Organização <ArrowRightAltIcon></ArrowRightAltIcon></a>
+                    <a className='sidebar-label' href='/organization'>Organização</a>
                     <Select
                         value={loading ? '' : selectedOrg}
                         onChange={handleOrgChange}
@@ -104,9 +102,9 @@ export default function Sidebar() {
                     </Select>
                 </Box>
             </Box>
-            <Divider />
 
             <List>
+                <label className='sidebar-label'>Ferramentas</label>
                 {drawerItems.map((item) => {
                     const isActive = location.pathname.includes(item.path);
                     return (

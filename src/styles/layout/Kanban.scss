@@ -9,4 +9,15 @@
     height: 80%;
     width: 100%;
     margin-top: 32px;
+
+    .MuiTypography-root.MuiTypography-h6 {
+        font-weight: bold;
+    }
+
+    .css-1rmiwj1-MuiPaper-root {
+        background-color: #fff;
+        border: 2px solid #C8C6C6;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
 }

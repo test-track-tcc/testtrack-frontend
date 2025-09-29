@@ -11,9 +11,8 @@
     a:active {
         display: flex;
         gap: 4px;
-        color: black;
-        font-weight: bold;
-        text-decoration: none;
+        color: #6C6767;
+        text-decoration: underline;
         margin-bottom: 4px;
         align-items: center;
     }
@@ -22,6 +21,16 @@
         margin-top: 10px 0px;
         width: 100%;
     }
+}
+
+label.sidebar-label {
+    display: flex;
+    gap: 4px;
+    color: #6C6767;
+    text-decoration: underline;
+    margin-bottom: 4px;
+    align-items: center;
+    padding: 10px;
 }
 
 .sidebar-logo {
