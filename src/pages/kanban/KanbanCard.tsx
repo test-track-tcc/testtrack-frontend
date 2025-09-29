@@ -1,7 +1,22 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Paper, Typography } from '@mui/material';
-import type { TestCase } from '../../types/TestCase';
+import { Paper, Typography, Box, Chip, Avatar, Tooltip } from '@mui/material';
+import { type TestCase, Priority, TestType } from '../../types/TestCase';
+
+const priorityColors: { [key in Priority]: 'error' | 'warning' | 'info' | 'success' | 'default' } = {
+  [Priority.CRITICAL]: 'error',
+  [Priority.HIGH]: 'error',
+  [Priority.MEDIUM]: 'warning',
+  [Priority.LOW]: 'info',
+  [Priority.NONE]: 'default',
+};
+
+const typeColors: { [key in TestType]?: 'primary' | 'secondary' | 'default' } = {
+    [TestType.FUNCIONAL]: 'primary',
+    [TestType.REGRESSAO]: 'secondary',
+    [TestType.ACEITACAO]: 'primary',
+};
+
 
 interface KanbanCardProps {
   item: TestCase;
@@ -16,7 +31,7 @@ export default function KanbanCard({ item }: KanbanCardProps) {
     transition,
     isDragging,
   } = useSortable({
-    id: item.id!,
+    id: item.id,
     data: {
       type: 'Card',
       item,
@@ -29,6 +44,11 @@ export default function KanbanCard({ item }: KanbanCardProps) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   return (
     <Paper
       ref={setNodeRef}
@@ -36,19 +56,58 @@ export default function KanbanCard({ item }: KanbanCardProps) {
       {...attributes}
       {...listeners}
       sx={{
-        padding: 2,
-        marginBottom: 2,
+        p: 2,
+        mb: 1.5,
         backgroundColor: 'white',
+        cursor: 'grab',
+        '&:active': {
+          cursor: 'grabbing',
+        },
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
       }}
     >
-      <Typography variant="body2" color="text.secondary" >
-        {item.priority}
-      </Typography>
-      <div>
-        <Typography variant="body1">{`${item.project.prefix}-${item.projectSequenceId}`}</Typography>
-        <Typography variant="body1">{item.title}</Typography>
-      </div>
-      <Typography variant="body1">{item.estimatedTime}</Typography>
+      <Box>
+        <Typography variant="caption" color="text.secondary">
+          {`${item.project.prefix}-${item.projectSequenceId}`}
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
+          {item.title}
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Chip 
+          label={item.priority}
+          color={priorityColors[item.priority] || 'default'}
+          size="small"
+        />
+        {item.testType && (
+          <Chip
+            label={item.testType}
+            color={typeColors[item.testType] || 'default'}
+            size="small"
+            variant="outlined"
+          />
+        )}
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          {item.estimatedTime ? `Est: ${item.estimatedTime} min` : ''}
+        </Typography>
+
+        {item.responsible ? (
+            <Tooltip title={item.responsible.name}>
+                <Avatar sx={{ width: 28, height: 28, fontSize: '0.8rem' }}>
+                    {getInitials(item.responsible.name ?? '')}
+                </Avatar>
+            </Tooltip>
+        ) : (
+            <Avatar sx={{ width: 28, height: 28, bgcolor: 'grey.300' }} />
+        )}
+      </Box>
     </Paper>
   );
 }

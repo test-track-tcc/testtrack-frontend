@@ -7,7 +7,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Box, Button, IconButton, Typography, CircularProgress, Alert, Select, MenuItem, FormControl, InputLabel, TextField, type SelectChangeEvent } from '@mui/material';
+import { Box, Select, MenuItem, FormControl, InputLabel, TextField } from '@mui/material';
 import { TestCaseService } from '../../services/TestCaseService';
 import { type TestCase, type TestCaseStatus, type UpdateTestCasePayload } from '../../types/TestCase';
 import PageLayout from '../../components/layout/PageLayout';
@@ -89,7 +89,6 @@ export default function KanbanPage() {
     if (!over || active.id === over.id) return;
 
     const activeId = String(active.id);
-    const overId = String(over.id);
 
     const [sourceColumnId, sourceCard] = Object.entries(columns).reduce(
       (acc, [colId, cards]) => {
@@ -101,96 +100,96 @@ export default function KanbanPage() {
 
     if (!sourceColumnId || !sourceCard) return;
 
-    const destinationColumnId = Object.keys(columns).find(
-        (colId) => colId === overId || columns[colId as TestCaseStatus].some(c => c.id === overId)
-    ) as TestCaseStatus | undefined;
+    let destinationColumnId = over.id as TestCaseStatus;
+    if (!columns[destinationColumnId]) {
+      const parentColumn = Object.keys(columns).find(colId =>
+        columns[colId as TestCaseStatus].some(item => item.id === over.id)
+      );
+      if (parentColumn) {
+        destinationColumnId = parentColumn as TestCaseStatus;
+      } else {
+        return;
+      }
+    }
 
     if (!destinationColumnId) return;
 
     if (sourceColumnId !== destinationColumnId) {
-        setColumns(prev => {
-            const newColumns = { ...prev };
-            
-            newColumns[sourceColumnId] = newColumns[sourceColumnId].filter(c => c.id !== activeId);
-            
-            const overCardIndex = newColumns[destinationColumnId].findIndex(c => c.id === overId);
-            const newCard = { ...sourceCard, status: destinationColumnId };
-            
-            if (overCardIndex !== -1) {
-                newColumns[destinationColumnId].splice(overCardIndex, 0, newCard);
-            } else {
-                newColumns[destinationColumnId].push(newCard);
-            }
-            
-            return newColumns;
-        });
+      setColumns(prev => {
+        const itemToMove = prev[sourceColumnId].find(c => c.id === activeId);
+        if (!itemToMove) return prev;
 
-        try {
-            const updatePayload: UpdateTestCasePayload = { status: destinationColumnId };
-            await TestCaseService.update(activeId, updatePayload);
-        } catch (error) {
-            console.error('Erro ao atualizar o status:', error);
-        }
+        const newColumns = {
+          ...prev,
+          [sourceColumnId]: prev[sourceColumnId].filter(c => c.id !== activeId),
+          [destinationColumnId]: [
+            ...prev[destinationColumnId],
+            { ...itemToMove, status: destinationColumnId },
+          ],
+        };
+
+        return newColumns;
+      });
+
+      try {
+        const updatePayload: UpdateTestCasePayload = { status: destinationColumnId };
+        await TestCaseService.update(activeId, updatePayload);
+      } catch (error) {
+        console.error('Erro ao atualizar o status:', error);
+      }
     }
   };
-
-  if (loading) {
-    return (
-      <PageLayout>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <CircularProgress />
-        </Box>
-      </PageLayout>
-    );
-  }
 
   return (
     <PageLayout>
       <title>Kanban | TestTrack</title>
-      <h1>Quadro Kanban</h1>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <h1>Quadro Kanban</h1>
+      </Box>
 
-        <Box className='section-datagrid-filter'>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Projeto</InputLabel>
-            <Select
-              value={projectId || ''}
-              label="Projeto"
-              // onChange={handleProjectChange}
-            >
-              {/* {allProjects.map((proj) => (
-                <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
-              ))} */}
-            </Select>
-          </FormControl>
-          
-          <TextField 
-            label="Pesquisa" 
-            variant="outlined" 
-            placeholder="ID, Título..." 
-            // value={searchQuery}
-            // onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ flexGrow: 1 }}
-          />
-          
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              // value={statusFilter}
-              label="Status"
-              // onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <MenuItem value=""><em>Todos</em></MenuItem>
-              {/* {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)} */}
-            </Select>
-          </FormControl>
+      <Box className='section-datagrid-filter'>
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Projeto</InputLabel>
+          <Select
+            value={projectId || ''}
+            label="Projeto"
+            // onChange={handleProjectChange}
+          >
+            {/* {allProjects.map((proj) => (
+              <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+            ))} */}
+          </Select>
+        </FormControl>
+        
+        <TextField 
+          label="Pesquisa" 
+          variant="outlined" 
+          placeholder="ID, Título..." 
+          // value={searchQuery}
+          // onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ flexGrow: 1 }}
+        />
+        
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            // value={statusFilter}
+            label="Status"
+            // onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <MenuItem value=""><em>Todos</em></MenuItem>
+            {/* {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)} */}
+          </Select>
+        </FormControl>
 
-          <FormControl sx={{ minWidth: 150 }} disabled>
-            <InputLabel>Script</InputLabel>
-            <Select value="" label="Script">
-              <MenuItem value=""><em>Todos</em></MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+        <FormControl sx={{ minWidth: 150 }} disabled>
+          <InputLabel>Script</InputLabel>
+          <Select value="" label="Script">
+            <MenuItem value=""><em>Todos</em></MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <Box className="kanban-container">
           {Object.entries(columns).map(([columnId, items]) => (
