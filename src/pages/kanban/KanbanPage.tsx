@@ -145,6 +145,8 @@ export default function KanbanPage() {
       <title>Kanban | TestTrack</title>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <h1>Quadro Kanban</h1>
+
+        
       </Box>
 
       <Box className='section-datagrid-filter'>

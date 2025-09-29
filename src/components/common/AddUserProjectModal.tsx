@@ -29,7 +29,7 @@ interface AddUserToProjectModalProps {
   onSuccess: () => void;
 }
 
-export default function AddUserToProjectModal({ open, project, handleClose, onSuccess }: AddUserToProjectModalProps) {
+export default function AddUserToProjectModal({ open, project, handleClose }: AddUserToProjectModalProps) {
   const [members, setMembers] = useState<User[]>([]); 
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState('');

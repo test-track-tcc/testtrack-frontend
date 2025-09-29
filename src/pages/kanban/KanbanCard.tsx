@@ -95,7 +95,7 @@ export default function KanbanCard({ item }: KanbanCardProps) {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          {item.estimatedTime ? `Est: ${item.estimatedTime} min` : ''}
+          {item.estimatedTime ? `Est: ${item.estimatedTime}` : ''}
         </Typography>
 
         {item.responsible ? (
