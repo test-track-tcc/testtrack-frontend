@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { List, ListItemButton, ListItemIcon, ListItemText, Box, Divider, Toolbar, Button, Select, MenuItem, Collapse, CircularProgress, type SelectChangeEvent } from '@mui/material';
+import { List, ListItemButton, ListItemIcon, ListItemText, Box, Toolbar, Button, Select, MenuItem, Collapse, CircularProgress, type SelectChangeEvent } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CasesIcon from '@mui/icons-material/Cases';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -190,7 +190,7 @@ export default function Sidebar() {
             
             <Box>
                 <Box className="organization-div">
-                    <p className='sidebar-label'>Projeto Selecionado</p> 
+                    <label className='sidebar-label'>Projeto Selecionado</label> 
                     <Select
                         value={projectsLoading ? '' : selectedProject}
                         onChange={handleProjectChange}
@@ -208,7 +208,6 @@ export default function Sidebar() {
                     </Select>
                 </Box>
             </Box>
-            <Divider />
 
             <List>
                 <label className='sidebar-label'>Geral</label>
@@ -257,7 +256,9 @@ export default function Sidebar() {
                 <Avatar>{user ? getInitials(user.name) : 'TT'}</Avatar>
                 <Box flexDirection={'column'} className="user-details">
                     <p className='user-name'>{user?.name || 'Usuário'}</p>
-                    <p className='user-role'>{user?.role || 'Visitante'}</p>
+                    <p className='user-role'>
+                        {user?.role || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
+                    </p>
                 </Box>
             </Box>
             
