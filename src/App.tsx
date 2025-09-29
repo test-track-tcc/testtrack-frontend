@@ -35,7 +35,12 @@ function App() {
 
         <Route path="/organization" element={<SelectOrganization />} />
 
-        <Route path="/projects/:projectId/kanban" element={<KanbanPage />} />
+        <Route path="/organization/:orgId/dashboard" element={<Dashboard />} />
+            <Route path="/organization/:orgId/projects" element={<Projects />} />
+            
+            <Route path="/organization/:orgId/project/:projectId/dashboard" element={<Dashboard />} />
+            <Route path="/organization/:orgId/project/:projectId/testCase" element={<TestCase />} />
+            <Route path="/organization/:orgId/project/:projectId/kanban" element={<KanbanPage />} />
 
         <Route
           path="/organization/:orgId/projects"
