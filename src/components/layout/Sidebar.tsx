@@ -37,7 +37,7 @@ export default function Sidebar() {
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [selectedOrg, setSelectedOrg] = useState<string>('');
     const [orgLoading, setOrgLoading] = useState(true);
-    const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+    const [user, setUser] = useState<{ id: string; name: string; role: string } | null>(null);
 
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>('');
@@ -45,10 +45,10 @@ export default function Sidebar() {
     const [projectMenuOpen, setProjectMenuOpen] = useState(true);
 
     useEffect(() => {
-        const fetchOrganizations = async () => {
+        const fetchOrganizations = async (userId?: string) => {
             setOrgLoading(true);
             try {
-                const data = await OrganizationService.get();
+                const data = await OrganizationService.getUsersOrganization(userId ?? '');
                 setOrganizations(data);
                 if (orgId && data.some(org => org.id === orgId)) {
                     setSelectedOrg(orgId);
@@ -64,12 +64,14 @@ export default function Sidebar() {
         };
 
         const userData = localStorage.getItem('userData');
+        let userId: string | undefined = undefined;
         if (userData) {
             const parsedUser = JSON.parse(userData);
-            setUser({ name: parsedUser.name || 'John Doe', role: parsedUser.role || 'Membro' });
+            setUser({ id: parsedUser.id, name: parsedUser.name || 'John Doe', role: parsedUser.role || 'Membro' });
+            userId = parsedUser.id;
         }
 
-        fetchOrganizations();
+        fetchOrganizations(userId);
     }, []); 
 
     useEffect(() => {

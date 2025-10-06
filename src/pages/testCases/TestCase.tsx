@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { TestCaseService } from '../../services/TestCaseService';
 import { ProjectService } from '../../services/ProjectService';
-import { type TestCase as TestCaseType, TestCaseStatus } from '../../types/TestCase';
+import { type TestCase as TestCaseType, TestCaseStatus, Priority } from '../../types/TestCase';
 import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import EditTestCaseModal from './form/EditTestCaseModal';
@@ -26,6 +26,7 @@ export default function TestCase() {
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
   const handleEdit = (id: string) => setEditingTestCaseId(id);
   const handleCloseEditModal = () => setEditingTestCaseId(null);
   const [viewingTestCaseId, setViewingTestCaseId] = useState<string | null>(null);
@@ -91,10 +92,12 @@ export default function TestCase() {
         fullId.toLowerCase().includes(searchLower);
       
       const statusMatch = statusFilter === '' || tc.status === statusFilter;
+      const priorityMatch = priorityFilter === '' || tc.priority === priorityFilter; 
 
-      return searchMatch && statusMatch;
+
+      return searchMatch && statusMatch && priorityMatch;
     });
-  }, [testCases, searchQuery, statusFilter]);
+  }, [testCases, searchQuery, statusFilter, priorityFilter]);
 
   const columns: GridColDef<TestCaseType>[] = [
     { 
@@ -179,6 +182,20 @@ export default function TestCase() {
             >
               <MenuItem value=""><em>Todos</em></MenuItem>
               {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Prioridade</InputLabel>
+            <Select
+              value={priorityFilter}
+              label="Prioridade"
+              onChange={(e) => setPriorityFilter(e.target.value)}
+            >
+              <MenuItem value=""><em>Todas</em></MenuItem>
+              {Object.values(Priority).map(p => (
+                <MenuItem key={String(p)} value={String(p)}>{String(p)}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
