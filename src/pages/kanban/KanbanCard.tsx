@@ -20,9 +20,10 @@ const typeColors: { [key in TestType]?: 'primary' | 'secondary' | 'default' } = 
 
 interface KanbanCardProps {
   item: TestCase;
+  onClick: (id: string) => void;
 }
 
-export default function KanbanCard({ item }: KanbanCardProps) {
+export default function KanbanCard({ item, onClick }: KanbanCardProps) {
   const {
     setNodeRef,
     attributes,
@@ -55,13 +56,17 @@ export default function KanbanCard({ item }: KanbanCardProps) {
       style={style}
       {...attributes}
       {...listeners}
+      onClick={() => onClick(item.id!)}
       sx={{
         p: 2,
         mb: 1.5,
         backgroundColor: 'white',
-        cursor: 'grab',
+        cursor: 'pointer',
         '&:active': {
           cursor: 'grabbing',
+        },
+        '&:hover': {
+          boxShadow: 3,
         },
         display: 'flex',
         flexDirection: 'column',
