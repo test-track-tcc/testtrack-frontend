@@ -71,6 +71,16 @@ export default function TestCase() {
   useEffect(() => {
     fetchData();
   }, [projectId]);
+
+  const handleSwitchToEdit = (id: string) => {
+    handleCloseViewModal();
+    handleEdit(id);
+  };
+
+  const handleDeleteFromView = (id: string) => {
+    handleCloseViewModal();
+    handleDelete(id);
+  };
   
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
@@ -259,6 +269,8 @@ export default function TestCase() {
           open={!!viewingTestCaseId}
           testCaseId={viewingTestCaseId}
           handleClose={handleCloseViewModal}
+          onEdit={handleSwitchToEdit}
+          onDelete={handleDeleteFromView}
         />
       )}
     </PageLayout>
