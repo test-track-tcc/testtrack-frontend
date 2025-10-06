@@ -192,7 +192,7 @@ export default function Sidebar() {
             
             <Box>
                 <Box className="organization-div">
-                    <label className='sidebar-label'>Projeto Selecionado</label> 
+                    <label className='sidebar-label'>Projeto</label> 
                     <Select
                         value={projectsLoading ? '' : selectedProject}
                         onChange={handleProjectChange}
@@ -229,8 +229,8 @@ export default function Sidebar() {
                 <>
                     <List disablePadding>
                         <ListItemButton onClick={handleProjectMenuClick}>
-                             <ListItemIcon><DescriptionIcon /></ListItemIcon>
-                            <ListItemText primary={`Menu do Projeto`} />
+                            <ListItemIcon><DescriptionIcon /></ListItemIcon>
+                            <ListItemText primary={projects.find(p => p.id === selectedProject)?.name || 'Projeto'} />
                             {projectMenuOpen ? <ExpandLess /> : <ExpandMore />}
                         </ListItemButton>
                     </List>

@@ -39,14 +39,23 @@ export default function TestCase() {
     try {
       setLoading(true);
       setError('');
-      const [projectData, testCasesData] = await Promise.all([
-        ProjectService.getById(projectId),
-        TestCaseService.getByProjectId(projectId),
-        // ProjectService.getProjectsByOrganization() 
-      ]);
+
+      const projectData = await ProjectService.getById(projectId);
       setProject(projectData);
-      setTestCases(testCasesData);
-      // setAllProjects(allProjectsData);
+
+      if (projectData?.organization?.id) {
+        const organizationId = projectData.organization.id;
+
+        const [testCasesData, allProjectsData] = await Promise.all([
+          TestCaseService.getByProjectId(projectId),
+          ProjectService.getProjectsByOrganization(organizationId)
+        ]);
+
+        setTestCases(testCasesData);
+        setAllProjects(allProjectsData);
+      } else {
+        throw new Error('Não foi possível encontrar a organização para este projeto.');
+      }
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setError('Não foi possível carregar os dados do projeto.');
@@ -137,7 +146,7 @@ export default function TestCase() {
     <PageLayout>
       <title>Casos de Testes | TestTrack</title>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <h1>Casos de Teste: {project?.name || 'Projeto'}</h1>
+        <h1>Casos de Teste</h1>
         <Button
           className='btn primary icon'
           onClick={() => setIsCreateModalOpen(true)}
@@ -171,6 +180,7 @@ export default function TestCase() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{ flexGrow: 1 }}
+            autoComplete='off'
           />
           
           <FormControl sx={{ minWidth: 200 }}>
@@ -196,13 +206,6 @@ export default function TestCase() {
               {Object.values(Priority).map(p => (
                 <MenuItem key={String(p)} value={String(p)}>{String(p)}</MenuItem>
               ))}
-            </Select>
-          </FormControl>
-
-          <FormControl sx={{ minWidth: 150 }} disabled>
-            <InputLabel>Script</InputLabel>
-            <Select value="" label="Script">
-              <MenuItem value=""><em>Todos</em></MenuItem>
             </Select>
           </FormControl>
         </Box>
