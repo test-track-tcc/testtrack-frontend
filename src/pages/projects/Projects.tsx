@@ -188,7 +188,7 @@ export default function Projects() {
 
                             <Box className="button-group" sx={{ marginTop: 'auto', paddingTop: '16px' }}>
                                 <Button className="btn icon secondary" onClick={() => setEditingProject(project)}>Editar projeto</Button>
-                                <Button className="btn icon primary" onClick={() => navigate(`/projects/${project.id}/test-cases`)}>Ver detalhes</Button>
+                                <Button className="btn icon primary" onClick={() => navigate(`/organization/${orgId}/project/${project.id}/testCase`)}>Ver detalhes</Button>
                             </Box>
                         </Box>
                     ))

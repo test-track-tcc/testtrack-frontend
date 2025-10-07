@@ -149,14 +149,18 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
         <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle} component="form" onSubmit={handleSave}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h5" component="h2">Editar Caso de Teste</Typography>
+                    <Typography variant="h5" component="h2">
+                        <span>
+                            <span className='test-case-prefix'>{testCaseData?.project.prefix}-{testCaseData?.projectSequenceId} </span><strong>{testCaseData?.title}</strong>
+                        </span>
+                    </Typography>
                     <IconButton onClick={handleClose}><CloseIcon /></IconButton>
                 </Box>
                 <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
                     {/* PAINEL ESQUERDO */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} className="left-panel">
                         <Box>
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
                             <Typography variant="body1">{testCaseData?.project?.name}</Typography>

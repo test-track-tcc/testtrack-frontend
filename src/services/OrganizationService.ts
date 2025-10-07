@@ -14,14 +14,13 @@ export const OrganizationService = {
 
     getUsersOrganization: async (userId: string): Promise<Organization[]> => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/organizations`);
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/organization/user/${userId}`);
             return response.data;
         } catch (error) {
-            console.error('Erro ao buscar organizações:', error);
+            console.error(`Erro ao buscar organizações do usuário ${userId}:`, error);
             throw error;
         }
     },
-
 
     create: async (data: OrganizationPayload): Promise<OrganizationPayload> => {
         try {

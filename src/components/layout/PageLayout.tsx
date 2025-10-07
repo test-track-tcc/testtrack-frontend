@@ -27,6 +27,11 @@ export default function PageLayout({ children }: PageLayoutProps) {
 
       <Box
         component="main"
+        sx={{
+          flexGrow: 1,
+          width: `calc(100% - ${drawerWidth}px)`,
+          overflow: 'auto',
+        }}
       >
         {children}
       </Box>
