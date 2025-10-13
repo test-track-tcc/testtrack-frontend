@@ -7,7 +7,9 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { type User } from '../../../types/User';
+import { type TestScenario } from '../../../types/TestScenario';
 import { TestCaseService } from '../../../services/TestCaseService';
+import { TestScenarioService } from '../../../services/TestScenarioService';
 import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
@@ -52,6 +54,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
     const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
     const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
     const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
+    const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]); // 3. CRIAR ESTADO PARA CENÁRIOS
     const [scripts, setScripts] = useState<File[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,13 +66,23 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                 setLoading(true);
                 setError('');
                 try {
-                    const [fetchedTestCaseData, users, customTypes] = await Promise.all([
-                        TestCaseService.getById(testCaseId),
+                    const fetchedTestCaseData = await TestCaseService.getById(testCaseId);
+                    setTestCaseData(fetchedTestCaseData);
+                    
+                    const projectId = fetchedTestCaseData.project?.id;
+                    if (!projectId) {
+                        setError("Projeto não encontrado para este caso de teste.");
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Agora, busca o resto dos dados em paralelo
+                    const [users, customTypes, scenarios] = await Promise.all([
                         OrganizationService.getUsers(organizationId),
-                        CustomTestTypeService.findAllByOrg(organizationId)
+                        CustomTestTypeService.findAllByOrg(organizationId),
+                        TestScenarioService.getByProjectId(projectId) // 4. BUSCAR CENÁRIOS
                     ]);
 
-                    setTestCaseData(fetchedTestCaseData);
                     setFormData({
                         title: fetchedTestCaseData.title,
                         description: fetchedTestCaseData.description,
@@ -83,12 +96,14 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         estimatedTime: fetchedTestCaseData.estimatedTime || '',
                         timeSpent: fetchedTestCaseData.timeSpent || '',
                         executionDate: formatDateForInput(fetchedTestCaseData.executionDate),
+                        testScenarioId: fetchedTestCaseData.testScenario?.id || '',
                     });
 
                     setOrganizationUsers(users);
                     if (Array.isArray(customTypes)) {
                         setCustomTestTypes(customTypes);
                     }
+                    setTestScenarios(scenarios); // 6. SALVAR CENÁRIOS NO ESTADO
 
                 } catch (err) {
                     setError("Falha ao carregar dados do caso de teste.");
@@ -124,6 +139,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             customTestTypeId: isCustomType ? formData.testType : null,
             scripts: scripts.length > 0 ? scripts : undefined,
             executionDate: formData.executionDate || null,
+            testScenarioId: formData.testScenarioId || undefined,
         };
 
         try {
@@ -165,6 +181,21 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
                             <Typography variant="body1">{testCaseData?.project?.name}</Typography>
                         </Box>
+                        
+                        {/* 8. CAMPO ADICIONADO AQUI */}
+                        <FormControl fullWidth>
+                            <InputLabel>Cenário de Teste</InputLabel>
+                            <Select name="testScenarioId" label="Cenário de Teste" value={formData.testScenarioId || ''} onChange={handleChange}>
+                                <MenuItem value="">
+                                    <em>Nenhum</em>
+                                </MenuItem>
+                                {testScenarios.map(scenario => (
+                                    <MenuItem key={scenario.id} value={scenario.id}>
+                                        {`${scenario.identifier} - ${scenario.name}`}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
                         <FormControl fullWidth>
                             <InputLabel>Tipo de Teste</InputLabel>

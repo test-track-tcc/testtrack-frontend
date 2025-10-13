@@ -1,21 +1,22 @@
-// src/pages/testScenarios/TestScenarios.tsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DataGrid, type GridColDef, type GridRowParams } from '@mui/x-data-grid';
-import { Box, Button, CircularProgress, Alert } from '@mui/material';
+import { Box, Button, CircularProgress, Alert, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import PageLayout from '../../components/layout/PageLayout';
 import { type TestScenario } from '../../types/TestScenario';
 import { TestScenarioService } from '../../services/TestScenarioService';
 import TestScenarioModal from './TestScenarioModal';
 import DeleteConfirmationModal from '../../components/common/DeleteConfirmationModal';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function TestScenarios() {
   const { projectId } = useParams<{ projectId: string }>();
   const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [modalState, setModalState] = useState<{
     open: boolean;
     mode: 'create' | 'edit' | 'view';
@@ -78,10 +79,10 @@ export default function TestScenarios() {
       headerName: 'Ações',
       sortable: false,
       renderCell: (params) => (
-        <>
-          <Button size="small" onClick={() => handleOpenModal('edit', params.row)}>Editar</Button>
-          <Button size="small" color="error" onClick={() => setDeleteModalState({ open: true, scenarioId: params.row.id })}>Deletar</Button>
-        </>
+        <Box>
+          <IconButton color="info" size="small" onClick={() => handleOpenModal('edit', params.row)}><EditIcon /></IconButton>
+          <IconButton size="small" color="error" onClick={() => setDeleteModalState({ open: true, scenarioId: params.row.id })}><DeleteIcon /></IconButton>
+        </Box>
       ),
     },
   ];

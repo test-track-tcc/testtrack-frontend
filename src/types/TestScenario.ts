@@ -12,7 +12,7 @@ export interface TestScenario {
   preconditions?: string;
   acceptanceCriteria?: string;
   project: Project;
-  author: User;
+  createdBy: User;
   testCases: TestCase[];
   createdAt: string;
   updatedAt: string;

@@ -17,8 +17,10 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type User } from '../../../types/User';
+import { type TestScenario } from '../../../types/TestScenario'; // 1. IMPORTAR TIPO
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { TestCaseService } from '../../../services/TestCaseService';
+import { TestScenarioService } from '../../../services/TestScenarioService'; // 2. IMPORTAR SERVIÇO
 import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
@@ -59,30 +61,34 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     steps: '',
     expectedResult: '',
     status: TestCaseStatus.NAO_INICIADO,
+    testScenarioId: '', // 3. ADICIONAR CAMPO AO FORMULÁRIO
   });
   const [scriptFiles, setScriptFiles] = useState<File[]>([]);
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
   const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
   const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
+  const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]); // 4. CRIAR ESTADO PARA CENÁRIOS
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Efeito para buscar usuários e tipos de teste da organização
+  // Efeito para buscar usuários, tipos de teste e cenários
   useEffect(() => {
-    if (open && organizationId) {
+    if (open && organizationId && projectId) {
       Promise.all([
         OrganizationService.getUsers(organizationId),
-        CustomTestTypeService.findAllByOrg(organizationId)
+        CustomTestTypeService.findAllByOrg(organizationId),
+        TestScenarioService.getByProjectId(projectId) // 5. BUSCAR CENÁRIOS
       ])
-      .then(([users, customTypes]) => {
+      .then(([users, customTypes, scenarios]) => {
         setOrganizationUsers(users);
         if (Array.isArray(customTypes)) {
           setCustomTestTypes(customTypes);
         }
+        setTestScenarios(scenarios); // 6. SALVAR CENÁRIOS NO ESTADO
       })
-      .catch(() => setError('Não foi possível carregar os dados da organização.'));
+      .catch(() => setError('Não foi possível carregar os dados da organização ou do projeto.'));
     }
-  }, [open, organizationId]);
+  }, [open, organizationId, projectId]);
 
   // Efeito para unir os tipos de teste (padrão + personalizados)
   useEffect(() => {
@@ -99,6 +105,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         title: '', description: '', testType: '', priority: '',
         responsibleId: '', estimatedTime: '', steps: '',
         expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
+        testScenarioId: '', // Limpar cenário
       });
       setScriptFiles([]);
       setError('');
@@ -139,6 +146,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         status: formData.status as TestCaseStatus,
         createdById,
         scripts: scriptFiles,
+        testScenarioId: formData.testScenarioId || undefined, // 7. ADICIONAR AO PAYLOAD
       };
 
       await TestCaseService.create(payload);
@@ -166,6 +174,18 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>{projectName}</Typography>
             
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Cenário de Teste</InputLabel>
+              <Select name="testScenarioId" label="Cenário de Teste (Opcional)" value={formData.testScenarioId} onChange={handleChange}>
+                <MenuItem value=""><em>Nenhum</em></MenuItem>
+                {testScenarios.map(scenario => (
+                  <MenuItem key={scenario.id} value={scenario.id}>
+                    {`${scenario.identifier} - ${scenario.name}`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Tipo de Teste</InputLabel>
               <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleChange} required>
