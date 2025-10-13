@@ -20,7 +20,6 @@ export interface TestScenario {
 
 export interface CreateTestScenarioPayload {
   projectId: string;
-  identifier: string;
   name: string;
   description: string;
   objective: string;

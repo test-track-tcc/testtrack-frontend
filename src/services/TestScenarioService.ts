@@ -1,4 +1,3 @@
-// src/services/TestScenarioService.ts
 import axios from 'axios';
 import { type TestScenario, type CreateTestScenarioPayload, type UpdateTestScenarioPayload } from '../types/TestScenario';
 

@@ -42,14 +42,15 @@ export default function TestScenarioModal({ open, mode, projectId, testScenario,
   const [formData, setFormData] = useState<Omit<CreateTestScenarioPayload, 'projectId'>>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [displayIdentifier, setDisplayIdentifier] = useState('');
 
   useEffect(() => {
     if (open) {
       if (mode === 'create') {
         setFormData(initialState);
+        setDisplayIdentifier('');
       } else {
         setFormData({
-          identifier: testScenario?.identifier || '',
           name: testScenario?.name || '',
           description: testScenario?.description || '',
           objective: testScenario?.objective || '',
@@ -58,10 +59,12 @@ export default function TestScenarioModal({ open, mode, projectId, testScenario,
           relatedRequirements: testScenario?.relatedRequirements || [],
           testCaseIds: testScenario?.testCases?.map(tc => tc.id) || [],
         });
+        setDisplayIdentifier(testScenario?.identifier || 'N/A');
       }
       setError('');
     }
   }, [open, mode, testScenario]);
+
 
   const handleChange = (field: keyof typeof formData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [field]: event.target.value }));
@@ -93,18 +96,26 @@ export default function TestScenarioModal({ open, mode, projectId, testScenario,
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" component="h2">{title}</Typography>
+          <Typography variant="h5" component="h2" sx={{fontWeight: "bold"}}>{title}</Typography>
           <IconButton onClick={onClose}><CloseIcon /></IconButton>
         </Box>
         <Divider sx={{ my: 2 }} />
         
-        <TextField label="Identificador (Ex: CTN-001)" value={formData.identifier} onChange={handleChange('identifier')} fullWidth required disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Nome / Título" value={formData.name} onChange={handleChange('name')} fullWidth required disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Objetivo" value={formData.objective} onChange={handleChange('objective')} fullWidth multiline rows={2} required disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Descrição" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} required disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Pré-condições" value={formData.preconditions} onChange={handleChange('preconditions')} fullWidth multiline rows={2} disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Critérios de Aceitação" value={formData.acceptanceCriteria} onChange={handleChange('acceptanceCriteria')} fullWidth multiline rows={2} disabled={isReadonly} sx={{ mb: 2 }} />
-        <TextField label="Requisitos Relacionados (separados por vírgula)" value={formData.relatedRequirements?.join(', ')} onChange={(e) => setFormData(prev => ({...prev, relatedRequirements: e.target.value.split(',').map(s => s.trim())}))} fullWidth disabled={isReadonly} sx={{ mb: 2 }} />
+        {mode !== 'create' && (
+          <TextField 
+            label="Identificador" 
+            value={displayIdentifier} 
+            fullWidth 
+            disabled
+            sx={{ mb: 2 }} 
+          />
+        )}
+        <TextField label="Nome / Título" value={formData.name} onChange={handleChange('name')} fullWidth required disabled={isReadonly} autoComplete='off' sx={{ mb: 2 }} />
+        <TextField label="Objetivo" value={formData.objective} onChange={handleChange('objective')} fullWidth multiline rows={2} required disabled={isReadonly} sx={{ mb: 2 }} autoComplete='off' />
+        <TextField label="Descrição" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} required disabled={isReadonly} sx={{ mb: 2 }} autoComplete='off' />
+        <TextField label="Pré-condições" value={formData.preconditions} onChange={handleChange('preconditions')} fullWidth multiline rows={2} disabled={isReadonly} sx={{ mb: 2 }} autoComplete='off' />
+        <TextField label="Critérios de Aceitação" value={formData.acceptanceCriteria} onChange={handleChange('acceptanceCriteria')} fullWidth multiline rows={2} disabled={isReadonly} sx={{ mb: 2 }} autoComplete='off' />
+        <TextField label="Requisitos Relacionados (separados por vírgula)" value={formData.relatedRequirements?.join(', ')} onChange={(e) => setFormData(prev => ({...prev, relatedRequirements: e.target.value.split(',').map(s => s.trim())}))} fullWidth disabled={isReadonly} sx={{ mb: 2 }} autoComplete='off' />
 
 
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
