@@ -54,7 +54,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
     const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
     const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
     const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
-    const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]); // 3. CRIAR ESTADO PARA CENÁRIOS
+    const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
     const [scripts, setScripts] = useState<File[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,11 +76,10 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         return;
                     }
 
-                    // Agora, busca o resto dos dados em paralelo
                     const [users, customTypes, scenarios] = await Promise.all([
                         OrganizationService.getUsers(organizationId),
                         CustomTestTypeService.findAllByOrg(organizationId),
-                        TestScenarioService.getByProjectId(projectId) // 4. BUSCAR CENÁRIOS
+                        TestScenarioService.getByProjectId(projectId)
                     ]);
 
                     setFormData({
@@ -103,7 +102,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                     if (Array.isArray(customTypes)) {
                         setCustomTestTypes(customTypes);
                     }
-                    setTestScenarios(scenarios); // 6. SALVAR CENÁRIOS NO ESTADO
+                    setTestScenarios(scenarios);
 
                 } catch (err) {
                     setError("Falha ao carregar dados do caso de teste.");
