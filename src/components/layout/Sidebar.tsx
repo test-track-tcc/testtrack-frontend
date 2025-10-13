@@ -23,6 +23,7 @@ const mainItems = [
 ];
 
 const projectSpecificItems = [
+    { title: 'Cenários de Testes', path: '/testScenario', icon: <CasesIcon /> },
     { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
     { title: 'Relatórios', path: '/reports', icon: <AssessmentIcon /> },

@@ -3,6 +3,7 @@ import Login from "./pages/auth/Login";
 import Onboarding from "./pages/auth/Onboarding";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/home/Dashboard";
+import TestScenarios from "./pages/testScenario/TestScenario";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
 import KanbanPage from "./pages/kanban/KanbanPage";
@@ -40,7 +41,9 @@ function App() {
             
             <Route path="/organization/:orgId/project/:projectId/dashboard" element={<Dashboard />} />
             <Route path="/organization/:orgId/project/:projectId/testCase" element={<TestCase />} />
+            <Route path="/organization/:orgId/project/:projectId/testScenario" element={<TestScenarios />} />
             <Route path="/organization/:orgId/project/:projectId/kanban" element={<KanbanPage />} />
+            
 
         <Route
           path="/organization/:orgId/projects"

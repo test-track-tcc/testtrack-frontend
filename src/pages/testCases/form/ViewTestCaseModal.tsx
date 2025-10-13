@@ -116,6 +116,10 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
             <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
               <Box>
                 <DetailItem label="Projeto" value={testCase.project.name} />
+                
+                {/* CAMPO ADICIONADO AQUI */}
+                <DetailItem label="Cenário de Teste" value={testCase.testScenario ? `${testCase.testScenario.identifier} - ${testCase.testScenario.name}` : 'Nenhum'} />
+
                 <DetailItem label="Status" value={testCase.status.replace(/_/g, ' ')} />
                 <DetailItem label="Prioridade" value={testCase.priority} />
                 <DetailItem label="Tipo de Teste" value={getTestTypeDisplay()} />

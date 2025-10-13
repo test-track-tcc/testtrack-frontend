@@ -1,6 +1,7 @@
 import type { CustomTestType } from './CustomTestType';
 import { type Project } from './Project';
 import { type User } from './User';
+import type { TestScenario } from './TestScenario';
 
 export interface CreateTestCasePayload {
   projectId: string;
@@ -17,6 +18,7 @@ export interface CreateTestCasePayload {
   steps: string;
   status: TestCaseStatus;
   expectedResult: string;
+  testScenarioId?: string;
   taskLink?: string;
   scripts?: File[];
 }
@@ -81,6 +83,7 @@ export interface TestCase {
   expectedResult: string;
   taskLink: string | null;
   status: TestCaseStatus;
+  testScenario: TestScenario;
   project: Project;
   projectSequenceId: number;
   comments: Comment[] | null;
