@@ -87,6 +87,16 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
     return testCase.customTestType ? `${testCase.customTestType.name} (Personalizado)` : testCase.testType;
   };
 
+  // 1. FUNÇÃO PARA FORMATAR A EXIBIÇÃO DO DISPOSITIVO
+  const getDeviceDisplay = () => {
+    if (!testCase || !testCase.targetDevice) return '---';
+    if (testCase.targetDevice === 'OTHER') {
+        return testCase.customTargetDevice || 'Outro (não especificado)';
+    }
+    // Formata para ter apenas a primeira letra maiúscula (ex: DESKTOP -> Desktop)
+    return testCase.targetDevice.charAt(0).toUpperCase() + testCase.targetDevice.slice(1).toLowerCase();
+  };
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
@@ -117,12 +127,15 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
               <Box>
                 <DetailItem label="Projeto" value={testCase.project.name} />
                 
-                {/* CAMPO ADICIONADO AQUI */}
                 <DetailItem label="Cenário de Teste" value={testCase.testScenario ? `${testCase.testScenario.identifier} - ${testCase.testScenario.name}` : 'Nenhum'} />
 
                 <DetailItem label="Status" value={testCase.status.replace(/_/g, ' ')} />
                 <DetailItem label="Prioridade" value={testCase.priority} />
                 <DetailItem label="Tipo de Teste" value={getTestTypeDisplay()} />
+
+                {/* 2. CAMPO ADICIONADO AQUI */}
+                <DetailItem label="Dispositivo Alvo" value={getDeviceDisplay()} />
+
                 <DetailItem label="Responsável" value={testCase.responsible?.name} />
                 <DetailItem label="Criado por" value={testCase.createdBy.name} />
                 <Divider sx={{ my: 1 }} />
