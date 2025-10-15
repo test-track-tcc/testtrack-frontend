@@ -25,8 +25,8 @@ import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
-// 1. IMPORTAR O DeviceSelector E O TIPO DeviceType
 import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
+import { FunctionalTestFramework } from '../../../types/TestCase';
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -64,7 +64,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     expectedResult: '',
     status: TestCaseStatus.NAO_INICIADO,
     testScenarioId: '',
-    // 2. ADICIONAR OS CAMPOS DE DISPOSITIVO AO ESTADO DO FORMULÁRIO
+    functionalFramework: '',
     targetDevice: '' as DeviceType | '',
     customTargetDevice: '',
   });
@@ -76,7 +76,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Efeito para buscar usuários, tipos de teste e cenários (sem alterações aqui)
   useEffect(() => {
     if (open && organizationId && projectId) {
       Promise.all([
@@ -95,7 +94,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     }
   }, [open, organizationId, projectId]);
 
-  // Efeito para unir os tipos de teste (sem alterações aqui)
   useEffect(() => {
     const standardTypes = Object.values(TestType).map(t => ({ value: t, label: t.replace(/_/g, ' ') }));
     const customTypesFormatted = customTestTypes.map(ct => ({ value: ct.id, label: `${ct.name} (Personalizado)` }));
@@ -103,7 +101,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   }, [customTestTypes]);
 
 
-  // Efeito para limpar o formulário ao fechar o modal
   useEffect(() => {
     if (!open) {
       setFormData({
@@ -111,7 +108,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         responsibleId: '', estimatedTime: '', steps: '',
         expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
         testScenarioId: '',
-        // 3. LIMPAR OS CAMPOS DE DISPOSITIVO
+        functionalFramework: '',
         targetDevice: '',
         customTargetDevice: '',
       });
@@ -122,15 +119,21 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   }, [open]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
-    setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
+    const { name, value } = event.target;
+    
+    setFormData(prev => {
+        const newState = { ...prev, [name]: value };
+        if (name === 'testType' && value !== TestType.FUNCIONAL) {
+            newState.functionalFramework = '';
+        }
+        return newState;
+    });
   };
 
-  // 4. CRIAR HANDLERS ESPECÍFICOS PARA O DeviceSelector
   const handleDeviceChange = (device: DeviceType | '') => {
     setFormData(prev => ({
       ...prev,
       targetDevice: device,
-      // Limpa o campo customizado se uma opção padrão for selecionada
       customTargetDevice: device !== 'OTHER' ? '' : prev.customTargetDevice,
     }));
   };
@@ -172,6 +175,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         testScenarioId: formData.testScenarioId || undefined,
         targetDevice: formData.targetDevice || undefined,
         customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : '',
+        functionalFramework: formData.testType === TestType.FUNCIONAL ? formData.functionalFramework as FunctionalTestFramework : undefined,
       };
 
       await TestCaseService.create(payload);
@@ -217,6 +221,23 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
                 {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {formData.testType === TestType.FUNCIONAL && (
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Framework</InputLabel>
+                    <Select
+                        name="functionalFramework"
+                        label="Framework"
+                        value={formData.functionalFramework}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value=""><em>Nenhum</em></MenuItem>
+                        {Object.values(FunctionalTestFramework).map(fw => (
+                            <MenuItem key={fw} value={fw}>{fw.replace(/_/g, ' ')}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            )}
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Status</InputLabel>

@@ -93,7 +93,7 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
     if (testCase.targetDevice === 'OTHER') {
         return testCase.customTargetDevice || 'Outro (não especificado)';
     }
-    // Formata para ter apenas a primeira letra maiúscula (ex: DESKTOP -> Desktop)
+
     return testCase.targetDevice.charAt(0).toUpperCase() + testCase.targetDevice.slice(1).toLowerCase();
   };
 
@@ -128,10 +128,12 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
                 <DetailItem label="Projeto" value={testCase.project.name} />
                 
                 <DetailItem label="Cenário de Teste" value={testCase.testScenario ? `${testCase.testScenario.identifier} - ${testCase.testScenario.name}` : 'Nenhum'} />
-
+                <DetailItem label="Tipo de Teste" value={getTestTypeDisplay()} />
+                {testCase.testType === 'FUNCIONAL' && (
+                  <DetailItem label="Framework" value={testCase.functionalFramework?.replace(/_/g, ' ')} />
+                )}
                 <DetailItem label="Status" value={testCase.status.replace(/_/g, ' ')} />
                 <DetailItem label="Prioridade" value={testCase.priority} />
-                <DetailItem label="Tipo de Teste" value={getTestTypeDisplay()} />
 
                 {/* 2. CAMPO ADICIONADO AQUI */}
                 <DetailItem label="Dispositivo Alvo" value={getDeviceDisplay()} />

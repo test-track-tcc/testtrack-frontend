@@ -25,7 +25,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
 
   return (
     <div>
-      <FormControl fullWidth margin="none">
+      <FormControl fullWidth margin="none" sx={{marginBottom: '16px'}}>
         <InputLabel>Tipo de Dispositivo</InputLabel>
         <Select
           value={targetDevice}

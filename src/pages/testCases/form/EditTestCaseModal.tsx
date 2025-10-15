@@ -17,6 +17,7 @@ import { type UpdateTestCasePayload, type TestCase } from '../../../types/TestCa
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
 import { format } from 'date-fns';
 import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
+import { FunctionalTestFramework } from '../../../types/TestCase';
 
 
 const modalStyle = {
@@ -100,6 +101,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         testScenarioId: fetchedTestCaseData.testScenario?.id || '',
                         targetDevice: fetchedTestCaseData.targetDevice || '',
                         customTargetDevice: fetchedTestCaseData.customTargetDevice || '',
+                        functionalFramework: fetchedTestCaseData.functionalFramework ?? null,
                     });
 
                     setOrganizationUsers(users);
@@ -126,8 +128,15 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
     }, [customTestTypes]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
-        setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
-    };
+    const { name, value } = event.target;
+    setFormData(prev => {
+        const newState = { ...prev, [name]: value };
+        if (name === 'testType' && value !== TestType.FUNCIONAL) {
+            newState.functionalFramework = null;
+        }
+        return newState;
+    });
+  };
 
     const handleDeviceChange = (device: DeviceType | '') => {
         setFormData(prev => ({
@@ -157,6 +166,8 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             testScenarioId: formData.testScenarioId || undefined,
             targetDevice: formData.targetDevice || undefined,
             customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : undefined,
+            functionalFramework: formData.testType === TestType.FUNCIONAL ? (formData.functionalFramework as FunctionalTestFramework) : null,
+
         };
 
         try {
@@ -219,6 +230,23 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                                 {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
                             </Select>
                         </FormControl>
+
+                        {formData.testType === TestType.FUNCIONAL && (
+                            <FormControl fullWidth>
+                                <InputLabel>Framework</InputLabel>
+                                <Select
+                                    name="functionalFramework"
+                                    label="Framework"
+                                    value={formData.functionalFramework || ''}
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value=""><em>Nenhum</em></MenuItem>
+                                    {Object.values(FunctionalTestFramework).map(fw => (
+                                        <MenuItem key={fw} value={fw}>{fw.replace(/_/g, ' ')}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
 
                         <FormControl fullWidth>
                             <InputLabel>Status</InputLabel>

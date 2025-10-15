@@ -4,6 +4,13 @@ import { type User } from './User';
 import type { TestScenario } from './TestScenario';
 import { type DeviceType } from '../components/common/DeviceSelector';
 
+export const FunctionalTestFramework = {
+  SELENIUM: 'SELENIUM',
+  CYPRESS: 'CYPRESS',
+  ROBOT_FRAMEWORK: 'ROBOT_FRAMEWORK',
+} as const;
+export type FunctionalTestFramework = typeof FunctionalTestFramework[keyof typeof FunctionalTestFramework];
+
 export interface CreateTestCasePayload {
   projectId: string;
   title: string;
@@ -24,6 +31,7 @@ export interface CreateTestCasePayload {
   scripts?: File[];
   targetDevice: "" | DeviceType | undefined;
   customTargetDevice: string;
+  functionalFramework?: FunctionalTestFramework | null;
 }
 
 export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
@@ -90,6 +98,7 @@ export interface TestCase {
   project: Project;
   targetDevice: "" | DeviceType | undefined;
   customTargetDevice: string;
+  functionalFramework?: FunctionalTestFramework | null;
   projectSequenceId: number;
   comments: Comment[] | null;
   attachments: string[] | null;
