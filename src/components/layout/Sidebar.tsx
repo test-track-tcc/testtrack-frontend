@@ -192,24 +192,26 @@ export default function Sidebar() {
             </Box>
             
             <Box>
-                <Box className="organization-div">
-                    <label className='sidebar-label'>Projeto</label> 
-                    <Select
-                        value={projectsLoading ? '' : selectedProject}
-                        onChange={handleProjectChange}
-                        className='organization-select'
-                        disabled={projectsLoading || projects.length === 0}
-                        renderValue={(value) => {
-                            if (projectsLoading) return <CircularProgress size={20} />;
-                            if (!value) return <em>Nenhum projeto</em>;
-                            return projects.find(p => p.id === value)?.name;
-                        }}
-                    >
-                        {projects.map((project) => (
-                            <MenuItem key={project.id} value={project.id}>{project.name}</MenuItem>
-                        ))}
-                    </Select>
-                </Box>
+                {projects.length > 0 && (
+                    <Box className="organization-div">
+                        <label className='sidebar-label'>Projeto</label> 
+                        <Select
+                            value={projectsLoading ? '' : selectedProject}
+                            onChange={handleProjectChange}
+                            className='organization-select'
+                            disabled={projectsLoading || projects.length === 0}
+                            renderValue={(value) => {
+                                if (projectsLoading) return <CircularProgress size={20} />;
+                                if (!value) return <em>Nenhum projeto</em>;
+                                return projects.find(p => p.id === value)?.name;
+                            }}
+                        >
+                            {projects.map((project) => (
+                                <MenuItem key={project.id} value={project.id}>{project.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </Box>
+                )}
             </Box>
 
             <List>

@@ -16,6 +16,8 @@ import { type CustomTestType } from '../../../types/CustomTestType';
 import { type UpdateTestCasePayload, type TestCase } from '../../../types/TestCase';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
 import { format } from 'date-fns';
+import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
+
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -49,7 +51,7 @@ interface EditTestCaseModalProps {
 }
 
 export default function EditTestCaseModal({ open, testCaseId, organizationId, handleClose, onSaveSuccess }: EditTestCaseModalProps) {
-    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload>>({});
+    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload> & { targetDevice?: DeviceType | '', customTargetDevice?: string }>({});
     const [testCaseData, setTestCaseData] = useState<TestCase | null>(null);
     const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
     const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
@@ -96,6 +98,8 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         timeSpent: fetchedTestCaseData.timeSpent || '',
                         executionDate: formatDateForInput(fetchedTestCaseData.executionDate),
                         testScenarioId: fetchedTestCaseData.testScenario?.id || '',
+                        targetDevice: fetchedTestCaseData.targetDevice || '',
+                        customTargetDevice: fetchedTestCaseData.customTargetDevice || '',
                     });
 
                     setOrganizationUsers(users);
@@ -125,6 +129,18 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
         setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
     };
 
+    const handleDeviceChange = (device: DeviceType | '') => {
+        setFormData(prev => ({
+            ...prev,
+            targetDevice: device,
+            customTargetDevice: device !== 'OTHER' ? '' : prev.customTargetDevice,
+        }));
+    };
+
+    const handleCustomDeviceChange = (customDevice: string) => {
+        setFormData(prev => ({ ...prev, customTargetDevice: customDevice }));
+    };
+
     const handleSave = async (event: React.FormEvent) => {
         event.preventDefault();
         setError('');
@@ -139,6 +155,8 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             scripts: scripts.length > 0 ? scripts : undefined,
             executionDate: formData.executionDate || null,
             testScenarioId: formData.testScenarioId || undefined,
+            targetDevice: formData.targetDevice || undefined,
+            customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : undefined,
         };
 
         try {
@@ -181,7 +199,6 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                             <Typography variant="body1">{testCaseData?.project?.name}</Typography>
                         </Box>
                         
-                        {/* 8. CAMPO ADICIONADO AQUI */}
                         <FormControl fullWidth>
                             <InputLabel>Cenário de Teste</InputLabel>
                             <Select name="testScenarioId" label="Cenário de Teste" value={formData.testScenarioId || ''} onChange={handleChange}>
@@ -217,6 +234,13 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                                 {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
                             </Select>
                         </FormControl>
+                        
+                        <DeviceSelector
+                            targetDevice={formData.targetDevice || ''}
+                            customTargetDevice={formData.customTargetDevice || ''}
+                            onDeviceChange={handleDeviceChange}
+                            onCustomDeviceChange={handleCustomDeviceChange}
+                        />
 
                         <FormControl fullWidth>
                             <InputLabel>Prioridade</InputLabel>

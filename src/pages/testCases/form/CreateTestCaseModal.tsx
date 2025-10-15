@@ -17,14 +17,16 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type User } from '../../../types/User';
-import { type TestScenario } from '../../../types/TestScenario'; // 1. IMPORTAR TIPO
+import { type TestScenario } from '../../../types/TestScenario';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { TestCaseService } from '../../../services/TestCaseService';
-import { TestScenarioService } from '../../../services/TestScenarioService'; // 2. IMPORTAR SERVIÇO
+import { TestScenarioService } from '../../../services/TestScenarioService';
 import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
+// 1. IMPORTAR O DeviceSelector E O TIPO DeviceType
+import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -61,36 +63,39 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     steps: '',
     expectedResult: '',
     status: TestCaseStatus.NAO_INICIADO,
-    testScenarioId: '', // 3. ADICIONAR CAMPO AO FORMULÁRIO
+    testScenarioId: '',
+    // 2. ADICIONAR OS CAMPOS DE DISPOSITIVO AO ESTADO DO FORMULÁRIO
+    targetDevice: '' as DeviceType | '',
+    customTargetDevice: '',
   });
   const [scriptFiles, setScriptFiles] = useState<File[]>([]);
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
   const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
   const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
-  const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]); // 4. CRIAR ESTADO PARA CENÁRIOS
+  const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Efeito para buscar usuários, tipos de teste e cenários
+  // Efeito para buscar usuários, tipos de teste e cenários (sem alterações aqui)
   useEffect(() => {
     if (open && organizationId && projectId) {
       Promise.all([
         OrganizationService.getUsers(organizationId),
         CustomTestTypeService.findAllByOrg(organizationId),
-        TestScenarioService.getByProjectId(projectId) // 5. BUSCAR CENÁRIOS
+        TestScenarioService.getByProjectId(projectId)
       ])
       .then(([users, customTypes, scenarios]) => {
         setOrganizationUsers(users);
         if (Array.isArray(customTypes)) {
           setCustomTestTypes(customTypes);
         }
-        setTestScenarios(scenarios); // 6. SALVAR CENÁRIOS NO ESTADO
+        setTestScenarios(scenarios);
       })
       .catch(() => setError('Não foi possível carregar os dados da organização ou do projeto.'));
     }
   }, [open, organizationId, projectId]);
 
-  // Efeito para unir os tipos de teste (padrão + personalizados)
+  // Efeito para unir os tipos de teste (sem alterações aqui)
   useEffect(() => {
     const standardTypes = Object.values(TestType).map(t => ({ value: t, label: t.replace(/_/g, ' ') }));
     const customTypesFormatted = customTestTypes.map(ct => ({ value: ct.id, label: `${ct.name} (Personalizado)` }));
@@ -105,7 +110,10 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         title: '', description: '', testType: '', priority: '',
         responsibleId: '', estimatedTime: '', steps: '',
         expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
-        testScenarioId: '', // Limpar cenário
+        testScenarioId: '',
+        // 3. LIMPAR OS CAMPOS DE DISPOSITIVO
+        targetDevice: '',
+        customTargetDevice: '',
       });
       setScriptFiles([]);
       setError('');
@@ -116,6 +124,21 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
     setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
   };
+
+  // 4. CRIAR HANDLERS ESPECÍFICOS PARA O DeviceSelector
+  const handleDeviceChange = (device: DeviceType | '') => {
+    setFormData(prev => ({
+      ...prev,
+      targetDevice: device,
+      // Limpa o campo customizado se uma opção padrão for selecionada
+      customTargetDevice: device !== 'OTHER' ? '' : prev.customTargetDevice,
+    }));
+  };
+
+  const handleCustomDeviceChange = (customDevice: string) => {
+    setFormData(prev => ({ ...prev, customTargetDevice: customDevice }));
+  };
+
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -146,7 +169,9 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         status: formData.status as TestCaseStatus,
         createdById,
         scripts: scriptFiles,
-        testScenarioId: formData.testScenarioId || undefined, // 7. ADICIONAR AO PAYLOAD
+        testScenarioId: formData.testScenarioId || undefined,
+        targetDevice: formData.targetDevice || undefined,
+        customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : '',
       };
 
       await TestCaseService.create(payload);
@@ -207,6 +232,14 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
                 {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {/* 6. ADICIONAR O COMPONENTE DeviceSelector AO FORMULÁRIO */}
+            <DeviceSelector
+              targetDevice={formData.targetDevice}
+              customTargetDevice={formData.customTargetDevice}
+              onDeviceChange={handleDeviceChange}
+              onCustomDeviceChange={handleCustomDeviceChange}
+            />
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Prioridade</InputLabel>
@@ -219,7 +252,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
             <TextField name="timeSpent" label="Horas Gastas" fullWidth sx={{ mb: 2 }} value={"0h"} disabled />
           </Box>
           
-          {/* PAINEL DIREITO */}
           <Box>
             <TextField name="title" label="Título do Caso de Teste" fullWidth required sx={{ mb: 2 }} value={formData.title} onChange={handleChange} />
             <TextField name="description" label="Descrição" multiline rows={4} fullWidth sx={{ mb: 2 }} value={formData.description} onChange={handleChange} />

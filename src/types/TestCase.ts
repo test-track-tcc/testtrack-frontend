@@ -2,6 +2,7 @@ import type { CustomTestType } from './CustomTestType';
 import { type Project } from './Project';
 import { type User } from './User';
 import type { TestScenario } from './TestScenario';
+import { type DeviceType } from '../components/common/DeviceSelector';
 
 export interface CreateTestCasePayload {
   projectId: string;
@@ -21,6 +22,8 @@ export interface CreateTestCasePayload {
   testScenarioId?: string;
   taskLink?: string;
   scripts?: File[];
+  targetDevice: "" | DeviceType | undefined;
+  customTargetDevice: string;
 }
 
 export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
@@ -85,6 +88,8 @@ export interface TestCase {
   status: TestCaseStatus;
   testScenario: TestScenario;
   project: Project;
+  targetDevice: "" | DeviceType | undefined;
+  customTargetDevice: string;
   projectSequenceId: number;
   comments: Comment[] | null;
   attachments: string[] | null;
