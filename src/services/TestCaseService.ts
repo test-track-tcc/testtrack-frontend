@@ -99,5 +99,13 @@ export const TestCaseService = {
       console.error(`Erro ao deletar caso de teste ${testCaseId}:`, error);
       throw error;
     }
-  }
+  },
+
+  addComment: async (testCaseId: string, formData: FormData): Promise<Comment> => {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/test-cases/${testCaseId}/comments`, formData, {
+            headers: {
+            },
+        });
+        return response.data;
+    },
 };

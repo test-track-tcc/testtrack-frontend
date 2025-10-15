@@ -71,9 +71,14 @@ export const TestCaseStatus = {
 export type TestCaseStatus = typeof TestCaseStatus[keyof typeof TestCaseStatus];
 
 export interface Comment {
+  id: string;
   idUser: string;
   comment: string;
   date: string;
+  attachments: [];
+  createdAt: Date;
+  author: User;
+  text: string;
 }
 
 export interface TestCase {
