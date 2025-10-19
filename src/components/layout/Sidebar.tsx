@@ -16,6 +16,7 @@ import { OrganizationService } from '../../services/OrganizationService';
 import { ProjectService } from '../../services/ProjectService';
 import { type Project } from '../../types/Project';
 import { getInitials } from '../../utils/getInitials';
+import { NotificationBell } from '../common/notifications/NotificationBell';
 
 const mainItems = [
     { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
@@ -257,14 +258,24 @@ export default function Sidebar() {
             )}
 
             <Box flexGrow={1} />
-            <Box display={'flex'} flexDirection={'row'} p={2} className="user-info" gap={"10px"}>
-                <Avatar>{user ? getInitials(user.name) : 'TT'}</Avatar>
-                <Box flexDirection={'column'} className="user-details">
-                    <p className='user-name'>{user?.name || 'Usuário'}</p>
-                    <p className='user-role'>
-                        {user?.role || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
-                    </p>
-                </Box>
+
+            <Box 
+              display={'flex'} 
+              flexDirection={'row'} 
+              alignItems={'center'} 
+              justifyContent={'space-between'}
+              p={2}
+            >
+                <Box display={'flex'} flexDirection={'row'} className="user-info" gap={"10px"}>
+                    <Avatar>{user ? getInitials(user.name) : 'TT'}</Avatar>
+                    <Box flexDirection={'column'} className="user-details">
+                        <p className='user-name'>{user?.name || 'Usuário'}</p>
+                        <p className='user-role'>
+                            {user?.role || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
+                        </p>
+                    </Box>
+                </Box>
+              <NotificationBell authUserId={user?.id} />
             </Box>
             
             <Box className="logout-button" textAlign="center" p={2}>
