@@ -55,11 +55,10 @@ const DetailItem = ({ label, value }: { label: string, value: string | undefined
 );
 
 export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdit, onDelete }: ViewTestCaseModalProps) {
+    const serverRootUrl = import.meta.env.VITE_API_BASE_URL.replace('/api', '')
     const [testCase, setTestCase] = useState<TestCase | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
-    // --- ESTADOS PARA A FUNCIONALIDADE DE COMENTÁRIOS ---
     const [newComment, setNewComment] = useState('');
     const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -237,8 +236,12 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
                                             {comment.attachments && comment.attachments.length > 0 && (
                                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                                     {comment.attachments.map((path, index) => (
-                                                        <a key={index} href={`${import.meta.env.VITE_API_URL}/${path}`} target="_blank" rel="noopener noreferrer">
-                                                            <img src={`${import.meta.env.VITE_API_URL}/${path}`} alt={`Evidência ${index + 1}`} style={{ height: '60px', width: 'auto', borderRadius: '4px', border: '1px solid #ddd', objectFit: 'cover' }} />
+                                                        <a key={index} href={`${serverRootUrl}/api/${path}`} target="_blank" rel="noopener noreferrer">
+                                                            <img 
+                                                                src={`${serverRootUrl}/api/${path}`} 
+                                                                alt={`Evidência ${index + 1}`} 
+                                                                style={{ height: '60px', width: 'auto', borderRadius: '4px', border: '1px solid #ddd', objectFit: 'cover' }} 
+                                                            />
                                                         </a>
                                                     ))}
                                                 </Box>

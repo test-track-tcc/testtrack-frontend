@@ -33,7 +33,7 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
           label="Tipo de Dispositivo"
         >
           <MenuItem value="">
-            <em>None</em>
+            <em>Nenhum</em>
           </MenuItem>
           <MenuItem value={'DESKTOP'}>Desktop</MenuItem>
           <MenuItem value={'MOBILE'}>Mobile</MenuItem>
