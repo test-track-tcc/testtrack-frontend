@@ -1,9 +1,12 @@
 import axios from 'axios';
-import type { Bug } from '../types/Bug';
+import type { Bug, BugStatus } from '../types/Bug';
 import type { User } from '../types/User'; 
 
-export const BugsService = {
+interface UpdateBugStatusDto {
+  status: BugStatus;
+}
 
+export const BugsService = {
   getAllBugs: async (): Promise<Bug[]> => {
     try {
       const response = await axios.get<Bug[]>(`${import.meta.env.VITE_API_BASE_URL}/bugs`);
@@ -14,6 +17,35 @@ export const BugsService = {
         throw new Error(`Falha ao buscar bugs: ${error.response?.data?.message || error.message}`);
       }
       throw new Error('Falha ao buscar bugs: erro desconhecido');
+    }
+  },
+
+  findOne: async (bugId: string): Promise<Bug> => {
+    try {
+      const response = await axios.get<Bug>(`${import.meta.env.VITE_API_BASE_URL}/bugs/${bugId}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error(`Erro ao buscar bug ${bugId}:`, error.response?.data || error.message);
+        throw new Error(`Falha ao buscar bug: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Falha ao buscar bug: erro desconhecido');
+    }
+  },
+
+  updateStatus: async (bugId: string, status: BugStatus): Promise<Bug> => {
+    try {
+      const response = await axios.patch<Bug>(
+        `${import.meta.env.VITE_API_BASE_URL}/bugs/${bugId}/status`, 
+        { status } as UpdateBugStatusDto
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error(`Erro ao atualizar status do bug ${bugId}:`, error.response?.data || error.message);
+        throw new Error(`Falha ao atualizar status: ${error.response?.data?.message || error.message}`);
+      }
+      throw new Error('Falha ao atualizar status: erro desconhecido');
     }
   },
 

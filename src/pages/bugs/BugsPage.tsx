@@ -1,143 +1,220 @@
-import { useState, useEffect } from 'react';
-import {
-  Box, Typography, List, ListItem, ListItemText, Button,
-  Modal, Select, MenuItem, FormControl, InputLabel, CircularProgress, Alert
+import { useEffect, useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; 
+import { 
+  Box, Typography,
+  Select, MenuItem, FormControl, InputLabel, Alert,
+  type SelectChangeEvent, TextField, Button 
 } from '@mui/material';
-import { BugsService } from '../../services/BugsService';
-import { type Bug } from '../../types/Bug';
-import { type User } from '../../types/User';
-import PageLayout from '../../components/layout/PageLayout';
+import { DataGrid, type GridColDef, type GridRowParams, type GridRenderCellParams } from '@mui/x-data-grid'; 
+import EditIcon from '@mui/icons-material/Edit';
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
+import { BugsService } from '../../services/BugsService';
+import { type Bug, BugStatus } from '../../types/Bug';
+import { ProjectService } from '../../services/ProjectService'; 
+import { type Project } from '../../types/Project'; 
+import { Priority } from '../../types/TestCase';
+import PageLayout from '../../components/layout/PageLayout'; 
+import ViewBugModal from './modal/ViewBugModal';
+import EditBugStatusModal from './modal/EditBugModal'; // Ajuste o caminho se necessário
 
 function BugsPage() {
+  const { orgId, projectId: routeProjectId } = useParams<{ orgId: string, projectId: string }>(); 
+  const navigate = useNavigate();
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(''); 
   const [bugs, setBugs] = useState<Bug[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedBug, setSelectedBug] = useState<Bug | null>(null);
-  const [selectedDeveloperId, setSelectedDeveloperId] = useState<string>('');
+  const [viewingBugId, setViewingBugId] = useState<string | null>(null); 
+  const [editingBugId, setEditingBugId] = useState<string | null>(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const [statusFilter, setStatusFilter] = useState(''); 
+  const [priorityFilter, setPriorityFilter] = useState('');
+
+  const canEditStatus = true; // Assuma sua lógica de permissão aqui
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!orgId) return; 
+
+      setIsLoading(true); setError(null);
       try {
-        setIsLoading(true);
-        setError(null);
-        const bugsData = await BugsService.getAllBugs();
-        setBugs(bugsData);
-        const usersData = await BugsService.getAllUsers();
-        setUsers(usersData);
+        const projectsData = await ProjectService.getProjectsByOrganization(orgId);
+        setAllProjects(projectsData);
+
+        const currentProjectId = routeProjectId && projectsData.some(p => p.id === routeProjectId) 
+          ? routeProjectId 
+          : projectsData[0]?.id || '';
+        setSelectedProjectId(currentProjectId);
+
+        if (currentProjectId) {
+          const bugsData = await BugsService.getAllBugs(); 
+          setBugs(bugsData); 
+        } else {
+           setBugs([]);
+        }
       } catch (err: any) {
         setError(err.message || 'Erro ao carregar dados');
-      } finally {
-        setIsLoading(false);
-      }
+        console.error("Erro fetchData:", err);
+      } finally { setIsLoading(false); }
     };
     fetchData();
-  }, []);
+  }, [orgId, routeProjectId]); 
 
-  const handleOpenModal = (bug: Bug) => {
-    setSelectedBug(bug);
-    setSelectedDeveloperId(bug.assignedDeveloperId || '');
-    setModalOpen(true);
-  };
+  const filteredBugs = useMemo(() => {
+    return bugs.filter(bug => {
+      // const projectMatch = !selectedProjectId || bug.testCase?.project?.id === selectedProjectId;
+      // if (!projectMatch) return false;
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedBug(null);
-    setSelectedDeveloperId('');
-  };
-
-  const handleAssignDeveloper = async () => {
-    if (!selectedBug || !selectedDeveloperId) return;
-
-    try {
-      const updatedBug = await BugsService.assignDeveloper(selectedBug.id, selectedDeveloperId);
+      const searchLower = searchQuery.toLowerCase().trim();
+      const searchMatch = searchLower === '' || 
+        bug.title.toLowerCase().includes(searchLower); 
       
-      setBugs(bugs.map(b => (b.id === updatedBug.id ? updatedBug : b)));
-      handleCloseModal();
-    } catch (err: any) {
-      setError(err.message || 'Erro ao atribuir desenvolvedor');
+      const statusMatch = statusFilter === '' || bug.status === statusFilter;
+      const priorityMatch = priorityFilter === '' || bug.priority === priorityFilter; 
+
+      return searchMatch && statusMatch && priorityMatch;
+    });
+  }, [bugs, selectedProjectId, searchQuery, statusFilter, priorityFilter]); 
+
+  const handleProjectChange = (event: SelectChangeEvent<string>) => {
+    const newProjectId = event.target.value;
+    if (orgId && newProjectId) {
+      setSelectedProjectId(newProjectId); 
+      navigate(`/organization/${orgId}/project/${newProjectId}/bugs`); 
     }
   };
 
-  if (isLoading) {
-    return <PageLayout><CircularProgress /></PageLayout>;
-  }
+  const handleOpenViewModal = (id: string) => setViewingBugId(id);
+  const handleCloseViewModal = () => setViewingBugId(null);
+
+  const handleOpenEditModal = (id: string) => setEditingBugId(id);
+  const handleCloseEditModal = () => setEditingBugId(null);
+  
+  const handleStatusUpdated = () => {
+    handleCloseEditModal(); 
+    const reloadBugs = async () => {
+       if (!selectedProjectId) return;
+       try {
+           setIsLoading(true); 
+           const bugsData = await BugsService.getAllBugs(); 
+           setBugs(bugsData);
+       } catch (err:any) {setError(err.message || 'Erro ao recarregar');}
+       finally { setIsLoading(false); }
+    };
+    reloadBugs();
+  };
+
+  const columns: GridColDef<Bug>[] = [
+    { field: 'title', headerName: 'Título', flex: 2 },
+    { field: 'status', headerName: 'Status', flex: 1 },
+    { field: 'priority', headerName: 'Prioridade', flex: 1 },
+    { 
+      field: 'testCase', headerName: 'Caso de Teste', flex: 1.5,
+      valueGetter: (_value, row) => row.testCase?.title || 'N/A' 
+    },
+    { 
+      field: 'assignedDeveloper', headerName: 'Responsável', flex: 1.5,
+      valueGetter: (_value, row) => row.assignedDeveloper?.name || 'Ninguém'
+    },
+    {
+      field: 'actions', headerName: 'Ações', width: 80, sortable: false, 
+      renderCell: (params: GridRenderCellParams<Bug>) => (
+        <Button
+        color="primary" 
+        onClick={() => handleOpenEditModal(params.row.id)} 
+        title="Editar Status"
+        >
+          <EditIcon /> 
+        </Button>
+      ),
+    },
+  ];
+
+  if (!orgId) return <PageLayout><Alert severity="warning">Organização não encontrada na URL.</Alert></PageLayout>;
 
   return (
     <PageLayout>
+      <title>Defeitos | TestTrack</title>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" gutterBottom sx={{fontWeight: 'bold'}}>
-          Lista de Defeitos (Bugs)
+          Lista de Defeitos
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        
-        <List className='bugs-list'>
-          {bugs.length === 0 && <Typography>Nenhum bug encontrado.</Typography>}
-          {bugs.map((bug) => (
-            <ListItem key={bug.id} divider>
-              <ListItemText
-                primary={bug.title}
-                secondary={
-                  `Status: ${bug.status} | Prioridade: ${bug.priority} | Responsável: ${bug.assignedDeveloper?.name || 'Nenhum'}`
-                }
-              />
-              <Button 
-                variant="contained" 
-                onClick={() => handleOpenModal(bug)}
-              >
-                Atribuir
-              </Button>
-            </ListItem>
-          ))}
-        </List>
+      </Box>
 
-        <Modal
-          open={modalOpen}
-          onClose={handleCloseModal}
-        >
-          <Box sx={modalStyle}>
-            <Typography variant="h6" component="h2">
-              Atribuir Desenvolvedor
-            </Typography>
-            <Typography sx={{ mt: 2 }}>
-              Bug: {selectedBug?.title}
-            </Typography>
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel id="developer-select-label">Desenvolvedor</InputLabel>
-              <Select
-                labelId="developer-select-label"
-                value={selectedDeveloperId}
-                label="Desenvolvedor"
-                onChange={(e) => setSelectedDeveloperId(e.target.value as string)}
-              >
-                <MenuItem value="">
-                  <em>Nenhum</em>
-                </MenuItem>
-                {users.map((user) => (
-                  <MenuItem key={user.id} value={user.id}>
-                    {user.name} ({user.email})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button variant="outlined" onClick={handleCloseModal}>Cancelar</Button>
-              <Button variant="contained" onClick={handleAssignDeveloper}>Salvar</Button>
-            </Box>
-          </Box>
-        </Modal>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      
+      <section className='page-body'>
+        <Box className='section-datagrid-filter' sx={{ mb: 2 }}>
+           <FormControl sx={{ minWidth: 200 }}>
+             <InputLabel>Projeto</InputLabel>
+             <Select
+               value={isLoading ? '' : selectedProjectId} 
+               label="Projeto"
+               onChange={handleProjectChange}
+               disabled={isLoading || allProjects.length === 0}
+             >
+               {allProjects.map((proj) => (
+                 <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+               ))}
+             </Select>
+           </FormControl>
+
+          <TextField 
+            label="Pesquisa" variant="outlined" placeholder="Título..." 
+            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ flexGrow: 1 }} autoComplete='off' disabled={isLoading}
+          />
+
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={statusFilter} label="Status" onChange={(e) => setStatusFilter(e.target.value)} disabled={isLoading}>
+              <MenuItem value=""><em>Todos</em></MenuItem>
+              {Object.values(BugStatus).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel>Prioridade</InputLabel>
+            <Select value={priorityFilter} label="Prioridade" onChange={(e) => setPriorityFilter(e.target.value)} disabled={isLoading}>
+              <MenuItem value=""><em>Todas</em></MenuItem>
+              {Object.values(Priority).map(p => ( 
+                <MenuItem key={String(p)} value={String(p)}>{String(p)}</MenuItem> 
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+        
+        <Box className="box-datagrid" sx={{ height: 600, width: '100%' }}>
+          <DataGrid<Bug>
+            rows={filteredBugs}
+            columns={columns}
+            getRowId={(row) => row.id}
+            loading={isLoading}
+            disableColumnFilter disableColumnMenu
+            localeText={{ noRowsLabel: 'Nenhum defeito encontrado.' }}
+            sx={{ '--DataGrid-overlayHeight': '300px' }}
+            onRowDoubleClick={(params: GridRowParams) => handleOpenViewModal(params.id as string)}
+          />
+        </Box>
+      </section>
+
+      {viewingBugId && (
+          <ViewBugModal
+              open={!!viewingBugId}
+              bugId={viewingBugId}
+              handleClose={handleCloseViewModal}
+          />
+      )}
+
+      {editingBugId && (
+          <EditBugStatusModal
+              open={!!editingBugId}
+              bugId={editingBugId}
+              handleClose={handleCloseEditModal}
+              onStatusUpdated={handleStatusUpdated}
+          />
+      )}
 
     </PageLayout>
   );
