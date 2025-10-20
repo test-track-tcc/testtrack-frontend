@@ -254,11 +254,11 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
 
             {formData.status === TestCaseStatus.REPROVADO && (
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel id="bug-responsible-label">Responsável pela Correção</InputLabel>
+                    <InputLabel id="bug-responsible-label">Desenvolvedor para correção</InputLabel>
                     <Select
                         labelId="bug-responsible-label"
                         name="bugResponsibleId"
-                        label="Responsável pela Correção"
+                        label="Desenvolvedor para correção"
                         value={formData.bugResponsibleId}
                         onChange={handleChange}
                         required

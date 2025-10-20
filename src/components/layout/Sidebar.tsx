@@ -17,6 +17,7 @@ import { ProjectService } from '../../services/ProjectService';
 import { type Project } from '../../types/Project';
 import { getInitials } from '../../utils/getInitials';
 import { NotificationBell } from '../common/notifications/NotificationBell';
+import BugReportIcon from '@mui/icons-material/BugReport';
 
 const mainItems = [
     { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
@@ -28,6 +29,7 @@ const projectSpecificItems = [
     { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
     { title: 'Relatórios', path: '/reports', icon: <AssessmentIcon /> },
+    { title: 'Defeitos', path: '/bugs', icon: <BugReportIcon /> },
 ];
 
 export default function Sidebar() {

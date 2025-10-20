@@ -261,11 +261,11 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
 
                         {formData.status === TestCaseStatus.REPROVADO && (
                             <FormControl fullWidth>
-                                <InputLabel id="bug-responsible-label">Responsável pela Correção</InputLabel>
+                                <InputLabel id="bug-responsible-label">Desenvolvedor para correção</InputLabel>
                                 <Select
                                     labelId="bug-responsible-label"
                                     name="bugResponsibleId"
-                                    label="Responsável pela Correção"
+                                    label="Desenvolvedor para correçãoo"
                                     value={formData.bugResponsibleId || ''}
                                     onChange={handleChange}
                                     required

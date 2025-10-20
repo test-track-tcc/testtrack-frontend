@@ -172,10 +172,16 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
                                 <DetailItem label="Cenário de Teste" value={testCase.testScenario ? `${testCase.testScenario.identifier} - ${testCase.testScenario.name}` : 'Nenhum'} />
                                 <DetailItem label="Status" value={testCase.status.replace(/_/g, ' ')} />
                                 <DetailItem label="Prioridade" value={testCase.priority} />
+                                <DetailItem label="Responsável" value={testCase.responsible?.name} />
+                                {testCase.status == "REPROVADO" &&
+                                    <DetailItem 
+                                        label="Desenvolvedor para correção" 
+                                        value={testCase.bugResponsible ? `${testCase.bugResponsible.name} (${testCase.bugResponsible.email})` : 'Nenhum'}
+                                    />
+                                }
                                 <DetailItem label="Tipo de Teste" value={getTestTypeDisplay()} />
                                 {testCase.testType === 'FUNCIONAL' && (<DetailItem label="Framework" value={testCase.functionalFramework?.replace(/_/g, ' ')} />)}
                                 <DetailItem label="Dispositivo Alvo" value={getDeviceDisplay()} />
-                                <DetailItem label="Responsável" value={testCase.responsible?.name} />
                                 <DetailItem label="Criado por" value={testCase.createdBy.name} />
                                 <Divider sx={{ my: 1 }} />
                                 <DetailItem label="Tempo Estimado" value={testCase.estimatedTime} />
