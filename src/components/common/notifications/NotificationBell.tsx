@@ -11,10 +11,8 @@ import {
   Box,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-// Certifique-se que o caminho para seu serviço está correto
 import { NotificationService } from '../../../services/NotificationService'; 
 
-// O tipo de Notificação que esperamos do Backend
 interface Notification {
   id: string;
   message: string;
@@ -22,10 +20,9 @@ interface Notification {
   read: boolean;
   createdAt: string;
   link?: string;
-  actionId?: string; // O ID do convite (OrganizationUser ID)
+  actionId?: string;
 }
 
-// As props que o componente espera (o ID do usuário logado)
 interface NotificationBellProps {
   authUserId: string | undefined;
 }
@@ -38,11 +35,7 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  /**
-   * Busca as notificações no backend
-   */
   const fetchNotifications = async () => {
-    // Só busca se o ID do usuário existir
     if (!authUserId) {
       console.warn('NotificationBell: authUserId não fornecido, não buscando notificações.');
       return;
@@ -50,7 +43,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
 
     setIsLoading(true);
     try {
-      // Passa o authUserId para a chamada da API
       const data = await NotificationService.getNotifications(authUserId);
       setNotifications(data);
     } catch (error) {
@@ -60,13 +52,11 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
     }
   };
 
-  // Busca notificações quando o componente monta ou o usuário muda
   useEffect(() => {
     fetchNotifications();
-    // Opcional: Adicionar polling para atualizar a cada minuto
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [authUserId]); // Depende do authUserId
+  }, [authUserId]); 
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -76,9 +66,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
     setAnchorEl(null);
   };
 
-  /**
-   * Chamado quando o usuário clica em "Aceitar" em um convite
-   */
   const handleAcceptInvite = async (notification: Notification) => {
     if (!notification.actionId || !authUserId) {
       console.warn("Não foi possível aceitar: actionId ou authUserId faltando.");
@@ -98,13 +85,9 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
     }
   };
 
-  /**
-   * Chamado quando o usuário clica em uma notificação normal (ex: falha de teste)
-   */
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.link) return; // Não faz nada se não tiver link
 
-    // Marca como lida (se ainda não estiver)
     if (!notification.read) {
       try {
         await NotificationService.markNotificationAsRead(notification.id);
@@ -116,12 +99,10 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
       }
     }
 
-    // Navega para o link da notificação
     navigate(notification.link);
     handleClose();
   };
 
-  // --- RENDERIZAÇÃO ---
 
   return (
     <>
@@ -134,9 +115,9 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        MenuListProps={{ sx: { minWidth: 350, maxWidth: 400 } }}
+        MenuListProps={{ sx: { minWidth: 350, maxWidth: 600 } }}
       >
-        <Typography variant="h6" sx={{ px: 2, py: 1 }}>
+        <Typography variant="h6" sx={{ px: 2, py: 1, fontWeight: 'bold' }}>
           Notificações
         </Typography>
 
@@ -148,7 +129,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
 
         {!isLoading &&
           notifications.map((notification) => {
-            // Caso 1: É um convite para organização (e ainda não foi lido/aceito)
             if (notification.type === 'ORGANIZATION_INVITE' && !notification.read) {
               return (
                 <MenuItem key={notification.id} divider sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
