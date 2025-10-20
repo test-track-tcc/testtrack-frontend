@@ -62,11 +62,12 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     estimatedTime: '',
     steps: '',
     expectedResult: '',
-    status: TestCaseStatus.NAO_INICIADO,
+    status: TestCaseStatus.NAO_INICIADO as TestCaseStatus,
     testScenarioId: '',
     functionalFramework: '',
     targetDevice: '' as DeviceType | '',
     customTargetDevice: '',
+    bugResponsibleId : ''
   });
   const [scriptFiles, setScriptFiles] = useState<File[]>([]);
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
@@ -111,6 +112,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         functionalFramework: '',
         targetDevice: '',
         customTargetDevice: '',
+        bugResponsibleId : ''
       });
       setScriptFiles([]);
       setError('');
@@ -125,6 +127,10 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         const newState = { ...prev, [name]: value };
         if (name === 'testType' && value !== TestType.FUNCIONAL) {
             newState.functionalFramework = '';
+        }
+
+        if (name === 'status' && value !== 'REPROVADO') {
+            newState.bugResponsibleId = '';
         }
         return newState;
     });
@@ -176,6 +182,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         targetDevice: formData.targetDevice || undefined,
         customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : '',
         functionalFramework: formData.testType === TestType.FUNCIONAL ? formData.functionalFramework as FunctionalTestFramework : undefined,
+        bugResponsibleId: formData.bugResponsibleId || null,
       };
 
       await TestCaseService.create(payload);
@@ -198,7 +205,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         <Divider sx={{ mb: 2 }} />
         
         <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
-          {/* PAINEL ESQUERDO */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>{projectName}</Typography>
@@ -245,6 +251,25 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
                 {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {formData.status === TestCaseStatus.REPROVADO && (
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="bug-responsible-label">Responsável pela Correção</InputLabel>
+                    <Select
+                        labelId="bug-responsible-label"
+                        name="bugResponsibleId"
+                        label="Responsável pela Correção"
+                        value={formData.bugResponsibleId}
+                        onChange={handleChange}
+                        required
+                    >
+                        <MenuItem value=""><em>Nenhum (Selecione)</em></MenuItem>
+                        {organizationUsers.map(user => (
+                            <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            )}
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Responsável</InputLabel>

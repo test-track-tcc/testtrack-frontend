@@ -52,7 +52,7 @@ interface EditTestCaseModalProps {
 }
 
 export default function EditTestCaseModal({ open, testCaseId, organizationId, handleClose, onSaveSuccess }: EditTestCaseModalProps) {
-    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload> & { targetDevice?: DeviceType | '', customTargetDevice?: string }>({});
+    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload> & { targetDevice?: DeviceType | '', customTargetDevice?: string, bugResponsibleId?: string }>({});
     const [testCaseData, setTestCaseData] = useState<TestCase | null>(null);
     const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
     const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
@@ -102,6 +102,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         targetDevice: fetchedTestCaseData.targetDevice || '',
                         customTargetDevice: fetchedTestCaseData.customTargetDevice || '',
                         functionalFramework: fetchedTestCaseData.functionalFramework ?? null,
+                        bugResponsibleId: (fetchedTestCaseData as any).bugResponsibleId || '',
                     });
 
                     setOrganizationUsers(users);
@@ -133,6 +134,10 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
         const newState = { ...prev, [name]: value };
         if (name === 'testType' && value !== TestType.FUNCIONAL) {
             newState.functionalFramework = null;
+        }
+
+        if (name === 'status' && value !== TestCaseStatus.REPROVADO) {
+            newState.bugResponsibleId = '';
         }
         return newState;
     });
@@ -167,7 +172,7 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             targetDevice: formData.targetDevice || undefined,
             customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : undefined,
             functionalFramework: formData.testType === TestType.FUNCIONAL ? (formData.functionalFramework as FunctionalTestFramework) : null,
-
+            bugResponsibleId: formData.bugResponsibleId || null,
         };
 
         try {
@@ -203,7 +208,6 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                 <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
-                    {/* PAINEL ESQUERDO */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} className="left-panel">
                         <Box>
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
@@ -254,6 +258,25 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                                 {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
                             </Select>
                         </FormControl>
+
+                        {formData.status === TestCaseStatus.REPROVADO && (
+                            <FormControl fullWidth>
+                                <InputLabel id="bug-responsible-label">Responsável pela Correção</InputLabel>
+                                <Select
+                                    labelId="bug-responsible-label"
+                                    name="bugResponsibleId"
+                                    label="Responsável pela Correção"
+                                    value={formData.bugResponsibleId || ''}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <MenuItem value=""><em>Nenhum (Selecione)</em></MenuItem>
+                                    {organizationUsers.map(user => (
+                                        <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
 
                         <FormControl fullWidth>
                             <InputLabel>Responsável</InputLabel>

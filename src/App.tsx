@@ -12,6 +12,7 @@ import CreateOrganization1 from "./pages/organization/form/CreateOrganization1";
 import CreateOrganization2 from "./pages/organization/form/CreateOrganization2";
 import CreateOrganization3 from "./pages/organization/form/CreateOrganization3";
 import CreateOrganization4 from "./pages/organization/form/CreateOrganization4";
+import BugsPage from "./pages/bugs/BugsPage";
 
 function App() {
   const user = localStorage.getItem("userData");
@@ -43,7 +44,7 @@ function App() {
             <Route path="/organization/:orgId/project/:projectId/testCase" element={<TestCase />} />
             <Route path="/organization/:orgId/project/:projectId/testScenario" element={<TestScenarios />} />
             <Route path="/organization/:orgId/project/:projectId/kanban" element={<KanbanPage />} />
-            
+            <Route path="/organization/:orgId/project/:projectId/bugs" element={<BugsPage />} />
 
         <Route
           path="/organization/:orgId/projects"
