@@ -1,19 +1,21 @@
 // src/pages/bugs/modal/ViewBugModal.tsx (ou onde estiver seu arquivo)
 import React, { useState, useEffect } from 'react';
 import {
-  Modal, Box, Typography, IconButton, CircularProgress, Alert, Divider, Button
+  Modal, Box, Typography, IconButton, CircularProgress, Alert,
+  Divider, Button, Select, MenuItem, FormControl, InputLabel, type SelectChangeEvent
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import { BugsService } from '../../../services/BugsService';
-import { type Bug } from '../../../types/Bug'; 
-import { format } from 'date-fns'; 
+import { BugStatus, type Bug } from '../../../types/Bug';
+import { format } from 'date-fns';
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 'clamp(500px, 70vw, 900px)', 
+  width: 'clamp(500px, 70vw, 900px)',
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 3,
@@ -37,6 +39,7 @@ interface ViewBugModalProps {
   open: boolean;
   bugId: string | null;
   handleClose: () => void;
+  onStatusUpdated: () => void; // Continua necessário para recarregar a lista
 }
 
 const DetailItem = ({ label, value }: { label: string, value: React.ReactNode }) => (
@@ -46,19 +49,27 @@ const DetailItem = ({ label, value }: { label: string, value: React.ReactNode })
   </Box>
 );
 
-export default function ViewBugModal({ open, bugId, handleClose }: ViewBugModalProps) {
+export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated }: ViewBugModalProps) {
   const [bug, setBug] = useState<Bug | null>(null);
+  const [currentStatus, setCurrentStatus] = useState<BugStatus | ''>('');
+  const [isEditingStatus, setIsEditingStatus] = useState(false); // Novo estado
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const canEditStatus = true; // Assuma sua lógica de permissão
+
   useEffect(() => {
+    setIsEditingStatus(false); // Sempre começa em modo visualização
+
     const fetchBug = async () => {
       if (!bugId) return;
       setLoading(true);
       setError('');
       try {
-        const data = await BugsService.findOne(bugId);
+        const data = await BugsService.findOne(bugId); // Use findOne ou getById
         setBug(data);
+        setCurrentStatus(data.status); // Define status inicial
       } catch (err: any) {
         setError(err.message || 'Falha ao carregar detalhes do bug.');
         setBug(null);
@@ -70,9 +81,45 @@ export default function ViewBugModal({ open, bugId, handleClose }: ViewBugModalP
     if (open) {
       fetchBug();
     } else {
-      setBug(null); 
+      setBug(null);
+      setCurrentStatus('');
     }
   }, [open, bugId]);
+
+  const handleStatusChange = (event: SelectChangeEvent<string>) => {
+    setCurrentStatus(event.target.value as BugStatus);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!bug || !currentStatus || currentStatus === bug.status) return;
+    
+    setSaving(true);
+    setError('');
+    try {
+      await BugsService.updateStatus(bug.id, currentStatus); // Chama a API
+      onStatusUpdated(); // Recarrega a lista na página principal
+      setIsEditingStatus(false);
+      handleClose();
+    } catch (err: any) {
+      setError(err.message || 'Falha ao salvar o status.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEnterEditMode = () => {
+      if (bug) {
+          setCurrentStatus(bug.status); // Garante que começa com o valor certo
+          setIsEditingStatus(true);
+      }
+  };
+
+  const handleCancelEditMode = () => {
+      setIsEditingStatus(false);
+      if (bug) {
+          setCurrentStatus(bug.status); // Reverte qualquer mudança não salva
+      }
+  };
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -86,6 +133,18 @@ export default function ViewBugModal({ open, bugId, handleClose }: ViewBugModalP
               <Typography variant="h5" component="h2">
                 Detalhes do Defeito: {bug.title}
               </Typography>
+              {/* Mostra botão Editar APENAS se NÃO estiver editando */}
+              {!isEditingStatus && canEditStatus && (
+                <Button 
+                    variant="outlined" 
+                    startIcon={<EditIcon />} 
+                    onClick={handleEnterEditMode}
+                    size="small"
+                    sx={{ mr: 'auto', ml: 2 }} // Afasta dos outros botões
+                >
+                    Editar Status
+                </Button>
+              )}
               <IconButton onClick={handleClose}><CloseIcon /></IconButton>
             </Box>
             <Divider sx={{ mb: 2 }} />
@@ -93,7 +152,27 @@ export default function ViewBugModal({ open, bugId, handleClose }: ViewBugModalP
             <Box sx={{ overflowY: 'auto', p: 1 }}>
               <DetailItem label="Título" value={bug.title} />
               <DetailItem label="Descrição" value={bug.description} />
-              <DetailItem label="Status Atual" value={bug.status.replace(/_/g, ' ')} /> 
+              
+              {/* Renderização condicional do Status */}
+              {!isEditingStatus ? (
+                <DetailItem label="Status Atual" value={bug.status.replace(/_/g, ' ')} /> 
+              ) : (
+                <FormControl fullWidth sx={{ mt: 1, mb: 1.5 }} disabled={!canEditStatus || saving}>
+                  <InputLabel id="status-select-label-inline">Status</InputLabel>
+                  <Select
+                    labelId="status-select-label-inline"
+                    value={currentStatus}
+                    label="Status"
+                    onChange={handleStatusChange}
+                    size="small"
+                  >
+                    {Object.values(BugStatus).map(s => (
+                      <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
               <DetailItem label="Prioridade" value={bug.priority} />
               <DetailItem label="Caso de Teste Vinculado" value={bug.testCase?.title || 'N/A'} />
               <DetailItem label="Desenvolvedor Atribuído" value={bug.assignedDeveloper?.name || 'Ninguém'} />
@@ -103,7 +182,22 @@ export default function ViewBugModal({ open, bugId, handleClose }: ViewBugModalP
 
             <Divider sx={{ mt: 'auto', mb: 2 }} /> 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, pt: 1 }}>
-              <Button variant="outlined" onClick={handleClose}>Fechar</Button>
+              {/* Botões do modo Edição */}
+              {isEditingStatus && (
+                <>
+                  <Button variant="outlined" onClick={handleCancelEditMode} disabled={saving}>Cancelar</Button>
+                  <Button 
+                    variant="contained" 
+                    onClick={handleSaveChanges} 
+                    disabled={saving || !currentStatus || currentStatus === bug.status} // Verifica se houve mudança
+                  >
+                    {saving ? <CircularProgress size={24} /> : 'Salvar Status'}
+                  </Button>
+                </>
+              )}
+              {!isEditingStatus && (
+                <Button variant="outlined" onClick={handleClose}>Fechar</Button>
+              )}
             </Box>
           </>
         )}

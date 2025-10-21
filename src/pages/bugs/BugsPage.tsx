@@ -3,10 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Box, Typography,
   Select, MenuItem, FormControl, InputLabel, Alert,
-  type SelectChangeEvent, TextField, Button 
+  type SelectChangeEvent, TextField
 } from '@mui/material';
-import { DataGrid, type GridColDef, type GridRowParams, type GridRenderCellParams } from '@mui/x-data-grid'; 
-import EditIcon from '@mui/icons-material/Edit';
+import { DataGrid, type GridColDef, type GridRowParams } from '@mui/x-data-grid'; 
 
 import { BugsService } from '../../services/BugsService';
 import { type Bug, BugStatus } from '../../types/Bug';
@@ -15,7 +14,6 @@ import { type Project } from '../../types/Project';
 import { Priority } from '../../types/TestCase';
 import PageLayout from '../../components/layout/PageLayout'; 
 import ViewBugModal from './modal/ViewBugModal';
-import EditBugStatusModal from './modal/EditBugModal'; // Ajuste o caminho se necessário
 
 function BugsPage() {
   const { orgId, projectId: routeProjectId } = useParams<{ orgId: string, projectId: string }>(); 
@@ -23,15 +21,12 @@ function BugsPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(''); 
   const [bugs, setBugs] = useState<Bug[]>([]);
-  const [viewingBugId, setViewingBugId] = useState<string | null>(null); 
-  const [editingBugId, setEditingBugId] = useState<string | null>(null); 
+  const [targetBugId, setTargetBugId] = useState<string | null>(null); // ID do bug para abrir o modal
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(''); 
   const [statusFilter, setStatusFilter] = useState(''); 
   const [priorityFilter, setPriorityFilter] = useState('');
-
-  const canEditStatus = true; // Assuma sua lógica de permissão aqui
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +43,7 @@ function BugsPage() {
         setSelectedProjectId(currentProjectId);
 
         if (currentProjectId) {
+          // Idealmente filtrar no backend: await BugsService.getAllBugs({ projectId: currentProjectId });
           const bugsData = await BugsService.getAllBugs(); 
           setBugs(bugsData); 
         } else {
@@ -63,6 +59,7 @@ function BugsPage() {
 
   const filteredBugs = useMemo(() => {
     return bugs.filter(bug => {
+      // Descomente se precisar filtrar no frontend e o backend não suportar
       // const projectMatch = !selectedProjectId || bug.testCase?.project?.id === selectedProjectId;
       // if (!projectMatch) return false;
 
@@ -75,7 +72,7 @@ function BugsPage() {
 
       return searchMatch && statusMatch && priorityMatch;
     });
-  }, [bugs, selectedProjectId, searchQuery, statusFilter, priorityFilter]); 
+  }, [bugs, /* selectedProjectId, */ searchQuery, statusFilter, priorityFilter]); 
 
   const handleProjectChange = (event: SelectChangeEvent<string>) => {
     const newProjectId = event.target.value;
@@ -85,24 +82,34 @@ function BugsPage() {
     }
   };
 
-  const handleOpenViewModal = (id: string) => setViewingBugId(id);
-  const handleCloseViewModal = () => setViewingBugId(null);
+  // Abre o modal de visualização/edição (sempre começa em visualização)
+  const handleOpenModal = (id: string) => {
+    setTargetBugId(id);
+  };
 
-  const handleOpenEditModal = (id: string) => setEditingBugId(id);
-  const handleCloseEditModal = () => setEditingBugId(null);
+  // Fecha o modal
+  const handleCloseModal = () => {
+    setTargetBugId(null);
+  };
   
+  // Chamado após salvar status no modal
   const handleStatusUpdated = () => {
-    handleCloseEditModal(); 
+    // Recarrega os dados da lista
     const reloadBugs = async () => {
-       if (!selectedProjectId) return;
+       if (!selectedProjectId && !routeProjectId) return; 
+       const projectIdToLoad = selectedProjectId || routeProjectId; 
+       if (!projectIdToLoad) return;
+
        try {
            setIsLoading(true); 
+           // Idealmente filtrar no backend: await BugsService.getAllBugs({ projectId: projectIdToLoad });
            const bugsData = await BugsService.getAllBugs(); 
            setBugs(bugsData);
        } catch (err:any) {setError(err.message || 'Erro ao recarregar');}
        finally { setIsLoading(false); }
     };
     reloadBugs();
+    // O modal ViewBugModal agora controla internamente se permanece aberto ou fecha
   };
 
   const columns: GridColDef<Bug>[] = [
@@ -117,18 +124,7 @@ function BugsPage() {
       field: 'assignedDeveloper', headerName: 'Responsável', flex: 1.5,
       valueGetter: (_value, row) => row.assignedDeveloper?.name || 'Ninguém'
     },
-    {
-      field: 'actions', headerName: 'Ações', width: 80, sortable: false, 
-      renderCell: (params: GridRenderCellParams<Bug>) => (
-        <Button
-        color="primary" 
-        onClick={() => handleOpenEditModal(params.row.id)} 
-        title="Editar Status"
-        >
-          <EditIcon /> 
-        </Button>
-      ),
-    },
+    // Coluna de ações foi removida, a ação é pelo duplo clique
   ];
 
   if (!orgId) return <PageLayout><Alert severity="warning">Organização não encontrada na URL.</Alert></PageLayout>;
@@ -145,6 +141,7 @@ function BugsPage() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
       <section className='page-body'>
+        {/* Barra de Filtros */}
         <Box className='section-datagrid-filter' sx={{ mb: 2 }}>
            <FormControl sx={{ minWidth: 200 }}>
              <InputLabel>Projeto</InputLabel>
@@ -185,34 +182,29 @@ function BugsPage() {
           </FormControl>
         </Box>
         
+        {/* DataGrid com duplo clique para abrir o modal */}
         <Box className="box-datagrid" sx={{ height: 600, width: '100%' }}>
           <DataGrid<Bug>
             rows={filteredBugs}
-            columns={columns}
+            columns={columns} // Coluna de ações removida
             getRowId={(row) => row.id}
             loading={isLoading}
             disableColumnFilter disableColumnMenu
             localeText={{ noRowsLabel: 'Nenhum defeito encontrado.' }}
-            sx={{ '--DataGrid-overlayHeight': '300px' }}
-            onRowDoubleClick={(params: GridRowParams) => handleOpenViewModal(params.id as string)}
+            sx={{ '--DataGrid-overlayHeight': '300px' }} // Adicionado cursor pointer
+            onRowDoubleClick={(params: GridRowParams) => handleOpenModal(params.id as string)} // Duplo clique chama handleOpenModal
           />
         </Box>
       </section>
 
-      {viewingBugId && (
+      {/* Renderiza o ÚNICO modal */}
+      {targetBugId && (
           <ViewBugModal
-              open={!!viewingBugId}
-              bugId={viewingBugId}
-              handleClose={handleCloseViewModal}
-          />
-      )}
-
-      {editingBugId && (
-          <EditBugStatusModal
-              open={!!editingBugId}
-              bugId={editingBugId}
-              handleClose={handleCloseEditModal}
-              onStatusUpdated={handleStatusUpdated}
+              open={!!targetBugId}
+              bugId={targetBugId}
+              handleClose={handleCloseModal} // Função única para fechar
+              onStatusUpdated={handleStatusUpdated} // Passa a função de recarregar
+              // startInEditMode não é mais necessário aqui
           />
       )}
 
