@@ -27,7 +27,7 @@ interface EditBugStatusModalProps {
 }
 
 export default function EditBugStatusModal({ open, bugId, handleClose, onStatusUpdated }: EditBugStatusModalProps) {
-  const [bugTitle, setBugTitle] = useState(''); // Apenas título para contexto
+  const [bugTitle, setBugTitle] = useState('');
   const [initialStatus, setInitialStatus] = useState<BugStatus | ''>('');
   const [currentStatus, setCurrentStatus] = useState<BugStatus | ''>('');
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function EditBugStatusModal({ open, bugId, handleClose, onStatusU
 
     if (open) { fetchBugStatus(); }
      else { 
-        setBugTitle(''); setInitialStatus(''); setCurrentStatus(''); // Limpa ao fechar
+        setBugTitle(''); setInitialStatus(''); setCurrentStatus('');
      }
   }, [open, bugId]);
 

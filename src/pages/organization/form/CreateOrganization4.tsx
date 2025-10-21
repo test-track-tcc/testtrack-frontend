@@ -68,7 +68,7 @@ export default function CreateOrganization4() {
             }
             setMembers([...members, { id: foundUser.id, email: foundUser.email, role: newMemberRole }]);
             setNewMemberEmail('');
-            setNewMemberRole('MEMBER'); // Reseta para o padrão
+            setNewMemberRole('MEMBER');
             setFoundUser(null);
             setError('');
         }
@@ -91,19 +91,18 @@ export default function CreateOrganization4() {
                 throw new Error("ID da organização não encontrado. Por favor, volte ao passo anterior.");
             }
 
-            // AJUSTE: Mapeia os membros e agora envia o 'role' de cada um
             await Promise.all(
                 members.map(member => 
                     OrganizationService.addUserToOrganization({
                         userId: member.id,
                         organizationId: organizationId,
-                        role: member.role // <-- Enviando o cargo
+                        role: member.role
                     })
                 )
             );
 
             setSuccess('Membros adicionados com sucesso! Redirecionando...');
-            localStorage.removeItem('onboardingData'); // Limpa o localStorage
+            localStorage.removeItem('onboardingData');
             
             setTimeout(() => {
                 navigate(`/organization/${organizationId}/projects`);
@@ -117,10 +116,9 @@ export default function CreateOrganization4() {
         }
     };
 
-    // NOVA FUNÇÃO: Limpa o storage e navega
     const handleLater = () => {
         localStorage.removeItem('onboardingData');
-        navigate('/dashboard'); // Navega para a dashboard principal
+        navigate('/dashboard');
     };
 
     return (
@@ -141,13 +139,13 @@ export default function CreateOrganization4() {
                                     label='E-mail do usuário'
                                     style={{ minWidth: 300 }}
                                     value={member.email}
-                                    disabled // Desabilitado para não permitir edição
+                                    disabled
                                 />
                                 <TextField
                                     label="Função"
                                     value={member.role}
                                     style={{ minWidth: 150 }}
-                                    disabled // Desabilitado para não permitir edição
+                                    disabled
                                 />
                                 <IconButton onClick={() => handleRemoveMember(member.id)} color="error" className='delete-button' disabled={isSubmitting}>
                                     <DeleteIcon />

@@ -21,7 +21,7 @@ function BugsPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(''); 
   const [bugs, setBugs] = useState<Bug[]>([]);
-  const [targetBugId, setTargetBugId] = useState<string | null>(null); // ID do bug para abrir o modal
+  const [targetBugId, setTargetBugId] = useState<string | null>(null); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(''); 
@@ -43,7 +43,6 @@ function BugsPage() {
         setSelectedProjectId(currentProjectId);
 
         if (currentProjectId) {
-          // Idealmente filtrar no backend: await BugsService.getAllBugs({ projectId: currentProjectId });
           const bugsData = await BugsService.getAllBugs(); 
           setBugs(bugsData); 
         } else {
@@ -59,7 +58,6 @@ function BugsPage() {
 
   const filteredBugs = useMemo(() => {
     return bugs.filter(bug => {
-      // Descomente se precisar filtrar no frontend e o backend não suportar
       // const projectMatch = !selectedProjectId || bug.testCase?.project?.id === selectedProjectId;
       // if (!projectMatch) return false;
 
@@ -82,19 +80,15 @@ function BugsPage() {
     }
   };
 
-  // Abre o modal de visualização/edição (sempre começa em visualização)
   const handleOpenModal = (id: string) => {
     setTargetBugId(id);
   };
 
-  // Fecha o modal
   const handleCloseModal = () => {
     setTargetBugId(null);
   };
   
-  // Chamado após salvar status no modal
   const handleStatusUpdated = () => {
-    // Recarrega os dados da lista
     const reloadBugs = async () => {
        if (!selectedProjectId && !routeProjectId) return; 
        const projectIdToLoad = selectedProjectId || routeProjectId; 
@@ -102,14 +96,12 @@ function BugsPage() {
 
        try {
            setIsLoading(true); 
-           // Idealmente filtrar no backend: await BugsService.getAllBugs({ projectId: projectIdToLoad });
            const bugsData = await BugsService.getAllBugs(); 
            setBugs(bugsData);
        } catch (err:any) {setError(err.message || 'Erro ao recarregar');}
        finally { setIsLoading(false); }
     };
     reloadBugs();
-    // O modal ViewBugModal agora controla internamente se permanece aberto ou fecha
   };
 
   const columns: GridColDef<Bug>[] = [
@@ -124,7 +116,6 @@ function BugsPage() {
       field: 'assignedDeveloper', headerName: 'Responsável', flex: 1.5,
       valueGetter: (_value, row) => row.assignedDeveloper?.name || 'Ninguém'
     },
-    // Coluna de ações foi removida, a ação é pelo duplo clique
   ];
 
   if (!orgId) return <PageLayout><Alert severity="warning">Organização não encontrada na URL.</Alert></PageLayout>;
@@ -186,13 +177,13 @@ function BugsPage() {
         <Box className="box-datagrid" sx={{ height: 600, width: '100%' }}>
           <DataGrid<Bug>
             rows={filteredBugs}
-            columns={columns} // Coluna de ações removida
+            columns={columns}
             getRowId={(row) => row.id}
             loading={isLoading}
             disableColumnFilter disableColumnMenu
             localeText={{ noRowsLabel: 'Nenhum defeito encontrado.' }}
-            sx={{ '--DataGrid-overlayHeight': '300px' }} // Adicionado cursor pointer
-            onRowDoubleClick={(params: GridRowParams) => handleOpenModal(params.id as string)} // Duplo clique chama handleOpenModal
+            sx={{ '--DataGrid-overlayHeight': '300px' }}
+            onRowDoubleClick={(params: GridRowParams) => handleOpenModal(params.id as string)}
           />
         </Box>
       </section>
@@ -202,9 +193,8 @@ function BugsPage() {
           <ViewBugModal
               open={!!targetBugId}
               bugId={targetBugId}
-              handleClose={handleCloseModal} // Função única para fechar
-              onStatusUpdated={handleStatusUpdated} // Passa a função de recarregar
-              // startInEditMode não é mais necessário aqui
+              handleClose={handleCloseModal}
+              onStatusUpdated={handleStatusUpdated}
           />
       )}
 

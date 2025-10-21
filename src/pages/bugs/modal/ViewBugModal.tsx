@@ -1,4 +1,3 @@
-// src/pages/bugs/modal/ViewBugModal.tsx (ou onde estiver seu arquivo)
 import React, { useState, useEffect } from 'react';
 import {
   Modal, Box, Typography, IconButton, CircularProgress, Alert,
@@ -39,7 +38,7 @@ interface ViewBugModalProps {
   open: boolean;
   bugId: string | null;
   handleClose: () => void;
-  onStatusUpdated: () => void; // Continua necessário para recarregar a lista
+  onStatusUpdated: () => void;
 }
 
 const DetailItem = ({ label, value }: { label: string, value: React.ReactNode }) => (
@@ -52,24 +51,24 @@ const DetailItem = ({ label, value }: { label: string, value: React.ReactNode })
 export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated }: ViewBugModalProps) {
   const [bug, setBug] = useState<Bug | null>(null);
   const [currentStatus, setCurrentStatus] = useState<BugStatus | ''>('');
-  const [isEditingStatus, setIsEditingStatus] = useState(false); // Novo estado
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const canEditStatus = true; // Assuma sua lógica de permissão
+  const canEditStatus = true;
 
   useEffect(() => {
-    setIsEditingStatus(false); // Sempre começa em modo visualização
+    setIsEditingStatus(false);
 
     const fetchBug = async () => {
       if (!bugId) return;
       setLoading(true);
       setError('');
       try {
-        const data = await BugsService.findOne(bugId); // Use findOne ou getById
+        const data = await BugsService.findOne(bugId);
         setBug(data);
-        setCurrentStatus(data.status); // Define status inicial
+        setCurrentStatus(data.status);
       } catch (err: any) {
         setError(err.message || 'Falha ao carregar detalhes do bug.');
         setBug(null);
@@ -96,8 +95,8 @@ export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated
     setSaving(true);
     setError('');
     try {
-      await BugsService.updateStatus(bug.id, currentStatus); // Chama a API
-      onStatusUpdated(); // Recarrega a lista na página principal
+      await BugsService.updateStatus(bug.id, currentStatus);
+      onStatusUpdated();
       setIsEditingStatus(false);
       handleClose();
     } catch (err: any) {
@@ -109,7 +108,7 @@ export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated
 
   const handleEnterEditMode = () => {
       if (bug) {
-          setCurrentStatus(bug.status); // Garante que começa com o valor certo
+          setCurrentStatus(bug.status);
           setIsEditingStatus(true);
       }
   };
@@ -117,7 +116,7 @@ export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated
   const handleCancelEditMode = () => {
       setIsEditingStatus(false);
       if (bug) {
-          setCurrentStatus(bug.status); // Reverte qualquer mudança não salva
+          setCurrentStatus(bug.status);
       }
   };
 
@@ -133,14 +132,13 @@ export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated
               <Typography variant="h5" component="h2">
                 Detalhes do Defeito: {bug.title}
               </Typography>
-              {/* Mostra botão Editar APENAS se NÃO estiver editando */}
               {!isEditingStatus && canEditStatus && (
                 <Button 
                     variant="outlined" 
                     startIcon={<EditIcon />} 
                     onClick={handleEnterEditMode}
                     size="small"
-                    sx={{ mr: 'auto', ml: 2 }} // Afasta dos outros botões
+                    sx={{ mr: 'auto', ml: 2 }}
                 >
                     Editar Status
                 </Button>
@@ -189,7 +187,7 @@ export default function ViewBugModal({ open, bugId, handleClose, onStatusUpdated
                   <Button 
                     variant="contained" 
                     onClick={handleSaveChanges} 
-                    disabled={saving || !currentStatus || currentStatus === bug.status} // Verifica se houve mudança
+                    disabled={saving || !currentStatus || currentStatus === bug.status}
                   >
                     {saving ? <CircularProgress size={24} /> : 'Salvar Status'}
                   </Button>
