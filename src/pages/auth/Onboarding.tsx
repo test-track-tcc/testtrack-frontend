@@ -1,4 +1,3 @@
-// import React from 'react';
 import SimpleHeader from "../../components/layout/SimpleHeader";
 import PsychologyAltOutlinedIcon from '@mui/icons-material/PsychologyAltOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';

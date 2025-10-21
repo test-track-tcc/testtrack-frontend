@@ -32,6 +32,7 @@ export interface CreateTestCasePayload {
   targetDevice: "" | DeviceType | undefined;
   customTargetDevice: string;
   functionalFramework?: FunctionalTestFramework | null;
+  bugResponsibleId: string | null;
 }
 
 export type UpdateTestCasePayload = Partial<CreateTestCasePayload>;
@@ -92,6 +93,8 @@ export interface TestCase {
   priority: Priority;
   createdBy: User;
   responsible: User | null;
+  bugResponsible?: User | null;
+  bugResponsibleId: string | null;
   estimatedTime: string | null;
   timeSpent: string;
   executionDate: string;

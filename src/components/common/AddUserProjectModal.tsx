@@ -84,7 +84,6 @@ export default function AddUserToProjectModal({ open, project, handleClose }: Ad
     }
   };
 
-  // NOVA FUNÇÃO para remover o utilizador
   const handleRemoveUser = async (userId: string) => {
     if (!project) return;
 
@@ -95,7 +94,7 @@ export default function AddUserToProjectModal({ open, project, handleClose }: Ad
       try {
         await ProjectService.removeUserFromProject(project.id, userId);
         setSuccess('Membro removido com sucesso!');
-        fetchData(); // Recarrega a lista de membros
+        fetchData();
       } catch (err: any) {
         setError(err.response?.data?.message || 'Falha ao remover o membro.');
       } finally {

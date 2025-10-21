@@ -60,15 +60,12 @@ export default function EditOrganizationModal({ open, onClose, organization, onU
     setSelectedOrgId(null);
   }
   
-  // ▼▼▼ NOVA FUNÇÃO ADICIONADA ▼▼▼
-  // Esta função define os estados para abrir o modal de membros
   const handleOpenMembersModal = () => {
     if (organization) {
         setSelectedOrgId(organization.id);
         setIsMembersModalOpen(true);
     }
   }
-  // ▲▲▲ FIM DA NOVA FUNÇÃO ▲▲▲
 
   return (
     <>

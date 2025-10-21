@@ -3,8 +3,8 @@ import { Dialog, DialogContent, DialogTitle, Box, Tabs, Tab } from '@mui/materia
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { type Organization } from '../../types/Organization';
-import AccessGroupManager from './AccessGroupManager'; // O componente que acabamos de criar
-import PermissionManager from './PermissionManager';   // O componente que você me enviou
+import AccessGroupManager from './AccessGroupManager';
+import PermissionManager from './PermissionManager';
 
 interface TabPanelProps {
   children?: React.ReactNode;

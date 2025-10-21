@@ -86,7 +86,7 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
   };
 
   const handleNotificationClick = async (notification: Notification) => {
-    if (!notification.link) return; // Não faz nada se não tiver link
+    if (!notification.link) return;
 
     if (!notification.read) {
       try {
@@ -143,19 +143,17 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
                     >
                       Aceitar
                     </Button>
-                    {/* (Opcional) Botão de Rejeitar */}
                   </Box>
                 </MenuItem>
               );
             }
 
-            // Caso 2: Notificação normal (clicável)
             return (
               <MenuItem
                 key={notification.id}
-                selected={!notification.read} // Destaca não lidas
+                selected={!notification.read}
                 onClick={() => handleNotificationClick(notification)}
-                disabled={!notification.link} // Desabilita se não tiver link
+                disabled={!notification.link}
               >
                 {notification.message}
               </MenuItem>

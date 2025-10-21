@@ -11,8 +11,6 @@ import { type Organization } from '../../types/Organization';
 import { type AccessGroup, type UpdateAccessGroupPayload, type CreateAccessGroupPayload } from '../../types/AcessGroup';
 import { AccessGroupService } from '../../services/AccessGroupService';
 
-
-// Componente de formulário para criar/editar grupos
 function AccessGroupForm({ group, allPermissions, onSave, onCancel }: { group: Partial<AccessGroup> | null; allPermissions: Permission[]; onSave: (data: UpdateAccessGroupPayload, groupId?: string) => void; onCancel: () => void; }) {
     const [name, setName] = useState(group?.name || '');
     const [description, setDescription] = useState(group?.description || '');
@@ -50,7 +48,6 @@ function AccessGroupForm({ group, allPermissions, onSave, onCancel }: { group: P
     );
 }
 
-// O gerenciador de grupos de acesso
 export default function AccessGroupManager({ organization }: { organization: Organization }) {
     const [groups, setGroups] = useState<AccessGroup[]>([]);
     const [allPermissions, setAllPermissions] = useState<Permission[]>([]);

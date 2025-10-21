@@ -98,7 +98,7 @@ export default function OrganizationSelect() {
   
   const handleCloseMembersModal = () => {
       setIsMembersModalOpen(false);
-      setSelectedOrgId(null); // Limpa o ID aqui
+      setSelectedOrgId(null);
   }
 
   useEffect(() => {
