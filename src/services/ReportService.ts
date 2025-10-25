@@ -9,6 +9,7 @@ export const ReportService = {
   getAll: async (): Promise<Report[]> => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/reports`);
+      console.error(response)
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar relatórios:`, error);

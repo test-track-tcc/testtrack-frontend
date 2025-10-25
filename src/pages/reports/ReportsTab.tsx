@@ -139,16 +139,14 @@ export default function ReportsTab() {
     );
   }
 
-  // Note: Sem PageLayout ou <title>
   return (
     <Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {generationSuccess && <Alert severity="success" sx={{ mb: 2 }}>{generationSuccess}</Alert>}
 
-      <Grid>
-        {/* SEÇÃO DE GERAÇÃO */}
+      <Grid >
         <Grid>
-          <Card>
+          <Card className="reports-div">
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
                 Gerar Novo Relatório Personalizado
@@ -209,8 +207,8 @@ export default function ReportsTab() {
           <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }}>
             Relatórios Gerados
           </Typography>
-          <Paper>
-            <Box sx={{ p: 2 }}>
+          <Paper className="reports-div">
+            <Box sx={{ p: 2 }} >
               <FormControl sx={{ minWidth: 240 }}>
                 <InputLabel id="project-filter-label">Filtrar por Projeto</InputLabel>
                 <Select

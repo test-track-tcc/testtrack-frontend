@@ -46,15 +46,15 @@ function a11yProps(index: number) {
 export default function ReportsPage() {
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setSelectedTab(newValue);
     };
     
     return (
         <PageLayout>
-            <title>TestTrack | Dashboard</title>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Dashboard
+            <title>Relatórios | TestTrack</title>
+            <Typography variant="h4" component="h1" sx={{fontWeight: 'bold'}} gutterBottom>
+              Relatórios
             </Typography>
 
             <Box sx={{ width: '100%' }}>
