@@ -1,5 +1,5 @@
 // Caminho: src/pages/home/RealTimeTab.tsx
-// (Modificado para usar dados reais)
+// (Corrigido)
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -25,13 +25,12 @@ import {
 } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { ChartService } from '../../services/ChartService'; // Importar o novo serviço
-import { type TestStatusMetrics } from '../../types/Metrics'; // Importar o novo tipo
-
-// Registra os elementos necessários do Chart.js
+import { ChartService } from '../../services/ChartService';
+import { type TestStatusMetrics } from '../../types/Metrics';
+import { TestType } from '../../types/TestCase';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// Opções do gráfico (movido para fora para não recriar a cada render)
+// Opções do gráfico
 const pieChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -57,6 +56,26 @@ const pieChartOptions = {
   cutout: '70%',
 };
 
+// MAPA PARA NOMES AMIGÁVEIS (Tradução/Capitalização)
+const testTypeLabels: Record<string, string> = {
+  FUNCIONAL: 'Funcional',
+  REGRESSAO: 'Regressão',
+  DESEMPENHO: 'Desempenho',
+  SEGURANCA: 'Segurança',
+  USABILIDADE: 'Usabilidade',
+  INTEGRACAO: 'Integração',
+  ACEITACAO: 'Aceitação',
+  AUTOMATIZADO: 'Automatizado',
+  MANUAL: 'Manual',
+};
+
+// Função para capitalizar (fallback caso não esteja no mapa)
+const capitalize = (s: string) => {
+    if (typeof s !== 'string') return '';
+    const lower = s.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
 
 export default function RealTimeTab() {
   const theme = useTheme();
@@ -64,7 +83,7 @@ export default function RealTimeTab() {
 
   // Estados dos filtros
   const [period, setPeriod] = useState('mensal');
-  const [testType, setTestType] = useState('total');
+  const [testType, setTestType] = useState('total'); 
 
   // Estados dos dados
   const [metrics, setMetrics] = useState<TestStatusMetrics | null>(null);
@@ -93,7 +112,7 @@ export default function RealTimeTab() {
     };
 
     fetchData();
-  }, [orgId, period, testType]); // Recarrega se os filtros ou o orgId mudarem
+  }, [orgId, period, testType]); 
 
   // Função para renderizar o conteúdo principal
   const renderContent = () => {
@@ -121,10 +140,10 @@ export default function RealTimeTab() {
     }
     
     // Se temos dados, calculamos e mostramos o gráfico
-    const successPercentage = ((metrics.success / metrics.total) * 100).toFixed(0);
-    const failurePercentage = ((metrics.failure / metrics.total) * 100).toFixed(0);
-    const inProgressPercentage = ((metrics.inProgress / metrics.total) * 100).toFixed(0);
-    const notStartedPercentage = ((metrics.notStarted / metrics.total) * 100).toFixed(0);
+    const successPercentage = metrics.total === 0 ? 0 : ((metrics.success / metrics.total) * 100).toFixed(0);
+    const failurePercentage = metrics.total === 0 ? 0 : ((metrics.failure / metrics.total) * 100).toFixed(0);
+    const inProgressPercentage = metrics.total === 0 ? 0 : ((metrics.inProgress / metrics.total) * 100).toFixed(0);
+    const notStartedPercentage = metrics.total === 0 ? 0 : ((metrics.notStarted / metrics.total) * 100).toFixed(0);
 
     const pieChartData = {
       labels: ['Sucesso', 'Falha', 'Em Andamento', 'Não Iniciados'],
@@ -151,7 +170,7 @@ export default function RealTimeTab() {
     return (
       <>
         <Grid container spacing={4} alignItems="center">
-          <Grid item xs={12} md={6}>
+          <Grid>
             <Box sx={{ position: 'relative', height: 300, width: '100%' }}>
               <Pie data={pieChartData} options={pieChartOptions} />
               <Box
@@ -169,7 +188,7 @@ export default function RealTimeTab() {
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid>
             <List>
               <ListItem disableGutters>
                 <ListItemIcon sx={{ minWidth: 24 }}>
@@ -223,7 +242,7 @@ export default function RealTimeTab() {
     <Card sx={{ mt: 2, p: 2, borderRadius: theme.shape.borderRadius }}>
       <CardContent>
         <Grid container alignItems="center" justifyContent="space-between" mb={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid>
             <Typography variant="h6" component="h2" gutterBottom>
               Relatórios de testes automatizados (em tempo real)
             </Typography>
@@ -231,7 +250,7 @@ export default function RealTimeTab() {
               Acompanhe o progresso dos seus testes automatizados aqui
             </Typography>
           </Grid>
-          <Grid item xs={12} sm="auto" container justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} spacing={1}>
+          <Grid container justifyContent={{ xs: 'flex-start', sm: 'flex-end' }} spacing={1}>
             <Grid>
               <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel id="period-select-label">Período</InputLabel>
@@ -258,9 +277,16 @@ export default function RealTimeTab() {
                   onChange={(e) => setTestType(e.target.value)}
                 >
                   <MenuItem value="total">Total de Testes</MenuItem>
-                  <MenuItem value="integracao">Integração</MenuItem>
-                  <MenuItem value="unidade">Unidade</MenuItem>
-                  {/* Você pode adicionar mais tipos aqui se necessário */}
+                  
+                  {/* Agora 'TestType' é um valor e pode ser iterado */}
+                  {Object.values(TestType).map((type) => (
+                    <MenuItem 
+                      key={type} 
+                      value={type.toLowerCase()} 
+                    >
+                      {testTypeLabels[type] || capitalize(type)}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
