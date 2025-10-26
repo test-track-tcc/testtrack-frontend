@@ -356,3 +356,19 @@ button.primary-button {
         margin-bottom: 10px;
     }
 }
+
+.reports-div {
+    border: 2.5px solid #C8C6C6;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    .MuiTypography-root {
+        margin-bottom: 10px;
+    }
+
+    .MuiGrid-root {
+        align-items: center;
+        .css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root {
+            width: 350px;
+        }
+    }
+}
