@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { type AccessGroup, type CreateAccessGroupPayload, type UpdateAccessGroupPayload } from '../types/AcessGroup';
 
-// Use a sua instância do axios se tiver uma, senão o 'axios' global funciona.
-// const axiosInstance = axios; 
-
 export const AccessGroupService = {
   findAllInOrg: async (orgId: string): Promise<AccessGroup[]> => {
     const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/access-group/organization/${orgId}`);
@@ -13,7 +10,7 @@ export const AccessGroupService = {
   findOne: async (id: string): Promise<AccessGroup> => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/access-group/${id}`);
-      return response.data; // Retorna um OBJETO AccessGroup, não um array
+      return response.data;
     } catch (error) {
       console.error('Erro ao buscar grupo de acesso:', error);
       throw error;

@@ -1,12 +1,8 @@
-// Caminho: src/pages/home/RealTimeTab.tsx
-// (Corrigido)
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Paper,
   Grid,
   Card,
   CardContent,
@@ -30,7 +26,6 @@ import { type TestStatusMetrics } from '../../types/Metrics';
 import { TestType } from '../../types/TestCase';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// Opções do gráfico
 const pieChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -56,7 +51,6 @@ const pieChartOptions = {
   cutout: '70%',
 };
 
-// MAPA PARA NOMES AMIGÁVEIS (Tradução/Capitalização)
 const testTypeLabels: Record<string, string> = {
   FUNCIONAL: 'Funcional',
   REGRESSAO: 'Regressão',
@@ -69,7 +63,6 @@ const testTypeLabels: Record<string, string> = {
   MANUAL: 'Manual',
 };
 
-// Função para capitalizar (fallback caso não esteja no mapa)
 const capitalize = (s: string) => {
     if (typeof s !== 'string') return '';
     const lower = s.toLowerCase();
@@ -80,17 +73,11 @@ const capitalize = (s: string) => {
 export default function RealTimeTab() {
   const theme = useTheme();
   const { orgId } = useParams<{ orgId: string }>();
-
-  // Estados dos filtros
   const [period, setPeriod] = useState('mensal');
   const [testType, setTestType] = useState('total'); 
-
-  // Estados dos dados
   const [metrics, setMetrics] = useState<TestStatusMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Efeito para buscar os dados
   useEffect(() => {
     if (!orgId) {
       setError("Organização não encontrada.");
@@ -114,7 +101,6 @@ export default function RealTimeTab() {
     fetchData();
   }, [orgId, period, testType]); 
 
-  // Função para renderizar o conteúdo principal
   const renderContent = () => {
     if (loading) {
       return (
@@ -139,7 +125,6 @@ export default function RealTimeTab() {
       );
     }
     
-    // Se temos dados, calculamos e mostramos o gráfico
     const successPercentage = metrics.total === 0 ? 0 : ((metrics.success / metrics.total) * 100).toFixed(0);
     const failurePercentage = metrics.total === 0 ? 0 : ((metrics.failure / metrics.total) * 100).toFixed(0);
     const inProgressPercentage = metrics.total === 0 ? 0 : ((metrics.inProgress / metrics.total) * 100).toFixed(0);
@@ -278,7 +263,6 @@ export default function RealTimeTab() {
                 >
                   <MenuItem value="total">Total de Testes</MenuItem>
                   
-                  {/* Agora 'TestType' é um valor e pode ser iterado */}
                   {Object.values(TestType).map((type) => (
                     <MenuItem 
                       key={type} 
