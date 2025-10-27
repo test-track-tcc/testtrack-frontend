@@ -46,11 +46,11 @@ export function useAuth() {
 
   const handleLogout = async () => {
    try {
-     await AuthService.logout();
+      navigate('/login');
+      await AuthService.logout();
    } catch (error) {
      console.error("Error during backend logout:", error);
    } finally {
-      navigate('/login');
       removeItem('authToken');
       removeItem('userData');
    }
