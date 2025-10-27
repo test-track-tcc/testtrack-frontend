@@ -50,9 +50,9 @@ export function useAuth() {
    } catch (error) {
      console.error("Error during backend logout:", error);
    } finally {
-     removeItem('authToken');
-     removeItem('userData');
-     navigate('/login');
+      navigate('/login');
+      removeItem('authToken');
+      removeItem('userData');
    }
  };
 
