@@ -126,9 +126,30 @@ export default function TestCase() {
       valueGetter: (_value, row) => `${row.project.prefix}-${row.projectSequenceId}`
     },
     { field: 'title', headerName: 'Caso de Teste', flex: 2 },
-    { field: 'status', headerName: 'Status', flex: 1 },
+    { 
+      field: 'status', 
+      headerName: 'Status', 
+      flex: 1,
+      valueGetter: (_value, row) => {
+        const statusValue = row.status; 
+        return statusValue ? statusValue.replace(/_/g, ' ') : 'N/A'; 
+      }
+    },
     { field: 'priority', headerName: 'Prioridade', flex: 1 },
-    { field: 'testType', headerName: 'Tipo de Teste', flex: 1 },
+    { 
+      field: 'testType',
+      headerName: 'Tipo de Teste', 
+      flex: 1,
+      valueGetter: (_value, row) => {
+        if (row.customTestType && row.customTestType.name) {
+          return row.customTestType.name;
+        }
+        if (row.testType) {
+          return row.testType;
+        }
+        return 'N/A';
+      }
+    },
     {
       field: 'responsible',
       headerName: 'Responsável',
