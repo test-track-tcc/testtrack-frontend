@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Modal, Box, Button, MenuItem, Select, TextField, FormControl,
     InputLabel, Typography, CircularProgress, Alert, type SelectChangeEvent,
-    IconButton, Divider
+    IconButton, Divider, Paper, List, ListItem, ListItemText
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
@@ -18,7 +18,7 @@ import ScriptDropzone from '../../../components/common/ScriptDropzone';
 import { format } from 'date-fns';
 import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
 import { FunctionalTestFramework } from '../../../types/TestCase';
-
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -317,6 +317,41 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         <Divider sx={{ my: 2 }} />
                         <Typography variant="subtitle2" gutterBottom>Adicionar Novos Scripts</Typography>
                         <ScriptDropzone files={scripts} onFilesChange={setScripts} />
+
+                        {testCaseData?.scripts && testCaseData.scripts.length > 0 && (
+                            <>
+                                <Divider sx={{ my: 2 }} />
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                Scripts Existentes
+                                </Typography>
+                                <Paper variant="outlined" sx={{ p: 1 }}>
+                                <List dense>
+                                    {testCaseData.scripts.map((script: any) => (
+                                    <ListItem
+                                        key={script.id}
+                                        secondaryAction={
+                                        <IconButton
+                                            href={`${import.meta.env.VITE_API_URL}/${script.scriptPath}`}
+                                            target="_blank"
+                                            title="Baixar script"
+                                            download
+                                            sx={{ pointerEvents: 'auto' }}
+                                            component="a"
+                                        >
+                                            <FileDownloadIcon />
+                                        </IconButton>
+                                        }
+                                    >
+                                        <ListItemText
+                                        primary={script.scriptPath.split(/[\\/]/).pop()}
+                                        secondary={`Versão: ${script.version}`}
+                                        />
+                                    </ListItem>
+                                    ))}
+                                </List>
+                                </Paper>
+                            </>
+                            )}
                     </Box>
                 </Box>
 
