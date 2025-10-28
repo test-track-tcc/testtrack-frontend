@@ -4,9 +4,18 @@ import { useTranslation } from 'react-i18next';
 import '../../i18n';
 import { useAuth } from '../../functions/AuthFunctions';
 
+// Defina este tipo em um local central (ex: types/Error.ts)
+// para que o useAuth possa usá-lo também.
+type ValidationErrors = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
 function Login() {
   const { t } = useTranslation();
-  const { credentials, loading, error, handleChange, handleLogin } = useAuth();
+  
+  const { credentials, loading, errors, handleChange, handleLogin } = useAuth();
 
   return (
     <div>
@@ -16,6 +25,8 @@ function Login() {
         <div className='login-box'>
           <h1>{t('login.welcome')}</h1>
           <Box className="login-form" component="form" onSubmit={handleLogin}>
+            
+
             <FormControl required>
               <TextField
                 id="email-input"
@@ -26,6 +37,9 @@ function Login() {
                 onChange={handleChange}
                 disabled={loading}
                 autoComplete="off"
+                required
+                error={!!errors?.email}
+                helperText={errors?.email}
               />
               <TextField
                 id="password-input"
@@ -36,17 +50,24 @@ function Login() {
                 value={credentials.password}
                 onChange={handleChange}
                 disabled={loading}
-              />
+                required 
+                error={!!errors?.password}
+                helperText={errors?.password}
+                />
+              {errors?.general && (
+                <Alert severity="error" style={{ width: '100%', boxSizing: 'border-box' }}>
+                  {errors.general}
+                </Alert>
+              )}
               <Button 
                 className="primary-button" 
                 variant="contained" 
                 type="submit"
                 disabled={loading}
-              >
+                >
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Entrar'}
               </Button>
             </FormControl>
-            {error && <Alert severity="error">{error}</Alert>}
           </Box>
           <p>Não possui uma conta? <a href="/register">Clique aqui</a></p>
         </div>

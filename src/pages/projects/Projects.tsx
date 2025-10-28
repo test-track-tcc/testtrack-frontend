@@ -217,7 +217,7 @@ export default function Projects() {
                                         Editar projeto
                                     </Button>
                                 )}
-                                <Button className="btn icon primary" onClick={() => navigate(`/organization/${orgId}/project/${project.id}/testCase`)}>Ver detalhes</Button>
+                                <Button className="btn icon primary" onClick={() => navigate(`/organization/${orgId}/project/${project.id}/dashboard`)}>Ver detalhes</Button>
                             </Box>
                         </Box>
                     ))
