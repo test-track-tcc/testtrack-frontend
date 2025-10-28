@@ -132,10 +132,13 @@ export default function ScriptsPage() {
             ),
         },
         {
-            field: 'projectName',
-            headerName: 'Projeto',
-            flex: 1.5,
-            valueGetter: (_value, row) => row.testCase?.project?.name ?? '---',
+            field: 'status',
+            headerName: 'Status',
+            flex: 1,
+            renderCell: (params: GridRenderCellParams<Script>) => {
+                const status = params.row.status;
+                return status ? status.replace(/_/g, ' ') : 'N/A';
+            }
         },
         {
             field: 'createdAt',
