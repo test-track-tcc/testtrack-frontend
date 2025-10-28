@@ -15,6 +15,7 @@ import RealTimeTab from '../reports/RealtimeTab';
 
 export default function Dashboard() {
     const { projectId } = useParams<{ projectId: string }>();
+    const { orgId } = useParams<{ orgId: string }>();
     const navigate = useNavigate();
     const [project, setProject] = useState<ProjectType | null>(null);
     const [recentTestCases, setRecentTestCases] = useState<TestCaseType[]>([]);
@@ -136,32 +137,34 @@ export default function Dashboard() {
 
     return (
         <PageLayout>
-            <title>Área de Trabalho | {project?.name || 'TestTrack'}</title>
+            <title>Dashboard | TestTrack</title>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" component="h1">
-                    Área de Trabalho
-                    {project && `: ${project.name}`}
+                <Typography variant="h4" component="h1" fontWeight={'bold'}> 
+                    {project && `${project.name}` || 'Área de Trabalho'}
                 </Typography>
             </Box>
 
-            <Paper sx={{ mb: 4, overflow: 'hidden' }}>
+            <Paper sx={{ mb: 4, overflow: 'hidden' }} className="paper-dashboard">
                 <Box
                     sx={{
-                        p: 2,
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        borderBottom: '1px solid',
-                        borderColor: 'divider'
+                        marginBottom: '8px'
                     }}
                 >
-                    <Typography variant="h6" component="h2">
-                        Últimos 5 Casos de Teste
-                    </Typography>
+                    <Box>
+                        <Typography variant="h6" component="h2" fontWeight={'bold'} mb={'8px'}>
+                            Casos de Teste
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Ultimas atualizações em seus casos de teste
+                        </Typography>
+                    </Box>
                     <Button
                         variant="outlined"
                         size="small"
-                        onClick={() => navigate(`/projects/${projectId}/test-cases`)} 
+                        onClick={() => navigate(`/organization/${orgId}/project/${projectId}/testCase`)} 
                     >
                         Ver todos
                     </Button>

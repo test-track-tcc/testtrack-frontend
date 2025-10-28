@@ -247,7 +247,7 @@ button.primary-button {
         @include flex-column(start, stretch, 16px);
     }
 
-    .project-organization-select {
+    .project-organization-select, .paper-dashboard {
         @include flex(space-between, center, 8px);
         flex-wrap: wrap;
         padding: 24px;
@@ -374,6 +374,18 @@ button.primary-button {
     }
 
     .css-1orzuox-MuiTableCell-root, .MuiTableCell-root {
+        font-family: 'Inter', sans-serif !important;
+    }
+}
+
+.paper-dashboard {
+    flex-wrap: wrap;
+    padding: 24px;
+    background-color: #F5F5F5;
+    border: 2px solid #C8C6C6;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    .MuiDataGrid-row {
         font-family: 'Inter', sans-serif !important;
     }
 }

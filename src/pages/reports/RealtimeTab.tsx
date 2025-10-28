@@ -228,11 +228,11 @@ export default function RealTimeTab({ projectId }: RealTimeTabProps) {
   };
 
   return (
-    <Card sx={{ mt: 2, p: 2, borderRadius: theme.shape.borderRadius }}>
+    <Card sx={{ mt: 2, p: 2, borderRadius: theme.shape.borderRadius }} className="paper-dashboard">
       <CardContent>
         <Grid container alignItems="center" justifyContent="space-between" mb={2}>
           <Grid>
-            <Typography variant="h6" component="h2" gutterBottom>
+            <Typography variant="h6" component="h2" gutterBottom fontWeight={'bold'}>
               Relatórios de Testes (em tempo real)
             </Typography>
             <Typography variant="body2" color="text.secondary">
