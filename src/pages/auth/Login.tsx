@@ -4,13 +4,6 @@ import { useTranslation } from 'react-i18next';
 import '../../i18n';
 import { useAuth } from '../../functions/AuthFunctions';
 
-// Defina este tipo em um local central (ex: types/Error.ts)
-// para que o useAuth possa usá-lo também.
-type ValidationErrors = {
-  email?: string;
-  password?: string;
-  general?: string;
-};
 
 function Login() {
   const { t } = useTranslation();

@@ -102,26 +102,53 @@ export default function OrganizationSelect() {
       setSelectedOrgId(null);
   }
 
-  const [userOrgRole, setUserOrgRole] = useState<string | null>(null);
+const [userRoles, setUserRoles] = useState<Record<string, string>>({}); // ADICIONAR
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const userDataString = localStorage.getItem('userData');
-      const userId = userDataString ? JSON.parse(userDataString).id : null;
-      if (!userId || !selectedOrgId) return;
-
+    // Renomeie a função para refletir o que ela faz
+    const fetchOrgsAndRoles = async () => {
       try {
-        const users = await OrganizationService.getUsers(selectedOrgId);
-        const currentUser = users.find(u => u.id === userId);
-        setUserOrgRole(currentUser?.role || 'MEMBER');
+        const userDataString = localStorage.getItem('userData');
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+        const userId = userData?.id;
+        if (!userId) {
+          setError('Usuário não encontrado.');
+          setLoading(false);
+          return;
+        }
+
+        // 1. Busca as organizações
+        const orgs = await OrganizationService.getUsersOrganization(userId);
+        setOrganizations(orgs);
+
+        // 2. AGORA, busca os cargos para CADA organização (O HACK)
+        const rolesMap: Record<string, string> = {};
+        
+        // Isso é INEFICIENTE (N+1 chamadas de API)
+        // Mas resolve o problema de lógica
+        for (const org of orgs) {
+          try {
+            const users = await OrganizationService.getUsers(org.id);
+            const currentUser = users.find(u => u.id === userId.toString());
+            rolesMap[org.id] = currentUser?.role || 'MEMBER';
+          } catch (err) {
+            console.error(`Erro ao buscar cargo para org ${org.id}`, err);
+            rolesMap[org.id] = 'MEMBER'; // Cargo padrão em caso de falha
+          }
+        }
+        
+        // 3. Armazena o mapa de cargos no estado
+        setUserRoles(rolesMap);
+
       } catch (err) {
-        console.error('Erro ao buscar role do usuário', err);
-        setUserOrgRole('MEMBER');
+        setError('Falha ao carregar as organizações.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserRole();
-  }, [selectedOrgId]);
+    fetchOrgsAndRoles();
+  }, []); // Roda só uma vez
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -170,12 +197,9 @@ export default function OrganizationSelect() {
               <div className="project-organization-infos">
                 <div className='organization-name-header'>
                   <label>{org.name}</label>
-                  {hasPermission(userOrgRole ?? '', Permissions.ADMIN) && (
+                  {hasPermission(userRoles[org.id] ?? '', Permissions.ADMIN) && (
                     <IconButton
-                      aria-label="more"
-                      id={`long-button-${org.id}`}
-                      aria-haspopup="true"
-                      onClick={(e) => handleMenuClick(e, org.id)}
+                      onClick={(e) => handleMenuClick(e, org.id)} 
                     >
                       <MoreHorizIcon />
                     </IconButton>
