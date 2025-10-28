@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Badge,
   IconButton,
@@ -7,7 +6,6 @@ import {
   MenuItem,
   CircularProgress,
   Typography,
-  Button,
   Box,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -31,8 +29,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const navigate = useNavigate();
-
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const fetchNotifications = async () => {
@@ -66,28 +62,26 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
     setAnchorEl(null);
   };
 
-  const handleAcceptInvite = async (notification: Notification) => {
-    if (!notification.actionId || !authUserId) {
-      console.warn("Não foi possível aceitar: actionId ou authUserId faltando.");
-      return;
-    }
+  // const handleAcceptInvite = async (notification: Notification) => {
+  //   if (!notification.actionId || !authUserId) {
+  //     console.warn("Não foi possível aceitar: actionId ou authUserId faltando.");
+  //     return;
+  //   }
 
-    try {
-      await NotificationService.acceptOrganizationInvite(notification.actionId, authUserId);
+  //   try {
+  //     await NotificationService.acceptOrganizationInvite(notification.actionId, authUserId);
 
-      await NotificationService.markNotificationAsRead(notification.id);
+  //     await NotificationService.markNotificationAsRead(notification.id);
 
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
-      );
-    } catch (error) {
-      console.error('Erro ao aceitar convite', error);
-    }
-  };
+  //     setNotifications((prev) =>
+  //       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
+  //     );
+  //   } catch (error) {
+  //     console.error('Erro ao aceitar convite', error);
+  //   }
+  // };
 
   const handleNotificationClick = async (notification: Notification) => {
-    if (!notification.link) return;
-
     if (!notification.read) {
       try {
         await NotificationService.markNotificationAsRead(notification.id);
@@ -99,7 +93,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
       }
     }
 
-    navigate(notification.link);
     handleClose();
   };
 
@@ -136,13 +129,13 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
                     {notification.message}
                   </Typography>
                   <Box>
-                    <Button
+                    {/* <Button
                       variant="contained"
                       size="small"
                       onClick={() => handleAcceptInvite(notification)}
                     >
                       Aceitar
-                    </Button>
+                    </Button> */}
                   </Box>
                 </MenuItem>
               );

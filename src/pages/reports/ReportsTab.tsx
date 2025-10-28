@@ -29,7 +29,6 @@ import { type Report } from '../../types/Report';
 import { ProjectService } from '../../services/ProjectService';
 import { ReportService } from '../../services/ReportService';
 
-// Função helper para formatar data
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('pt-BR', {
     day: '2-digit',

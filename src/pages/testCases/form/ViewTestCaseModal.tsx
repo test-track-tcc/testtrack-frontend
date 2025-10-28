@@ -204,24 +204,33 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
                                 <DetailItem label="Link da Tarefa/Requisito" value={testCase.taskLink} />
 
                                 {testCase.scripts && testCase.scripts.length > 0 && (
-                                  <>
-                                    <Divider sx={{ my: 2 }} />
-                                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>Scripts</Typography>
-                                    <Paper variant="outlined" sx={{ p: 1 }}>
-                                      <List dense>
-                                        {testCase.scripts.map((script: any) => (
-                                          <ListItem key={script.id} secondaryAction={
-                                            <IconButton href={`${import.meta.env.VITE_API_URL}/${script.scriptPath}`} target="_blank" title="Baixar script" download>
-                                                <FileDownloadIcon />
-                                            </IconButton>
-                                          }>
-                                            <ListItemText primary={script.scriptPath.split(/[\\/]/).pop()} secondary={`Versão: ${script.version}`} />
-                                          </ListItem>
-                                        ))}
-                                      </List>
-                                    </Paper>
-                                  </>
-                                )}
+                                    <>
+                                        <Divider sx={{ my: 2 }} />
+                                        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>Scripts</Typography>
+                                        <Paper variant="outlined" sx={{ p: 1 }}>
+                                            <List dense>
+                                                {testCase.scripts.map((script: any) => (
+                                                <ListItem key={script.id} secondaryAction={
+                                                <IconButton
+                                                    href={`${import.meta.env.VITE_API_URL}/${script.scriptPath}`} 
+                                                    target="_blank" 
+                                                    title="Baixar script"
+                                                    download
+                                                    sx={{ pointerEvents: 'auto' }}
+                                                >
+                                                    <FileDownloadIcon />
+                                                </IconButton>
+                                            }>
+                                                <ListItemText 
+                                                    primary={script.scriptPath.split(/[\\/]/).pop()} 
+                                                    secondary={`Versão: ${script.version}`} 
+                                                />
+                                            </ListItem>
+                                                ))}
+                                            </List>
+                                        </Paper>
+                                    </>
+                                 )}
                                 
                                 <Divider sx={{ my: 2 }} />
                                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>Comentários e Evidências</Typography>

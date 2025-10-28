@@ -1,6 +1,3 @@
-// Caminho: src/services/ChartService.ts
-// (Novo arquivo)
-
 import axios from 'axios';
 import { type TestStatusMetrics } from '../types/Metrics';
 
@@ -14,7 +11,6 @@ export const ChartService = {
     testType: string,
   ): Promise<TestStatusMetrics> => {
     try {
-      // Passa os filtros como query params
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/chart/test-status-metrics/${organizationId}`,
         {

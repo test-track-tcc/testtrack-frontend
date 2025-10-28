@@ -43,7 +43,7 @@ function BugsPage() {
         setSelectedProjectId(currentProjectId);
 
         if (currentProjectId) {
-          const bugsData = await BugsService.getAllBugs(); 
+          const bugsData = await BugsService.getAllBugs();
           setBugs(bugsData); 
         } else {
            setBugs([]);
@@ -57,20 +57,22 @@ function BugsPage() {
   }, [orgId, routeProjectId]); 
 
   const filteredBugs = useMemo(() => {
-    return bugs.filter(bug => {
-      // const projectMatch = !selectedProjectId || bug.testCase?.project?.id === selectedProjectId;
-      // if (!projectMatch) return false;
+    return bugs.filter(bug => {
+      const projectMatch = !selectedProjectId || bug.testCase?.project?.id === selectedProjectId;
+      if (!projectMatch) return false;
 
-      const searchLower = searchQuery.toLowerCase().trim();
-      const searchMatch = searchLower === '' || 
-        bug.title.toLowerCase().includes(searchLower); 
-      
-      const statusMatch = statusFilter === '' || bug.status === statusFilter;
-      const priorityMatch = priorityFilter === '' || bug.priority === priorityFilter; 
+      console.log(selectedProjectId);
 
-      return searchMatch && statusMatch && priorityMatch;
-    });
-  }, [bugs, /* selectedProjectId, */ searchQuery, statusFilter, priorityFilter]); 
+      const searchLower = searchQuery.toLowerCase().trim();
+      const searchMatch = searchLower === '' || 
+        bug.title.toLowerCase().includes(searchLower); 
+      
+      const statusMatch = statusFilter === '' || bug.status === statusFilter;
+      const priorityMatch = priorityFilter === '' || bug.priority === priorityFilter; 
+
+      return searchMatch && statusMatch && priorityMatch;
+    });
+  }, [bugs, selectedProjectId, searchQuery, statusFilter, priorityFilter]);
 
   const handleProjectChange = (event: SelectChangeEvent<string>) => {
     const newProjectId = event.target.value;
@@ -132,7 +134,6 @@ function BugsPage() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
       <section className='page-body'>
-        {/* Barra de Filtros */}
         <Box className='section-datagrid-filter' sx={{ mb: 2 }}>
            <FormControl sx={{ minWidth: 200 }}>
              <InputLabel>Projeto</InputLabel>

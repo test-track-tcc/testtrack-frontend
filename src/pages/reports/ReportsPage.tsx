@@ -1,14 +1,10 @@
-// Caminho: src/pages/home/Dashboard.tsx (Modificado)
-
 import { useState } from 'react';
 import PageLayout from "../../components/layout/PageLayout";
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 
-// Importe os novos componentes de aba
-import ReportsTab from './ReportsTab'; // Nosso componente de relatórios
+import ReportsTab from './ReportsTab';
 import RealTimeTab from './RealtimeTab'; 
 
-// Componente helper para o painel da aba
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -27,7 +23,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ pt: 3 }}> {/* Adiciona padding superior ao conteúdo da aba */}
+        <Box sx={{ pt: 3 }}>
           {children}
         </Box>
       )}
@@ -35,7 +31,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Função helper para acessibilidade
 function a11yProps(index: number) {
   return {
     id: `dashboard-tab-${index}`,
@@ -65,12 +60,10 @@ export default function ReportsPage() {
                     </Tabs>
                 </Box>
                 
-                {/* Painel da Aba de Relatórios */}
                 <TabPanel value={selectedTab} index={0}>
                     <ReportsTab />
                 </TabPanel>
                 
-                {/* Painel da Aba de Tempo Real */}
                 <TabPanel value={selectedTab} index={1}>
                     <RealTimeTab />
                 </TabPanel>
