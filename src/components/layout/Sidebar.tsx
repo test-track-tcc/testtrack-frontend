@@ -34,17 +34,22 @@ const projectSpecificItems = [
     { title: 'Defeitos', path: '/bugs', icon: <BugReportIcon /> },
 ];
 
+const roleLabels: Record<string, string> = {
+    ADMIN: 'Administrador',
+    DEVELOPER: 'Desenvolvedor',
+    MEMBER: 'Membro',
+};
+
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
     const { orgId, projectId } = useParams<{ orgId: string, projectId: string }>();
     const { handleLogout } = useAuth();
-
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [selectedOrg, setSelectedOrg] = useState<string>('');
     const [orgLoading, setOrgLoading] = useState(true);
     const [user, setUser] = useState<{ id: string; name: string; role: string } | null>(null);
-
+    const [userOrgRole, setUserOrgRole] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>('');
     const [projectsLoading, setProjectsLoading] = useState(false);
@@ -105,6 +110,23 @@ export default function Sidebar() {
 
         fetchProjects();
     }, [selectedOrg, projectId]);
+
+    useEffect(() => {
+        if (selectedOrg && user) {
+            const fetchUserRole = async () => {
+                try {
+                    const users = await OrganizationService.getUsers(selectedOrg);
+                    const currentUser = users.find(u => u.id === user.id);
+                    setUserOrgRole(currentUser ? roleLabels[currentUser.role] : 'Membro');
+                } catch (error) {
+                    console.error("Falha ao buscar role do usuário:", error);
+                    setUserOrgRole('Membro');
+                }
+            };
+            fetchUserRole();
+        }
+    }, [selectedOrg, user]);
+
 
     const handleOrgChange = (event: SelectChangeEvent<string>) => {
         const newOrgId = event.target.value;
@@ -275,7 +297,7 @@ export default function Sidebar() {
                     <Box flexDirection={'column'} className="user-details">
                         <p className='user-name'>{user?.name || 'Usuário'}</p>
                         <p className='user-role'>
-                            {user?.role || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
+                            {userOrgRole  || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
                         </p>
                     </Box>
                 </Box>

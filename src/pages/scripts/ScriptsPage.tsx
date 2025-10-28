@@ -23,6 +23,9 @@ import PageLayout from '../../components/layout/PageLayout';
 import { type Script } from '../../types/Script';
 import { ScriptService } from '../../services/ScriptsService';
 import { TestCaseStatus, Priority } from '../../types/TestCase';
+import { type Project } from '../../types/Project';
+import { ProjectService } from '../../services/ProjectService';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,19 +40,30 @@ export default function ScriptsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [priorityFilter, setPriorityFilter] = useState('');
+    const [allProjects, setAllProjects] = useState<Project[]>([]);
+    const [projectsLoading, setProjectsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (!projectId) {
-            setError('ID do Projeto não encontrado na URL.');
-            setLoading(false);
-            return;
-        }
+        const fetchProjects = async () => {
+            if (!orgId) return; 
+            setProjectsLoading(true);
+            try {
+                const projectsData = await ProjectService.getProjectsByOrganization(orgId);
+                setAllProjects(projectsData);
+            } catch (err) {
+                console.error("Falha ao buscar projetos:", err);
+                setError(prev => prev + " Falha ao carregar lista de projetos.");
+            } finally {
+                setProjectsLoading(false);
+            }
+        };
 
         const fetchScripts = async () => {
             try {
                 setLoading(true);
                 setError('');
-                const data = await ScriptService.getAllByProject(projectId);
+                const data = await ScriptService.getAllByProject(projectId ?? '');
 
                 if (Array.isArray(data)) {
                     setScripts(data);
@@ -72,8 +86,9 @@ export default function ScriptsPage() {
             }
         };
 
+        fetchProjects();
         fetchScripts();
-    }, [projectId]);
+    }, [projectId, orgId]);
 
     const getFileName = (path?: string | null) => {
         if (!path) return '';
@@ -103,6 +118,13 @@ export default function ScriptsPage() {
             return searchMatch && statusMatch && priorityMatch;
         });
     }, [safeScripts, searchQuery, statusFilter, priorityFilter]);
+
+    const handleProjectChange = (event: SelectChangeEvent<string>) => {
+        const newProjectId = event.target.value;
+        if (newProjectId && newProjectId !== projectId && orgId) {
+            navigate(`/organization/${orgId}/project/${newProjectId}/scripts`);
+        }
+    };
 
     const columns: GridColDef<Script>[] = [
         {
@@ -199,6 +221,23 @@ export default function ScriptsPage() {
                 {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
 
                 <Box className='section-datagrid-filter' sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                    <FormControl sx={{ minWidth: 200 }}>
+                        <InputLabel>Projeto</InputLabel>
+                        <Select
+                            value={projectId || ''} // Usa o projectId da URL
+                            label="Projeto"
+                            onChange={handleProjectChange}
+                            disabled={projectsLoading} // Desabilita enquanto carrega projetos
+                        >
+                            {allProjects.length === 0 && !projectsLoading && (
+                                <MenuItem value="" disabled>Nenhum projeto encontrado</MenuItem>
+                            )}
+                            {allProjects.map((proj) => (
+                                <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
                     <TextField
                         label="Pesquisa"
                         variant="outlined"
