@@ -7,6 +7,16 @@ export const AccessGroupService = {
     return response.data;
   },
 
+  findOne: async (id: string): Promise<AccessGroup> => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/access-group/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar grupo de acesso:', error);
+      throw error;
+    }
+  },
+
   create: async (payload: CreateAccessGroupPayload): Promise<AccessGroup> => {
     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/access-group`, payload);
     return response.data;
@@ -20,4 +30,25 @@ export const AccessGroupService = {
   remove: async (id: string): Promise<void> => {
     await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/access-group/${id}`);
   },
+
+  addUser: async (groupId: string, userId: string): Promise<AccessGroup> => {
+    try {
+      const payload = { groupId, userId };
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/access-group/addUser`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao adicionar usuário ao grupo:', error);
+      throw error;
+    }
+  },
+
+  removeUser: async (groupId: string, userId: string): Promise<AccessGroup> => {
+    try {
+      const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/access-group/${groupId}/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao remover usuário do grupo:', error);
+      throw error;
+    }
+  }
 };

@@ -3,13 +3,17 @@ import Login from "./pages/auth/Login";
 import Onboarding from "./pages/auth/Onboarding";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/home/Dashboard";
+import TestScenarios from "./pages/testScenario/TestScenario";
 import TestCase from "./pages/testCases/TestCase";
 import Projects from "./pages/projects/Projects";
+import KanbanPage from "./pages/kanban/KanbanPage";
 import SelectOrganization from "./pages/organization/SelectOrganization";
 import CreateOrganization1 from "./pages/organization/form/CreateOrganization1";
 import CreateOrganization2 from "./pages/organization/form/CreateOrganization2";
 import CreateOrganization3 from "./pages/organization/form/CreateOrganization3";
 import CreateOrganization4 from "./pages/organization/form/CreateOrganization4";
+import BugsPage from "./pages/bugs/BugsPage";
+import ReportsPage from "./pages/reports/ReportsPage";
 
 function App() {
   const user = localStorage.getItem("userData");
@@ -33,6 +37,16 @@ function App() {
         <Route path="/projects/:projectId/test-cases" element={<TestCase />} />
 
         <Route path="/organization" element={<SelectOrganization />} />
+
+        <Route path="/organization/:orgId/dashboard" element={<Dashboard />} />
+            <Route path="/organization/:orgId/projects" element={<Projects />} />
+            
+            <Route path="/organization/:orgId/project/:projectId/dashboard" element={<Dashboard />} />
+            <Route path="/organization/:orgId/project/:projectId/testCase" element={<TestCase />} />
+            <Route path="/organization/:orgId/project/:projectId/testScenario" element={<TestScenarios />} />
+            <Route path="/organization/:orgId/project/:projectId/kanban" element={<KanbanPage />} />
+            <Route path="/organization/:orgId/project/:projectId/bugs" element={<BugsPage />} />
+            <Route path="/organization/:orgId/project/:projectId/reports" element={<ReportsPage />} />
 
         <Route
           path="/organization/:orgId/projects"

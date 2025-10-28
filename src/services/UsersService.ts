@@ -26,5 +26,15 @@ export const UsersService = {
             console.error('Erro ao buscar usuário por email:', error);
             throw error;
         }
-    }
+    },
+
+    findAllInOrg: async (organizationId: string): Promise<User[]> => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/organization/${organizationId}`); 
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching users for organization:', error);
+        throw error; 
+      }
+  },
 };

@@ -17,12 +17,16 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type User } from '../../../types/User';
+import { type TestScenario } from '../../../types/TestScenario';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { TestCaseService } from '../../../services/TestCaseService';
+import { TestScenarioService } from '../../../services/TestScenarioService';
 import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
+import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
+import { FunctionalTestFramework } from '../../../types/TestCase';
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -58,33 +62,39 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     estimatedTime: '',
     steps: '',
     expectedResult: '',
-    status: TestCaseStatus.NAO_INICIADO,
+    status: TestCaseStatus.NAO_INICIADO as TestCaseStatus,
+    testScenarioId: '',
+    functionalFramework: '',
+    targetDevice: '' as DeviceType | '',
+    customTargetDevice: '',
+    bugResponsibleId : ''
   });
   const [scriptFiles, setScriptFiles] = useState<File[]>([]);
   const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
   const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
   const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
+  const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Efeito para buscar usuários e tipos de teste da organização
   useEffect(() => {
-    if (open && organizationId) {
+    if (open && organizationId && projectId) {
       Promise.all([
         OrganizationService.getUsers(organizationId),
-        CustomTestTypeService.findAllByOrg(organizationId)
+        CustomTestTypeService.findAllByOrg(organizationId),
+        TestScenarioService.getByProjectId(projectId)
       ])
-      .then(([users, customTypes]) => {
+      .then(([users, customTypes, scenarios]) => {
         setOrganizationUsers(users);
         if (Array.isArray(customTypes)) {
           setCustomTestTypes(customTypes);
         }
+        setTestScenarios(scenarios);
       })
-      .catch(() => setError('Não foi possível carregar os dados da organização.'));
+      .catch(() => setError('Não foi possível carregar os dados da organização ou do projeto.'));
     }
-  }, [open, organizationId]);
+  }, [open, organizationId, projectId]);
 
-  // Efeito para unir os tipos de teste (padrão + personalizados)
   useEffect(() => {
     const standardTypes = Object.values(TestType).map(t => ({ value: t, label: t.replace(/_/g, ' ') }));
     const customTypesFormatted = customTestTypes.map(ct => ({ value: ct.id, label: `${ct.name} (Personalizado)` }));
@@ -92,13 +102,17 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   }, [customTestTypes]);
 
 
-  // Efeito para limpar o formulário ao fechar o modal
   useEffect(() => {
     if (!open) {
       setFormData({
         title: '', description: '', testType: '', priority: '',
         responsibleId: '', estimatedTime: '', steps: '',
         expectedResult: '', status: TestCaseStatus.NAO_INICIADO,
+        testScenarioId: '',
+        functionalFramework: '',
+        targetDevice: '',
+        customTargetDevice: '',
+        bugResponsibleId : ''
       });
       setScriptFiles([]);
       setError('');
@@ -107,8 +121,33 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
   }, [open]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
-    setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
+    const { name, value } = event.target;
+    
+    setFormData(prev => {
+        const newState = { ...prev, [name]: value };
+        if (name === 'testType' && value !== TestType.FUNCIONAL) {
+            newState.functionalFramework = '';
+        }
+
+        if (name === 'status' && value !== 'REPROVADO') {
+            newState.bugResponsibleId = '';
+        }
+        return newState;
+    });
   };
+
+  const handleDeviceChange = (device: DeviceType | '') => {
+    setFormData(prev => ({
+      ...prev,
+      targetDevice: device,
+      customTargetDevice: device !== 'OTHER' ? '' : prev.customTargetDevice,
+    }));
+  };
+
+  const handleCustomDeviceChange = (customDevice: string) => {
+    setFormData(prev => ({ ...prev, customTargetDevice: customDevice }));
+  };
+
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -139,6 +178,11 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         status: formData.status as TestCaseStatus,
         createdById,
         scripts: scriptFiles,
+        testScenarioId: formData.testScenarioId || undefined,
+        targetDevice: formData.targetDevice || undefined,
+        customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : '',
+        functionalFramework: formData.testType === TestType.FUNCIONAL ? formData.functionalFramework as FunctionalTestFramework : undefined,
+        bugResponsibleId: formData.bugResponsibleId || null,
       };
 
       await TestCaseService.create(payload);
@@ -161,17 +205,45 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
         <Divider sx={{ mb: 2 }} />
         
         <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
-          {/* PAINEL ESQUERDO */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>{projectName}</Typography>
             
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Cenário de Teste</InputLabel>
+              <Select name="testScenarioId" label="Cenário de Teste (Opcional)" value={formData.testScenarioId} onChange={handleChange}>
+                <MenuItem value=""><em>Nenhum</em></MenuItem>
+                {testScenarios.map(scenario => (
+                  <MenuItem key={scenario.id} value={scenario.id}>
+                    {`${scenario.identifier} - ${scenario.name}`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Tipo de Teste</InputLabel>
               <Select name="testType" label="Tipo de Teste" value={formData.testType} onChange={handleChange} required>
                 {combinedTestTypes.map(t => <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {formData.testType === TestType.FUNCIONAL && (
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Framework</InputLabel>
+                    <Select
+                        name="functionalFramework"
+                        label="Framework"
+                        value={formData.functionalFramework}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value=""><em>Nenhum</em></MenuItem>
+                        {Object.values(FunctionalTestFramework).map(fw => (
+                            <MenuItem key={fw} value={fw}>{fw.replace(/_/g, ' ')}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            )}
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Status</InputLabel>
@@ -179,6 +251,25 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
                 {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {formData.status === TestCaseStatus.REPROVADO && (
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel id="bug-responsible-label">Desenvolvedor para correção</InputLabel>
+                    <Select
+                        labelId="bug-responsible-label"
+                        name="bugResponsibleId"
+                        label="Desenvolvedor para correção"
+                        value={formData.bugResponsibleId}
+                        onChange={handleChange}
+                        required
+                    >
+                        <MenuItem value=""><em>Nenhum (Selecione)</em></MenuItem>
+                        {organizationUsers.map(user => (
+                            <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            )}
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Responsável</InputLabel>
@@ -187,6 +278,14 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
                 {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
               </Select>
             </FormControl>
+
+            {/* 6. ADICIONAR O COMPONENTE DeviceSelector AO FORMULÁRIO */}
+            <DeviceSelector
+              targetDevice={formData.targetDevice}
+              customTargetDevice={formData.customTargetDevice}
+              onDeviceChange={handleDeviceChange}
+              onCustomDeviceChange={handleCustomDeviceChange}
+            />
             
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Prioridade</InputLabel>
@@ -199,7 +298,6 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
             <TextField name="timeSpent" label="Horas Gastas" fullWidth sx={{ mb: 2 }} value={"0h"} disabled />
           </Box>
           
-          {/* PAINEL DIREITO */}
           <Box>
             <TextField name="title" label="Título do Caso de Teste" fullWidth required sx={{ mb: 2 }} value={formData.title} onChange={handleChange} />
             <TextField name="description" label="Descrição" multiline rows={4} fullWidth sx={{ mb: 2 }} value={formData.description} onChange={handleChange} />

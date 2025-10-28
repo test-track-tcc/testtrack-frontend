@@ -8,6 +8,7 @@
 @use "./layout/Sidebar.scss";
 @use "./components/button.scss";
 @use "./layout/Modal.scss";
+@use "./layout/Kanban.scss";
 
 body {
     font-family: variables.$font-inter !important;
@@ -318,8 +319,56 @@ button.primary-button {
         border-radius: 16px;
         border: 0;
     }
+
+    .MuiDataGrid-row {
+        font-family: 'Inter', sans-serif;
+    }
 }
 
 .css-1yeiifd {
     height: fit-content;
+}
+
+.test-case-prefix {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2E819D;
+    margin-right: 8px;
+}
+
+.left-panel {
+    padding: 12px;
+    border: 2.5px solid #C8C6C6;
+    border-radius: 12px;
+    height: fit-content;
+}
+
+.bugs-list {
+    background-color: white;
+    border: 2.5px solid #C8C6C6;
+    border-radius: 12px;
+    min-height: 300px;
+    padding: 12px !important;
+
+    .MuiListItem-root {
+        border: 2.5px solid #C8C6C6;
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+}
+
+.reports-div {
+    border: 2.5px solid #C8C6C6;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    .MuiTypography-root {
+        margin-bottom: 10px;
+    }
+
+    .MuiGrid-root {
+        align-items: center;
+        .css-sc8y68-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root {
+            width: 350px;
+        }
+    }
 }

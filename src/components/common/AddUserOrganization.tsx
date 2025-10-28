@@ -28,14 +28,13 @@ interface AddUserOrganizationProps {
   handleClose: () => void;
 }
 
-// Tipo para o membro, agora incluindo o cargo
 type OrganizationMember = User & { role: 'ADMIN' | 'MEMBER' | 'DEVELOPER' };
 type OrganizationRole = 'ADMIN' | 'MEMBER' | 'DEVELOPER';
 
 export default function AddUserOrganization({ open, organizationId, handleClose }: AddUserOrganizationProps) {
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [newMemberRole, setNewMemberRole] = useState<OrganizationRole>('MEMBER'); // Estado para o cargo do novo membro
+  const [newMemberRole, setNewMemberRole] = useState<OrganizationRole>('MEMBER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -53,7 +52,6 @@ export default function AddUserOrganization({ open, organizationId, handleClose 
     setLoading(true);
     setError('');
     try {
-      // Chama o método atualizado do serviço
       const userList = await OrganizationService.getUsers(organizationId);
       setMembers(userList);
     } catch (err) {
@@ -100,7 +98,7 @@ export default function AddUserOrganization({ open, organizationId, handleClose 
       setSuccess(`Usuário ${userToInvite.name} convidado com sucesso!`);
       setNewMemberEmail('');
       setNewMemberRole('MEMBER');
-      fetchMembers(); // Re-busca a lista de membros
+      fetchMembers();
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro ao convidar o membro.');
     } finally {
@@ -121,7 +119,6 @@ export default function AddUserOrganization({ open, organizationId, handleClose 
     }
   };
 
-  // NOVA FUNÇÃO para alterar o cargo
   const handleRoleChange = async (userId: string, event: SelectChangeEvent) => {
     if (!organizationId) return;
     const newRole = event.target.value as OrganizationRole;
@@ -129,7 +126,6 @@ export default function AddUserOrganization({ open, organizationId, handleClose 
     try {
         await OrganizationService.updateUserRole(organizationId, userId, newRole);
         setSuccess('Cargo atualizado com sucesso!');
-        // Atualiza o estado local para uma resposta visual imediata
         setMembers(prevMembers =>
             prevMembers.map(member =>
                 member.id === userId ? { ...member, role: newRole } : member

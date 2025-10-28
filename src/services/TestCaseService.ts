@@ -15,17 +15,15 @@ export const TestCaseService = {
   create: async (payload: CreateTestCasePayload): Promise<TestCase> => {
     const formData = new FormData();
 
-    // Adiciona todos os campos ao FormData, exceto 'scripts'
     Object.entries(payload).forEach(([key, value]) => {
       if (key !== 'scripts' && value) {
         formData.append(key, value as string);
       }
     });
 
-    // Adiciona os arquivos de script, se existirem
     if (payload.scripts && payload.scripts.length > 0) {
       payload.scripts.forEach((file) => {
-        formData.append('scripts', file); // O backend espera 'scripts' (plural)
+        formData.append('scripts', file);
       });
     }
 
@@ -40,10 +38,9 @@ export const TestCaseService = {
     }
   },
 
-  // --- NOVA FUNÇÃO PARA ADICIONAR SCRIPT ---
   addScript: async (testCaseId: string, scriptFile: File): Promise<TestCase> => {
     const formData = new FormData();
-    formData.append('script', scriptFile); // O backend espera 'script' (singular)
+    formData.append('script', scriptFile);
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/test-cases/${testCaseId}/scripts`, formData, {
@@ -99,5 +96,13 @@ export const TestCaseService = {
       console.error(`Erro ao deletar caso de teste ${testCaseId}:`, error);
       throw error;
     }
-  }
+  },
+
+  addComment: async (testCaseId: string, formData: FormData): Promise<Comment> => {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/test-cases/${testCaseId}/comments`, formData, {
+            headers: {
+            },
+        });
+        return response.data;
+    },
 };

@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { TestCaseService } from '../../services/TestCaseService';
 import { ProjectService } from '../../services/ProjectService';
-import { type TestCase as TestCaseType, TestCaseStatus } from '../../types/TestCase';
+import { type TestCase as TestCaseType, TestCaseStatus, Priority } from '../../types/TestCase';
 import { type Project as ProjectType } from '../../types/Project';
 import PageLayout from '../../components/layout/PageLayout';
 import EditTestCaseModal from './form/EditTestCaseModal';
@@ -26,6 +26,7 @@ export default function TestCase() {
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
   const handleEdit = (id: string) => setEditingTestCaseId(id);
   const handleCloseEditModal = () => setEditingTestCaseId(null);
   const [viewingTestCaseId, setViewingTestCaseId] = useState<string | null>(null);
@@ -38,14 +39,23 @@ export default function TestCase() {
     try {
       setLoading(true);
       setError('');
-      const [projectData, testCasesData] = await Promise.all([
-        ProjectService.getById(projectId),
-        TestCaseService.getByProjectId(projectId),
-        // ProjectService.getProjectsByOrganization() 
-      ]);
+
+      const projectData = await ProjectService.getById(projectId);
       setProject(projectData);
-      setTestCases(testCasesData);
-      // setAllProjects(allProjectsData);
+
+      if (projectData?.organization?.id) {
+        const organizationId = projectData.organization.id;
+
+        const [testCasesData, allProjectsData] = await Promise.all([
+          TestCaseService.getByProjectId(projectId),
+          ProjectService.getProjectsByOrganization(organizationId)
+        ]);
+
+        setTestCases(testCasesData);
+        setAllProjects(allProjectsData);
+      } else {
+        throw new Error('Não foi possível encontrar a organização para este projeto.');
+      }
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       setError('Não foi possível carregar os dados do projeto.');
@@ -61,6 +71,16 @@ export default function TestCase() {
   useEffect(() => {
     fetchData();
   }, [projectId]);
+
+  const handleSwitchToEdit = (id: string) => {
+    handleCloseViewModal();
+    handleEdit(id);
+  };
+
+  const handleDeleteFromView = (id: string) => {
+    handleCloseViewModal();
+    handleDelete(id);
+  };
   
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este caso de teste?')) {
@@ -91,10 +111,12 @@ export default function TestCase() {
         fullId.toLowerCase().includes(searchLower);
       
       const statusMatch = statusFilter === '' || tc.status === statusFilter;
+      const priorityMatch = priorityFilter === '' || tc.priority === priorityFilter; 
 
-      return searchMatch && statusMatch;
+
+      return searchMatch && statusMatch && priorityMatch;
     });
-  }, [testCases, searchQuery, statusFilter]);
+  }, [testCases, searchQuery, statusFilter, priorityFilter]);
 
   const columns: GridColDef<TestCaseType>[] = [
     { 
@@ -104,9 +126,30 @@ export default function TestCase() {
       valueGetter: (_value, row) => `${row.project.prefix}-${row.projectSequenceId}`
     },
     { field: 'title', headerName: 'Caso de Teste', flex: 2 },
-    { field: 'status', headerName: 'Status', flex: 1 },
+    { 
+      field: 'status', 
+      headerName: 'Status', 
+      flex: 1,
+      valueGetter: (_value, row) => {
+        const statusValue = row.status; 
+        return statusValue ? statusValue.replace(/_/g, ' ') : 'N/A'; 
+      }
+    },
     { field: 'priority', headerName: 'Prioridade', flex: 1 },
-    { field: 'testType', headerName: 'Tipo de Teste', flex: 1 },
+    { 
+      field: 'testType',
+      headerName: 'Tipo de Teste', 
+      flex: 1,
+      valueGetter: (_value, row) => {
+        if (row.customTestType && row.customTestType.name) {
+          return row.customTestType.name;
+        }
+        if (row.testType) {
+          return row.testType;
+        }
+        return 'N/A';
+      }
+    },
     {
       field: 'responsible',
       headerName: 'Responsável',
@@ -134,7 +177,7 @@ export default function TestCase() {
     <PageLayout>
       <title>Casos de Testes | TestTrack</title>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <h1>Casos de Teste: {project?.name || 'Projeto'}</h1>
+        <h1>Casos de Teste</h1>
         <Button
           className='btn primary icon'
           onClick={() => setIsCreateModalOpen(true)}
@@ -168,6 +211,7 @@ export default function TestCase() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{ flexGrow: 1 }}
+            autoComplete='off'
           />
           
           <FormControl sx={{ minWidth: 200 }}>
@@ -182,10 +226,17 @@ export default function TestCase() {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 150 }} disabled>
-            <InputLabel>Script</InputLabel>
-            <Select value="" label="Script">
-              <MenuItem value=""><em>Todos</em></MenuItem>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Prioridade</InputLabel>
+            <Select
+              value={priorityFilter}
+              label="Prioridade"
+              onChange={(e) => setPriorityFilter(e.target.value)}
+            >
+              <MenuItem value=""><em>Todas</em></MenuItem>
+              {Object.values(Priority).map(p => (
+                <MenuItem key={String(p)} value={String(p)}>{String(p)}</MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -239,6 +290,8 @@ export default function TestCase() {
           open={!!viewingTestCaseId}
           testCaseId={viewingTestCaseId}
           handleClose={handleCloseViewModal}
+          onEdit={handleSwitchToEdit}
+          onDelete={handleDeleteFromView}
         />
       )}
     </PageLayout>

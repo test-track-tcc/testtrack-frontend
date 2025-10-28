@@ -39,7 +39,6 @@ export default function OrganizationSelect() {
     setSelectedOrgId(orgId);
   };
 
-  // CORREÇÃO 1: Esta função agora só fecha o menu.
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -50,13 +49,13 @@ export default function OrganizationSelect() {
       setEditingOrg(orgToEdit);
       setIsEditModalOpen(true);
     }
-    handleMenuClose(); // Fecha o menu, mas não limpa o ID
+    handleMenuClose();
   };
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingOrg(null);
-    setSelectedOrgId(null); // Limpa o ID aqui, ao fechar o modal
+    setSelectedOrgId(null);
   };
 
   const handleOrganizationUpdate = (updatedOrg: Organization) => {
@@ -77,7 +76,7 @@ export default function OrganizationSelect() {
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setDeletingOrg(null);
-    setSelectedOrgId(null); // Limpa o ID aqui
+    setSelectedOrgId(null);
   };
 
   const handleConfirmDelete = async () => {
@@ -92,7 +91,6 @@ export default function OrganizationSelect() {
     }
   };
 
-  // CORREÇÃO 2: Esta função agora só abre o modal de membros e fecha o menu.
   const handleOpenMembersModal = () => {
     setIsMembersModalOpen(true);
     handleMenuClose();
@@ -100,13 +98,21 @@ export default function OrganizationSelect() {
   
   const handleCloseMembersModal = () => {
       setIsMembersModalOpen(false);
-      setSelectedOrgId(null); // Limpa o ID aqui
+      setSelectedOrgId(null);
   }
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const data = await OrganizationService.get();
+        const userDataString = localStorage.getItem('userData');
+        const userData = userDataString ? JSON.parse(userDataString) : null;
+        const userId = userData?.id;
+        if (!userId) {
+          setError('Usuário não encontrado.');
+          setLoading(false);
+          return;
+        }
+        const data = await OrganizationService.getUsersOrganization(userId);
         setOrganizations(data);
       } catch (err) {
         setError('Falha ao carregar as organizações.');

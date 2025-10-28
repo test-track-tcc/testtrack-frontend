@@ -2,18 +2,23 @@ import { useState, useEffect } from 'react';
 import {
     Modal, Box, Button, MenuItem, Select, TextField, FormControl,
     InputLabel, Typography, CircularProgress, Alert, type SelectChangeEvent,
-    IconButton, Divider
+    IconButton, Divider, Paper, List, ListItem, ListItemText
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { TestType, Priority, TestCaseStatus } from '../../../types/TestCase';
 import { type User } from '../../../types/User';
+import { type TestScenario } from '../../../types/TestScenario';
 import { TestCaseService } from '../../../services/TestCaseService';
+import { TestScenarioService } from '../../../services/TestScenarioService';
 import { OrganizationService } from '../../../services/OrganizationService';
 import { CustomTestTypeService } from '../../../services/CustomTypeService';
 import { type CustomTestType } from '../../../types/CustomTestType';
 import { type UpdateTestCasePayload, type TestCase } from '../../../types/TestCase';
 import ScriptDropzone from '../../../components/common/ScriptDropzone';
 import { format } from 'date-fns';
+import DeviceSelector, { type DeviceType } from '../../../components/common/DeviceSelector';
+import { FunctionalTestFramework } from '../../../types/TestCase';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -47,11 +52,12 @@ interface EditTestCaseModalProps {
 }
 
 export default function EditTestCaseModal({ open, testCaseId, organizationId, handleClose, onSaveSuccess }: EditTestCaseModalProps) {
-    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload>>({});
+    const [formData, setFormData] = useState<Partial<UpdateTestCasePayload> & { targetDevice?: DeviceType | '', customTargetDevice?: string, bugResponsibleId?: string }>({});
     const [testCaseData, setTestCaseData] = useState<TestCase | null>(null);
     const [organizationUsers, setOrganizationUsers] = useState<User[]>([]);
     const [customTestTypes, setCustomTestTypes] = useState<CustomTestType[]>([]);
     const [combinedTestTypes, setCombinedTestTypes] = useState<{ value: string; label: string }[]>([]);
+    const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
     const [scripts, setScripts] = useState<File[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,13 +69,22 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                 setLoading(true);
                 setError('');
                 try {
-                    const [fetchedTestCaseData, users, customTypes] = await Promise.all([
-                        TestCaseService.getById(testCaseId),
+                    const fetchedTestCaseData = await TestCaseService.getById(testCaseId);
+                    setTestCaseData(fetchedTestCaseData);
+                    
+                    const projectId = fetchedTestCaseData.project?.id;
+                    if (!projectId) {
+                        setError("Projeto não encontrado para este caso de teste.");
+                        setLoading(false);
+                        return;
+                    }
+
+                    const [users, customTypes, scenarios] = await Promise.all([
                         OrganizationService.getUsers(organizationId),
-                        CustomTestTypeService.findAllByOrg(organizationId)
+                        CustomTestTypeService.findAllByOrg(organizationId),
+                        TestScenarioService.getByProjectId(projectId)
                     ]);
 
-                    setTestCaseData(fetchedTestCaseData);
                     setFormData({
                         title: fetchedTestCaseData.title,
                         description: fetchedTestCaseData.description,
@@ -83,12 +98,18 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         estimatedTime: fetchedTestCaseData.estimatedTime || '',
                         timeSpent: fetchedTestCaseData.timeSpent || '',
                         executionDate: formatDateForInput(fetchedTestCaseData.executionDate),
+                        testScenarioId: fetchedTestCaseData.testScenario?.id || '',
+                        targetDevice: fetchedTestCaseData.targetDevice || '',
+                        customTargetDevice: fetchedTestCaseData.customTargetDevice || '',
+                        functionalFramework: fetchedTestCaseData.functionalFramework ?? null,
+                        bugResponsibleId: (fetchedTestCaseData as any).bugResponsibleId || '',
                     });
 
                     setOrganizationUsers(users);
                     if (Array.isArray(customTypes)) {
                         setCustomTestTypes(customTypes);
                     }
+                    setTestScenarios(scenarios);
 
                 } catch (err) {
                     setError("Falha ao carregar dados do caso de teste.");
@@ -108,7 +129,30 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
     }, [customTestTypes]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
-        setFormData(prev => ({ ...prev, [event.target.name]: event.target.value }));
+    const { name, value } = event.target;
+    setFormData(prev => {
+        const newState = { ...prev, [name]: value };
+        if (name === 'testType' && value !== TestType.FUNCIONAL) {
+            newState.functionalFramework = null;
+        }
+
+        if (name === 'status' && value !== TestCaseStatus.REPROVADO) {
+            newState.bugResponsibleId = '';
+        }
+        return newState;
+    });
+  };
+
+    const handleDeviceChange = (device: DeviceType | '') => {
+        setFormData(prev => ({
+            ...prev,
+            targetDevice: device,
+            customTargetDevice: device !== 'OTHER' ? '' : prev.customTargetDevice,
+        }));
+    };
+
+    const handleCustomDeviceChange = (customDevice: string) => {
+        setFormData(prev => ({ ...prev, customTargetDevice: customDevice }));
     };
 
     const handleSave = async (event: React.FormEvent) => {
@@ -124,6 +168,11 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
             customTestTypeId: isCustomType ? formData.testType : null,
             scripts: scripts.length > 0 ? scripts : undefined,
             executionDate: formData.executionDate || null,
+            testScenarioId: formData.testScenarioId || undefined,
+            targetDevice: formData.targetDevice || undefined,
+            customTargetDevice: formData.targetDevice === 'OTHER' ? formData.customTargetDevice : undefined,
+            functionalFramework: formData.testType === TestType.FUNCIONAL ? (formData.functionalFramework as FunctionalTestFramework) : null,
+            bugResponsibleId: formData.bugResponsibleId || null,
         };
 
         try {
@@ -149,18 +198,35 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
         <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle} component="form" onSubmit={handleSave}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h5" component="h2">Editar Caso de Teste</Typography>
+                    <Typography variant="h5" component="h2">
+                        <span>
+                            <span className='test-case-prefix'>{testCaseData?.project.prefix}-{testCaseData?.projectSequenceId} </span><strong>{testCaseData?.title}</strong>
+                        </span>
+                    </Typography>
                     <IconButton onClick={handleClose}><CloseIcon /></IconButton>
                 </Box>
                 <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ overflowY: 'auto', p: 1, display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 4 }}>
-                    {/* PAINEL ESQUERDO */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} className="left-panel">
                         <Box>
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}>Projeto</Typography>
                             <Typography variant="body1">{testCaseData?.project?.name}</Typography>
                         </Box>
+                        
+                        <FormControl fullWidth>
+                            <InputLabel>Cenário de Teste</InputLabel>
+                            <Select name="testScenarioId" label="Cenário de Teste" value={formData.testScenarioId || ''} onChange={handleChange}>
+                                <MenuItem value="">
+                                    <em>Nenhum</em>
+                                </MenuItem>
+                                {testScenarios.map(scenario => (
+                                    <MenuItem key={scenario.id} value={scenario.id}>
+                                        {`${scenario.identifier} - ${scenario.name}`}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
                         <FormControl fullWidth>
                             <InputLabel>Tipo de Teste</InputLabel>
@@ -169,12 +235,48 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                             </Select>
                         </FormControl>
 
+                        {formData.testType === TestType.FUNCIONAL && (
+                            <FormControl fullWidth>
+                                <InputLabel>Framework</InputLabel>
+                                <Select
+                                    name="functionalFramework"
+                                    label="Framework"
+                                    value={formData.functionalFramework || ''}
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value=""><em>Nenhum</em></MenuItem>
+                                    {Object.values(FunctionalTestFramework).map(fw => (
+                                        <MenuItem key={fw} value={fw}>{fw.replace(/_/g, ' ')}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
+
                         <FormControl fullWidth>
                             <InputLabel>Status</InputLabel>
                             <Select name="status" label="Status" value={formData.status || ''} onChange={handleChange}>
                                 {Object.values(TestCaseStatus).map(s => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
                             </Select>
                         </FormControl>
+
+                        {formData.status === TestCaseStatus.REPROVADO && (
+                            <FormControl fullWidth>
+                                <InputLabel id="bug-responsible-label">Desenvolvedor para correção</InputLabel>
+                                <Select
+                                    labelId="bug-responsible-label"
+                                    name="bugResponsibleId"
+                                    label="Desenvolvedor para correçãoo"
+                                    value={formData.bugResponsibleId || ''}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <MenuItem value=""><em>Nenhum (Selecione)</em></MenuItem>
+                                    {organizationUsers.map(user => (
+                                        <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
 
                         <FormControl fullWidth>
                             <InputLabel>Responsável</InputLabel>
@@ -183,6 +285,13 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                                 {organizationUsers.map(user => <MenuItem key={user.id} value={user.id}>{user.name}</MenuItem>)}
                             </Select>
                         </FormControl>
+                        
+                        <DeviceSelector
+                            targetDevice={formData.targetDevice || ''}
+                            customTargetDevice={formData.customTargetDevice || ''}
+                            onDeviceChange={handleDeviceChange}
+                            onCustomDeviceChange={handleCustomDeviceChange}
+                        />
 
                         <FormControl fullWidth>
                             <InputLabel>Prioridade</InputLabel>
@@ -208,6 +317,41 @@ export default function EditTestCaseModal({ open, testCaseId, organizationId, ha
                         <Divider sx={{ my: 2 }} />
                         <Typography variant="subtitle2" gutterBottom>Adicionar Novos Scripts</Typography>
                         <ScriptDropzone files={scripts} onFilesChange={setScripts} />
+
+                        {testCaseData?.scripts && testCaseData.scripts.length > 0 && (
+                            <>
+                                <Divider sx={{ my: 2 }} />
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                Scripts Existentes
+                                </Typography>
+                                <Paper variant="outlined" sx={{ p: 1 }}>
+                                <List dense>
+                                    {testCaseData.scripts.map((script: any) => (
+                                    <ListItem
+                                        key={script.id}
+                                        secondaryAction={
+                                        <IconButton
+                                            href={`${import.meta.env.VITE_API_URL}/${script.scriptPath}`}
+                                            target="_blank"
+                                            title="Baixar script"
+                                            download
+                                            sx={{ pointerEvents: 'auto' }}
+                                            component="a"
+                                        >
+                                            <FileDownloadIcon />
+                                        </IconButton>
+                                        }
+                                    >
+                                        <ListItemText
+                                        primary={script.scriptPath.split(/[\\/]/).pop()}
+                                        secondary={`Versão: ${script.version}`}
+                                        />
+                                    </ListItem>
+                                    ))}
+                                </List>
+                                </Paper>
+                            </>
+                            )}
                     </Box>
                 </Box>
 
