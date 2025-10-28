@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Imports corretos
+import { DataGrid, type GridRenderCellParams, type GridColDef } from '@mui/x-data-grid';
 import {
   Box,
   Button,
@@ -14,14 +15,8 @@ import {
   Select,
   MenuItem,
   TextField,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton
+  IconButton,
+  type SelectChangeEvent
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { type Project } from '../../types/Project';
@@ -29,7 +24,7 @@ import { type Report } from '../../types/Report';
 import { ProjectService } from '../../services/ProjectService';
 import { ReportService } from '../../services/ReportService';
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string | Date): string => {
   return new Date(dateString).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -40,21 +35,26 @@ const formatDate = (dateString: string): string => {
 };
 
 export default function ReportsTab() {
-  const { orgId } = useParams<{ orgId: string }>();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { orgId, projectId } = useParams<{ orgId: string, projectId: string }>(); 
+  const navigate = useNavigate();
+  
+  const [projects, setProjects] = useState<Project[]>([])
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
   const [generationProjectId, setGenerationProjectId] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationSuccess, setGenerationSuccess] = useState('');
-  const [filterProjectId, setFilterProjectId] = useState<string>('');
+  
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   const fetchData = async () => {
-    if (!orgId) {
-      setError("ID da organização não encontrado.");
+    if (!projectId || !orgId) {
+      setError("ID da organização ou do projeto não encontrado.");
       setLoading(false);
       return;
     }
@@ -63,16 +63,15 @@ export default function ReportsTab() {
       setError('');
       setGenerationSuccess('');
 
-      const projectsData = await ProjectService.getProjectsByOrganization(orgId);
+      const [projectsData, reportsData] = await Promise.all([
+        ProjectService.getProjectsByOrganization(orgId),
+        ReportService.getAll() 
+      ]);
+      
       setProjects(projectsData);
-      
-      const projectIds = new Set(projectsData.map(p => p.id));
-      const allReportsData = await ReportService.getAll();
-      const orgReports = allReportsData.filter(report => 
-        projectIds.has(report.project.id)
-      );
-      
-      setReports(orgReports);
+      setReports(reportsData);
+
+      setGenerationProjectId(projectId); 
 
     } catch (err) {
       console.error("Erro ao carregar dados da página:", err);
@@ -84,11 +83,11 @@ export default function ReportsTab() {
 
   useEffect(() => {
     fetchData();
-  }, [orgId]);
+  }, [projectId, orgId]);
 
   const handleGenerateReport = async () => {
     if (!generationProjectId || !startDate || !endDate) {
-      setError("Por favor, selecione um projeto e um intervalo de datas para gerar o relatório.");
+      setError("Por favor, selecione um projeto e um intervalo de datas.");
       return;
     }
     setIsGenerating(true);
@@ -100,12 +99,13 @@ export default function ReportsTab() {
         new Date(startDate),
         new Date(endDate)
       );
-      setGenerationSuccess(response.message || "Geração de relatório iniciada. Atualize a lista em alguns instantes.");
-      setGenerationProjectId('');
+      setGenerationSuccess(response.message || "Geração iniciada. Atualize a lista em instantes.");
       setStartDate('');
       setEndDate('');
       setTimeout(() => {
-        fetchData();
+        if (generationProjectId === projectId) {
+          fetchData();
+        }
       }, 3000); 
     } catch (err) {
       setError("Falha ao iniciar a geração do relatório.");
@@ -115,153 +115,178 @@ export default function ReportsTab() {
   };
 
   const handleDownloadReport = async (report: Report) => {
+    if (!report || !report.id || !report.fileName) {
+      setError("Informações do relatório inválidas para download.");
+      return;
+    }
     try {
         await ReportService.downloadReport(report.id, report.fileName);
+        setError(''); 
     } catch (err) {
+        console.error(`Erro ao baixar o relatório ${report.fileName}:`, err);
         setError(`Falha ao baixar o arquivo ${report.fileName}.`);
     }
   };
 
-  const displayedReports = useMemo(() => {
-    if (!filterProjectId) {
-      return reports;
-    }
-    return reports.filter(report => report.project.id === filterProjectId);
-  }, [reports, filterProjectId]);
+  const handleProjectChange = (event: SelectChangeEvent<string>) => {
+      const newProjectId = event.target.value;
+      if (newProjectId && newProjectId !== projectId) {
+          navigate(`/organization/${orgId}/project/${newProjectId}/reports`); 
+      }
+  };
 
-  if (loading && reports.length === 0) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <CircularProgress />
-        <Typography sx={{ mt: 1 }}>Carregando relatórios...</Typography>
-      </Box>
-    );
+  const displayedReports = useMemo(() => {
+    return reports.filter(report => {
+      const searchLower = searchQuery.toLowerCase().trim();
+      const searchMatch = searchLower === '' ||
+        (report.fileName && report.fileName.toLowerCase().includes(searchLower)) ||
+        (report.project && report.project.name && report.project.name.toLowerCase().includes(searchLower));
+
+      return searchMatch;
+    });
+  }, [reports, searchQuery]);
+
+  const columns: GridColDef<Report>[] = [
+    { 
+      field: 'fileName', 
+      headerName: 'Nome do Arquivo',
+      flex: 2 
+    },
+    { 
+      field: 'project', 
+      headerName: 'Projeto', 
+      flex: 1,
+      valueGetter: (_value, row) => row.project?.name || 'N/A'
+    },
+    { 
+      field: 'generatedAt', 
+      headerName: 'Data de Geração', 
+      flex: 1,
+      valueGetter: (_value, row) => formatDate(row.generatedAt)
+    },
+    {
+      field: 'actions',
+      headerName: 'Ações',
+      flex: 0.5,
+      align: 'right',
+      headerAlign: 'right',
+      sortable: false,
+      renderCell: (params: GridRenderCellParams<Report>) => (
+        <Box>
+          <IconButton onClick={() => handleDownloadReport(params.row)} color="primary">
+            <DownloadIcon />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
+
+  if (loading) {
+    return <><Box sx={{display: 'flex', justifyContent: 'center', p: 4}}><CircularProgress /></Box></>;
   }
 
   return (
-    <Box>
+    <>
+      <title>Relatórios | TestTrack</title>
+    
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {generationSuccess && <Alert severity="success" sx={{ mb: 2 }}>{generationSuccess}</Alert>}
 
-      <Grid >
-        <Grid>
-          <Card className="reports-div">
-            <CardContent>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Gerar Novo Relatório Personalizado
-              </Typography>
-              <Grid container spacing={2} alignItems="flex-end">
-                <Grid>
-                  <FormControl fullWidth>
-                    <InputLabel id="project-generate-label">Projeto</InputLabel>
-                    <Select
-                      labelId="project-generate-label"
-                      value={generationProjectId}
-                      label="Projeto"
-                      onChange={(e) => setGenerationProjectId(e.target.value)}
-                    >
-                      {projects.map(project => (
-                        <MenuItem key={project.id} value={project.id}>{project.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid>
-                  <TextField
-                    fullWidth
-                    label="Data de Início"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid>
-                  <TextField
-                    fullWidth
-                    label="Data de Fim"
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={handleGenerateReport}
-                    disabled={isGenerating}
-                    startIcon={isGenerating ? <CircularProgress size={20} /> : null}
+       <Card sx={{ mb: 3 }}>
+         <CardContent>
+           <Typography variant="h6" component="h2" mb={2} fontWeight={'bold'}>
+             Gerar Novo Relatório Personalizado
+           </Typography>
+           <Grid container spacing={2} alignItems="flex-end">
+             <Grid> 
+               <FormControl sx={{ minWidth: 200 }} variant="outlined" fullWidth>
+                  <InputLabel>Projeto</InputLabel> 
+                  <Select
+                    value={generationProjectId}
+                    label="Projeto"
+                    onChange={(e) => setGenerationProjectId(e.target.value)} 
                   >
-                    {isGenerating ? 'Gerando...' : 'Gerar'}
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
+                    {projects.map((proj) => (
+                      <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+             </Grid>
+             <Grid> 
+               <TextField fullWidth label="Data de Início" type="date" value={startDate}
+                 onChange={(e) => setStartDate(e.target.value)}
+                 InputLabelProps={{ shrink: true }} variant="outlined" />
+             </Grid>
+              <Grid> 
+               <TextField fullWidth label="Data de Fim" type="date" value={endDate}
+                 onChange={(e) => setEndDate(e.target.value)}
+                 InputLabelProps={{ shrink: true }} variant="outlined" />
+             </Grid>
+             <Grid> 
+               <Button fullWidth variant="contained" onClick={handleGenerateReport}
+                 disabled={isGenerating}
+                 startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : null}
+                 sx={{ height: '56px' }} >
+                 {isGenerating ? 'Gerando...' : 'Gerar Relatório'}
+               </Button>
+             </Grid>
+           </Grid>
+         </CardContent>
+       </Card>
 
-        <Grid>
-          <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }} fontWeight={'bold'}>
-            Relatórios Gerados
-          </Typography>
-          <Paper className="reports-div">
-            <Box sx={{ p: 2 }} >
-              <FormControl sx={{ minWidth: 240 }}>
-                <InputLabel id="project-filter-label">Filtrar por Projeto</InputLabel>
-                <Select
-                  labelId="project-filter-label"
-                  value={filterProjectId}
-                  label="Filtrar por Projeto"
-                  onChange={(e) => setFilterProjectId(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Todos os Projetos</em>
-                  </MenuItem>
-                  {projects.map(project => (
-                    <MenuItem key={project.id} value={project.id}>{project.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Nome do Arquivo</TableCell>
-                    <TableCell>Projeto</TableCell>
-                    <TableCell>Data de Geração</TableCell>
-                    <TableCell align="right">Ações</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {displayedReports.length > 0 ? (
-                    displayedReports.map(report => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.fileName}</TableCell>
-                        <TableCell>{report.project.name}</TableCell>
-                        <TableCell>{formatDate(report.generatedAt)}</TableCell>
-                        <TableCell align="right">
-                          <IconButton onClick={() => handleDownloadReport(report)} color="primary">
-                            <DownloadIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        Nenhum relatório encontrado {filterProjectId ? 'para este projeto.' : 'nesta organização.'}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+      <section className='page-body'>
+        
+        <Box className='section-datagrid-filter'>
+          <FormControl sx={{ minWidth: 200 }} variant="outlined">
+            <InputLabel>Projeto</InputLabel>
+            <Select
+              value={projectId || ''}
+              label="Projeto" 
+              onChange={handleProjectChange}
+            >
+              {projects.map((proj) => (
+                <MenuItem key={proj.id} value={proj.id}>{proj.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          <TextField 
+            label="Pesquisa" 
+            variant="outlined" 
+            placeholder="Nome do arquivo..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ flexGrow: 1 }}
+            autoComplete='off'
+          />
+        </Box>
+        
+        {displayedReports.length > 0 ? (
+          <Box className="box-datagrid">
+            <div style={{ height: 600, width: '100%' }}>
+              <DataGrid<Report>
+                rows={displayedReports}
+                columns={columns}
+                getRowId={(row) => row.id!}
+                disableColumnFilter
+                disableColumnMenu
+                disableColumnResize
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: 'generatedAt', sort: 'desc' }],
+                  },
+                }}
+              />
+            </div>
+          </Box>
+        ) : (
+          <Box className="box-datagrid" height={ 600 } sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography variant='h6' align="center">
+              <strong>Nenhum relatório encontrado para este projeto.</strong>
+            </Typography>
+          </Box>
+        )}
+      </section>
+    </>
   );
 }

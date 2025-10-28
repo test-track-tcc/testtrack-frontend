@@ -132,7 +132,7 @@ export default function Sidebar() {
         const newOrgId = event.target.value;
         setSelectedOrg(newOrgId);
         setSelectedProject(''); 
-        navigate(`/organization/${newOrgId}/dashboard`);
+        navigate(`/organization/${newOrgId}/projects`);
     };
 
     const handleProjectChange = (event: SelectChangeEvent<string>) => {
