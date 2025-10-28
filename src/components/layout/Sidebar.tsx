@@ -198,7 +198,18 @@ export default function Sidebar() {
 
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                flexGrow: 1,
+                pr: 1,
+            }}
+            className="sidebar"
+        >
             <Toolbar>
                 <Box className="sidebar-logo">
                     <h1 className="title-header-link"><a href={user ? "/organization" : "/login"}>TestTrack</a></h1>
@@ -270,7 +281,7 @@ export default function Sidebar() {
                         </ListItemButton>
                     </List>
                     
-                    <Collapse in={projectMenuOpen} timeout="auto" unmountOnExit>
+                    <Collapse in={projectMenuOpen} timeout="auto" unmountOnExit sx={{ mb: 1 }} className='collapse-sidebar'>
                         <List component="div" disablePadding>
                             {projectSpecificItems.map((item) => (
                                 <ListItemButton
@@ -291,11 +302,14 @@ export default function Sidebar() {
             <Box flexGrow={1} />
 
             <Box 
-              display={'flex'} 
-              flexDirection={'row'} 
-              alignItems={'center'} 
-              justifyContent={'space-between'}
-              p={2}
+            display="flex"
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            alignItems="center"
+            justifyContent="space-between"
+            p={2}
+            gap={1}
+            sx={{ textAlign: { xs: 'center', sm: 'left' } }}
+
             >
                 <Box display={'flex'} flexDirection={'row'} className="user-info" gap={"10px"}>
                     <Avatar>{user ? getInitials(user.name) : 'TT'}</Avatar>
