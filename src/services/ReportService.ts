@@ -17,6 +17,18 @@ export const ReportService = {
     }
   },
 
+  getByProjectId: async (projectId: string): Promise<Report[]> => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/reports/project/${projectId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao buscar relatórios para o projeto ${projectId}:`, error);
+      throw error;
+    }
+  },
+
   generatePersonalized: async (projectId: string, startDate: Date, endDate: Date): Promise<{ message: string }> => {
     try {
       const startDateStr = formatDateForApi(startDate);

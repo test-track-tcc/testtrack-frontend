@@ -65,7 +65,7 @@ export default function ReportsTab() {
 
       const [projectsData, reportsData] = await Promise.all([
         ProjectService.getProjectsByOrganization(orgId),
-        ReportService.getAll() 
+        ReportService.getByProjectId(projectId) 
       ]);
       
       setProjects(projectsData);
