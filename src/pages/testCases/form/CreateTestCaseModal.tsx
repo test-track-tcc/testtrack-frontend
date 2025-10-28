@@ -199,7 +199,7 @@ export default function CreateTestCaseModal({ open, projectId, projectName, orga
     <Modal open={open} onClose={handleClose}>
       <Box sx={modalStyle} component="form" onSubmit={handleSave}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" component="h2">Novo Caso de Teste</Typography>
+          <Typography variant="h5" component="h2" fontWeight={'bold'}>Novo Caso de Teste</Typography>
           <IconButton onClick={handleClose}><CloseIcon /></IconButton>
         </Box>
         <Divider sx={{ mb: 2 }} />
