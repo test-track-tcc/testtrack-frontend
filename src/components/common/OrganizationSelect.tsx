@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { OrganizationService } from '../../services/OrganizationService';
+import { hasPermission, Permissions } from '../../utils/roles';
 import { type Organization } from '../../types/Organization';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditIcon from '@mui/icons-material/Edit';
@@ -101,6 +102,27 @@ export default function OrganizationSelect() {
       setSelectedOrgId(null);
   }
 
+  const [userOrgRole, setUserOrgRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const userDataString = localStorage.getItem('userData');
+      const userId = userDataString ? JSON.parse(userDataString).id : null;
+      if (!userId || !selectedOrgId) return;
+
+      try {
+        const users = await OrganizationService.getUsers(selectedOrgId);
+        const currentUser = users.find(u => u.id === userId);
+        setUserOrgRole(currentUser?.role || 'MEMBER');
+      } catch (err) {
+        console.error('Erro ao buscar role do usuário', err);
+        setUserOrgRole('MEMBER');
+      }
+    };
+
+    fetchUserRole();
+  }, [selectedOrgId]);
+
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
@@ -148,14 +170,16 @@ export default function OrganizationSelect() {
               <div className="project-organization-infos">
                 <div className='organization-name-header'>
                   <label>{org.name}</label>
-                  <IconButton
-                    aria-label="more"
-                    id={`long-button-${org.id}`}
-                    aria-haspopup="true"
-                    onClick={(e) => handleMenuClick(e, org.id)}
-                  >
-                    <MoreHorizIcon />
-                  </IconButton>
+                  {hasPermission(userOrgRole ?? '', Permissions.ADMIN) && (
+                    <IconButton
+                      aria-label="more"
+                      id={`long-button-${org.id}`}
+                      aria-haspopup="true"
+                      onClick={(e) => handleMenuClick(e, org.id)}
+                    >
+                      <MoreHorizIcon />
+                    </IconButton>
+                  )}
                 </div>
                 <p>{org.description}</p>
               </div>

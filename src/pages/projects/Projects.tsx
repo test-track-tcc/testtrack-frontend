@@ -10,7 +10,8 @@ import AddProjectModal from './form/AddProjectModal';
 import EditProjectModal from './form/EditProjectModal';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import AddUserToProjectModal from '../../components/common/AddUserProjectModal';
-
+import { hasPermission, Permissions } from '../../utils/roles';
+import { OrganizationService } from '../../services/OrganizationService';
 
 const statusDisplayMap = {
     [ProjectStatus.NOT_STARTED]: 'Não Iniciado',
@@ -46,6 +47,28 @@ export default function Projects() {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const isMenuOpen = Boolean(anchorEl);
     const [addingUsersToProject, setAddingUsersToProject] = useState<Project | null>(null);
+    const [userOrgRole, setUserOrgRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!orgId) return;
+
+        const fetchUserRole = async () => {
+            try {
+                const userDataString = localStorage.getItem('userData');
+                if (!userDataString) return;
+                const userId = JSON.parse(userDataString).id;
+                const users = await OrganizationService.getUsers(orgId);
+                const currentUser = users.find(u => u.id === userId);
+                setUserOrgRole(currentUser?.role || 'MEMBER');
+            } catch (err) {
+                console.error('Falha ao buscar role do usuário', err);
+                setUserOrgRole('MEMBER');
+            }
+        };
+
+        fetchUserRole();
+    }, [orgId]);
+
 
     const fetchProjects = async () => {
         if (!orgId) {
@@ -161,9 +184,11 @@ export default function Projects() {
                         <Box className="project-item" key={project.id}>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                                 <h2>{project.name}</h2>
-                                <IconButton onClick={(e) => handleMenuClick(e, project.id)}>
-                                    <MoreHorizIcon />
-                                </IconButton>
+                                {hasPermission(userOrgRole ?? '', Permissions.ADMIN) && (
+                                    <IconButton onClick={(e) => handleMenuClick(e, project.id)}>
+                                        <MoreHorizIcon />
+                                    </IconButton>
+                                )}
                             </Box>
                             
                             <p>{project.description || 'Sem descrição.'}</p>
@@ -187,7 +212,11 @@ export default function Projects() {
                             </p>
 
                             <Box className="button-group" sx={{ marginTop: 'auto', paddingTop: '16px' }}>
-                                <Button className="btn icon secondary" onClick={() => setEditingProject(project)}>Editar projeto</Button>
+                                {hasPermission(userOrgRole ?? '', Permissions.ADMIN) && (
+                                    <Button className="btn icon secondary" onClick={() => setEditingProject(project)}>
+                                        Editar projeto
+                                    </Button>
+                                )}
                                 <Button className="btn icon primary" onClick={() => navigate(`/organization/${orgId}/project/${project.id}/testCase`)}>Ver detalhes</Button>
                             </Box>
                         </Box>
