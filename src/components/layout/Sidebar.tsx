@@ -18,31 +18,38 @@ import { type Project } from '../../types/Project';
 import { getInitials } from '../../utils/getInitials';
 import { NotificationBell } from '../common/notifications/NotificationBell';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import CodeIcon from '@mui/icons-material/Code';
 
 const mainItems = [
-    { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
     { title: 'Projetos', path: '/projects', icon: <DescriptionIcon /> },
 ];
 
 const projectSpecificItems = [
+    { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
     { title: 'Cenários de Testes', path: '/testScenario', icon: <CasesIcon /> },
     { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
     { title: 'Relatórios', path: '/reports', icon: <AssessmentIcon /> },
+    { title: 'Scripts', path: '/scripts', icon: <CodeIcon /> },
     { title: 'Defeitos', path: '/bugs', icon: <BugReportIcon /> },
 ];
+
+const roleLabels: Record<string, string> = {
+    ADMIN: 'Administrador',
+    DEVELOPER: 'Desenvolvedor',
+    MEMBER: 'Membro',
+};
 
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
     const { orgId, projectId } = useParams<{ orgId: string, projectId: string }>();
     const { handleLogout } = useAuth();
-
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [selectedOrg, setSelectedOrg] = useState<string>('');
     const [orgLoading, setOrgLoading] = useState(true);
     const [user, setUser] = useState<{ id: string; name: string; role: string } | null>(null);
-
+    const [userOrgRole, setUserOrgRole] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<string>('');
     const [projectsLoading, setProjectsLoading] = useState(false);
@@ -104,11 +111,28 @@ export default function Sidebar() {
         fetchProjects();
     }, [selectedOrg, projectId]);
 
+    useEffect(() => {
+        if (selectedOrg && user) {
+            const fetchUserRole = async () => {
+                try {
+                    const users = await OrganizationService.getUsers(selectedOrg);
+                    const currentUser = users.find(u => u.id === user.id);
+                    setUserOrgRole(currentUser ? roleLabels[currentUser.role] : 'Membro');
+                } catch (error) {
+                    console.error("Falha ao buscar role do usuário:", error);
+                    setUserOrgRole('Membro');
+                }
+            };
+            fetchUserRole();
+        }
+    }, [selectedOrg, user]);
+
+
     const handleOrgChange = (event: SelectChangeEvent<string>) => {
         const newOrgId = event.target.value;
         setSelectedOrg(newOrgId);
         setSelectedProject(''); 
-        navigate(`/organization/${newOrgId}/dashboard`);
+        navigate(`/organization/${newOrgId}/projects`);
     };
 
     const handleProjectChange = (event: SelectChangeEvent<string>) => {
@@ -122,10 +146,14 @@ export default function Sidebar() {
     const handleItemClick = (path: string) => {
       if (selectedOrg) {
           if (path === '/projects') {
-              navigate(`/organization/${selectedOrg}/projects`);
-          } else if (path === '/dashboard') {
-              navigate(`/organization/${selectedOrg}/dashboard`);
-          } else {
+              navigate(`/organization/${selectedOrg}/projects`);
+          } else if (path === '/dashboard') {
+              if (selectedProject) {
+                  navigate(`/organization/${selectedOrg}/project/${selectedProject}/dashboard`);
+              } else {
+                  navigate(`/organization/${selectedOrg}/projects`);
+              }
+          } else {
               navigate(path);
           }
       } else {
@@ -149,8 +177,9 @@ export default function Sidebar() {
         const basePath = `/organization/${selectedOrg}`;
         
         if (path === '/dashboard') {
-            return location.pathname === `${basePath}/dashboard`;
-        }
+            return location.pathname === `${basePath}/dashboard` ||
+                location.pathname.startsWith(`${basePath}/project/`) && location.pathname.endsWith('/dashboard');
+        }   
         
         if (path === '/projects') {
             return location.pathname.startsWith(`${basePath}/projects`);
@@ -169,7 +198,18 @@ export default function Sidebar() {
 
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                flexGrow: 1,
+                pr: 1,
+            }}
+            className="sidebar"
+        >
             <Toolbar>
                 <Box className="sidebar-logo">
                     <h1 className="title-header-link"><a href={user ? "/organization" : "/login"}>TestTrack</a></h1>
@@ -241,7 +281,7 @@ export default function Sidebar() {
                         </ListItemButton>
                     </List>
                     
-                    <Collapse in={projectMenuOpen} timeout="auto" unmountOnExit>
+                    <Collapse in={projectMenuOpen} timeout="auto" unmountOnExit sx={{ mb: 1 }} className='collapse-sidebar'>
                         <List component="div" disablePadding>
                             {projectSpecificItems.map((item) => (
                                 <ListItemButton
@@ -262,18 +302,21 @@ export default function Sidebar() {
             <Box flexGrow={1} />
 
             <Box 
-              display={'flex'} 
-              flexDirection={'row'} 
-              alignItems={'center'} 
-              justifyContent={'space-between'}
-              p={2}
+            display="flex"
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            alignItems="center"
+            justifyContent="space-between"
+            p={2}
+            gap={1}
+            sx={{ textAlign: { xs: 'center', sm: 'left' } }}
+
             >
                 <Box display={'flex'} flexDirection={'row'} className="user-info" gap={"10px"}>
                     <Avatar>{user ? getInitials(user.name) : 'TT'}</Avatar>
                     <Box flexDirection={'column'} className="user-details">
                         <p className='user-name'>{user?.name || 'Usuário'}</p>
                         <p className='user-role'>
-                            {user?.role || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
+                            {userOrgRole  || 'Visitante'} em {organizations.find(org => org.id === selectedOrg)?.name || ''}
                         </p>
                     </Box>
                 </Box>

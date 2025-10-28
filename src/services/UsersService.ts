@@ -8,33 +8,30 @@ export const UsersService = {
       const response = await axios.post<UserRegister>(`${import.meta.env.VITE_API_BASE_URL}/users`, data);
       return response.data;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw new Error('Falha ao criar teste: erro desconhecido');
-      }
-      throw error;
+      throw error; 
     }
   },
 
   getUserByEmail: async (email: string): Promise<User | null> => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/email/${email}`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
-                return null;
-            }
-            console.error('Erro ao buscar usuário por email:', error);
-            throw error;
-        }
-    },
-
-    findAllInOrg: async (organizationId: string): Promise<User[]> => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/organization/${organizationId}`); 
-        return response.data;
+          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/email/${email}`);
+          return response.data;
       } catch (error) {
-        console.error('Error fetching users for organization:', error);
-        throw error; 
+          if (axios.isAxiosError(error) && error.response?.status === 404) {
+              return null;
+          }
+          console.error('Erro ao buscar usuário por email:', error);
+          throw error;
       }
+  },
+
+  findAllInOrg: async (organizationId: string): Promise<User[]> => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/organization/${organizationId}`); 
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching users for organization:', error);
+      throw error; 
+    }
   },
 };

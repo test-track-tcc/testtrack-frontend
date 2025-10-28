@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PageLayout from "../../components/layout/PageLayout";
 import { Tabs, Tab, Box, Typography } from '@mui/material';
+import { useParams } from 'react-router-dom';
 
 import ReportsTab from './ReportsTab';
 import RealTimeTab from './RealtimeTab'; 
@@ -13,7 +14,7 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
+  useParams<{ projectId: string; }>();
   return (
     <div
       role="tabpanel"
@@ -40,6 +41,7 @@ function a11yProps(index: number) {
 
 export default function ReportsPage() {
     const [selectedTab, setSelectedTab] = useState(0);
+    const { projectId } = useParams<{ projectId: string }>();
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setSelectedTab(newValue);
@@ -65,7 +67,7 @@ export default function ReportsPage() {
                 </TabPanel>
                 
                 <TabPanel value={selectedTab} index={1}>
-                    <RealTimeTab />
+                    <RealTimeTab projectId={projectId ?? ''} />
                 </TabPanel>
             </Box>
         </PageLayout>

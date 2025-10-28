@@ -14,6 +14,7 @@ import CreateOrganization3 from "./pages/organization/form/CreateOrganization3";
 import CreateOrganization4 from "./pages/organization/form/CreateOrganization4";
 import BugsPage from "./pages/bugs/BugsPage";
 import ReportsPage from "./pages/reports/ReportsPage";
+import ScriptsPage from "./pages/scripts/ScriptsPage";
 
 function App() {
   const user = localStorage.getItem("userData");
@@ -47,6 +48,7 @@ function App() {
             <Route path="/organization/:orgId/project/:projectId/kanban" element={<KanbanPage />} />
             <Route path="/organization/:orgId/project/:projectId/bugs" element={<BugsPage />} />
             <Route path="/organization/:orgId/project/:projectId/reports" element={<ReportsPage />} />
+            <Route path="/organization/:orgId/project/:projectId/scripts" element={<ScriptsPage />} />
 
         <Route
           path="/organization/:orgId/projects"

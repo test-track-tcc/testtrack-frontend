@@ -33,7 +33,6 @@ export const NotificationBell = ({ authUserId }: NotificationBellProps) => {
 
   const fetchNotifications = async () => {
     if (!authUserId) {
-      console.warn('NotificationBell: authUserId não fornecido, não buscando notificações.');
       return;
     }
 
