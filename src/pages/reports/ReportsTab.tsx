@@ -203,7 +203,7 @@ export default function ReportsTab() {
         </Grid>
 
         <Grid>
-          <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 2 }} fontWeight={'bold'}>
             Relatórios Gerados
           </Typography>
           <Paper className="reports-div">

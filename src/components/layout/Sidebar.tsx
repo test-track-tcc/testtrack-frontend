@@ -21,11 +21,11 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import CodeIcon from '@mui/icons-material/Code';
 
 const mainItems = [
-    { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
     { title: 'Projetos', path: '/projects', icon: <DescriptionIcon /> },
 ];
 
 const projectSpecificItems = [
+    { title: 'Área de Trabalho', path: '/dashboard', icon: <BarChartIcon /> },
     { title: 'Cenários de Testes', path: '/testScenario', icon: <CasesIcon /> },
     { title: 'Casos de Testes', path: '/testCase', icon: <CasesIcon /> },
     { title: 'Kanban', path: '/kanban', icon: <ViewKanbanIcon /> },
@@ -146,10 +146,14 @@ export default function Sidebar() {
     const handleItemClick = (path: string) => {
       if (selectedOrg) {
           if (path === '/projects') {
-              navigate(`/organization/${selectedOrg}/projects`);
-          } else if (path === '/dashboard') {
-              navigate(`/organization/${selectedOrg}/dashboard`);
-          } else {
+              navigate(`/organization/${selectedOrg}/projects`);
+          } else if (path === '/dashboard') {
+              if (selectedProject) {
+                  navigate(`/organization/${selectedOrg}/project/${selectedProject}/dashboard`);
+              } else {
+                  navigate(`/organization/${selectedOrg}/projects`);
+              }
+          } else {
               navigate(path);
           }
       } else {
@@ -173,8 +177,9 @@ export default function Sidebar() {
         const basePath = `/organization/${selectedOrg}`;
         
         if (path === '/dashboard') {
-            return location.pathname === `${basePath}/dashboard`;
-        }
+            return location.pathname === `${basePath}/dashboard` ||
+                location.pathname.startsWith(`${basePath}/project/`) && location.pathname.endsWith('/dashboard');
+        }   
         
         if (path === '/projects') {
             return location.pathname.startsWith(`${basePath}/projects`);
