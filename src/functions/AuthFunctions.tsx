@@ -4,13 +4,20 @@ import { AuthService } from '../services/AuthService';
 import { type UserLoginData } from '../types/User';
 import { removeItem } from '../utils/authStorage';
 
+type ValidationErrors = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
+
 export function useAuth() {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<UserLoginData>({
     email: '',
     password: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  
+  const [errors, setErrors] = useState<ValidationErrors | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,12 +26,13 @@ export function useAuth() {
       ...prev,
       [name]: value,
     }));
+    setErrors(null);
   };
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    setError(null);
+    setErrors(null);
 
     try {
       const data = await AuthService.login(credentials);
@@ -38,7 +46,32 @@ export function useAuth() {
         navigate('/organization');
       }
     } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro.');
+      if (err.response && err.response.data) {
+        const backendMessage = err.response.data.message;
+
+        if (Array.isArray(backendMessage)) {
+          const newErrors: ValidationErrors = {};
+          backendMessage.forEach((msg: string) => {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes("email")) {
+              newErrors.email = msg;
+            } else if (lowerMsg.includes("senha")) {
+              newErrors.password = msg;
+            } else {
+              newErrors.general = (newErrors.general || "") + msg + " ";
+            }
+          });
+          setErrors(newErrors);
+        } 
+        else if (typeof backendMessage === 'string') {
+          setErrors({ general: backendMessage });
+        }
+        else {
+           setErrors({ general: "E-mail ou senha inválidos." });
+        }
+      } else {
+        setErrors({ general: "Erro ao conectar com o servidor. Tente novamente." });
+      }
     } finally {
       setLoading(false);
     }
@@ -46,20 +79,22 @@ export function useAuth() {
 
   const handleLogout = async () => {
    try {
-      navigate('/login');
-      await AuthService.logout();
+        removeItem('userData');
+       navigate('/login');
+       removeItem('authToken');
+       await AuthService.logout();
    } catch (error) {
      console.error("Error during backend logout:", error);
    } finally {
-      removeItem('authToken');
-      removeItem('userData');
+       removeItem('authToken');
+       removeItem('userData');
    }
- };
+  };
 
   return {
     credentials,
     loading,
-    error,
+    errors,
     handleChange,
     handleLogin,
     handleLogout

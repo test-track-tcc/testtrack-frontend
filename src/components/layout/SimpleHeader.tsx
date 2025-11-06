@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Avatar, Menu, MenuItem, Divider, ListItemIcon, Typography, Box } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { getInitials } from "../../utils/getInitials";
 import { useAuth } from "../../functions/AuthFunctions";
@@ -22,17 +20,7 @@ function SimpleHeader() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-  const handleEdit = () => {
-    alert("Editar conta");
-    handleMenuClose();
-  };
-
-  const handleDelete = () => {
-    alert("Apagar conta");
-    handleMenuClose();
-  };
-
+  
   return (
     <header className="simple-header">
       <h1 className="title-header-link">
@@ -69,18 +57,6 @@ function SimpleHeader() {
           <Typography fontWeight="bold">{userData?.name}</Typography>
           <Typography color="text.secondary">{userData?.email}</Typography>
         </Box>
-
-        <Divider />
-
-        {/* Ações */}
-        <MenuItem onClick={handleEdit}>
-          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
-          Editar conta
-        </MenuItem>
-        <MenuItem onClick={handleDelete} >
-          <ListItemIcon><DeleteIcon fontSize="small" /></ListItemIcon>
-          Apagar conta
-        </MenuItem>
 
         <Divider />
 

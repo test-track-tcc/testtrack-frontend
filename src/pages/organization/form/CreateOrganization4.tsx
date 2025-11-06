@@ -118,7 +118,7 @@ export default function CreateOrganization4() {
 
     const handleLater = () => {
         localStorage.removeItem('onboardingData');
-        navigate('/dashboard');
+        navigate('/organization');
     };
 
     return (
