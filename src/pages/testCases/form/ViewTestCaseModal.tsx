@@ -248,17 +248,22 @@ export default function ViewTestCaseModal({ open, testCaseId, handleClose, onEdi
                                             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>{comment.text}</Typography>
                                             {comment.attachments && comment.attachments.length > 0 && (
                                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                                    {comment.attachments.map((path, index) => (
-                                                        <a key={index} href={`${serverRootUrl}/api/${path}`} target="_blank" rel="noopener noreferrer">
-                                                            <img 
-                                                                src={`${serverRootUrl}/api/${path}`} 
-                                                                alt={`Evidência ${index + 1}`} 
-                                                                style={{ height: '60px', width: 'auto', borderRadius: '4px', border: '1px solid #ddd', objectFit: 'cover' }} 
-                                                            />
+                                                    {comment.attachments.map((path, index) => {
+                                                    const isFullUrl = path.startsWith('http://') || path.startsWith('https://');
+                                                    const imageUrl = isFullUrl ? path : `${serverRootUrl}/api/${path}`;
+                                                    
+                                                    return (
+                                                        <a key={index} href={imageUrl} target="_blank" rel="noopener noreferrer">
+                                                        <img 
+                                                            src={imageUrl}
+                                                            alt={`Evidência ${index + 1}`}
+                                                            style={{ height: '60px', width: 'auto', borderRadius: '4px', border: '1px solid #ddd', objectFit: 'cover' }}
+                                                        />
                                                         </a>
-                                                    ))}
+                                                    );
+                                                    })}
                                                 </Box>
-                                            )}
+                                                )}
                                         </Paper>
                                     ))}
                                 </List>

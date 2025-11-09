@@ -181,7 +181,7 @@ export default function ScriptsPage() {
             renderCell: (params: GridRenderCellParams<Script>) => (
                 <Tooltip title="Baixar script">
                     <IconButton
-                        href={params.row.scriptPath ? `${API_URL}/${params.row.scriptPath}` : undefined}
+                        href={params.row.scriptPath || undefined}
                         target="_blank"
                         component="a"
                         download
