@@ -27,8 +27,6 @@ import { type Project } from '../../types/Project';
 import { ProjectService } from '../../services/ProjectService';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
-
 export default function ScriptsPage() {
     const { orgId, projectId } = useParams<{
         orgId: string;
@@ -181,7 +179,7 @@ export default function ScriptsPage() {
             renderCell: (params: GridRenderCellParams<Script>) => (
                 <Tooltip title="Baixar script">
                     <IconButton
-                        href={params.row.scriptPath ? `${API_URL}/${params.row.scriptPath}` : undefined}
+                        href={params.row.scriptPath || undefined}
                         target="_blank"
                         component="a"
                         download

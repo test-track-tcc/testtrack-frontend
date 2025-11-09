@@ -76,7 +76,7 @@ export interface Comment {
   idUser: string;
   comment: string;
   date: string;
-  attachments: [];
+  attachments?: string[];
   createdAt: Date;
   author: User;
   text: string;
